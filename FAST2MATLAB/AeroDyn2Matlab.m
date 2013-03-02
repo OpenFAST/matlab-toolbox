@@ -27,13 +27,12 @@ end
 %----------------------Read FST main file----------------------------------
 fid = fopen([AD_file],'r');
 if fid == -1
-    Flag = 0;
     error('AD file could not be found')
 end
 
 %skip hdr
 for hi = 1:hdrLines
-    fgets(fid);
+    DataOut.HdrLines{hi,1} = fgetl(fid); %bjj: added field for storing header lines
 end
 
 %PF: Commenting this out, not sure it's necessary
@@ -47,34 +46,13 @@ count=1;
 
 while true %loop until discovering FoilNm, than break
     
+    line = fgetl(fid);
     
-    % Get the Value, number or string
-    testVal=fscanf(fid,'%f',1);  %First check if line begins with a number
-    if isempty(testVal)
-        testVal=fscanf(fid,'%s',1);  %If not look for a string instead
-    end
-    
-    %assign value
-    DataOut.Val{count}=testVal; %assign Val
-    
-    %Now get the label
-    % Now get the label, some looping is necessary because often
-    % times, old values for FAST parameters and kept next to new
-    % ones seperated by a space and need to be ignored
-    test=0;
-    while test==0
-        testVal=fscanf(fid,'%f',1);
-        if isempty(testVal) %if we've reached something besides a number
-            testVal=fscanf(fid,'%s',1);
-            test=1;
-        end
-    end
-    DataOut.Label{count}=testVal; %Now save label
-    
-    fgets(fid); %Advanced to the next line
+    [DataOut.Val{count,1}, DataOut.Label{count,1}] = ParseFASTInputLine( line );
     
     %check if the last label read is the NumFoil
-    if strmatch(DataOut.Label{count},'NumFoil')
+    if strcmpi(DataOut.Label{count},'NumFoil')
+        numFoil = DataOut.Val{count};
         break; %if it does end the loop
     end
     
@@ -87,20 +65,21 @@ end %end while
 
 
 %% Read in FoilNm list
-numFoil = GetFastPar(DataOut,'NumFoil');
+% numFoil = GetFastPar(DataOut,'NumFoil');
 for i = 1:numFoil
-    DataOut.FoilNm{i} = fscanf(fid,'%s',1);
-    fgets(fid); %Advance to the next line
+    line = fgetl(fid);
+    DataOut.FoilNm{i,1} = ParseFASTInputLine( line );
 end
 
 %% Read in BldNodes and PrnElm
 
 %Get the number of blade nodes
-DataOut.Val{count+1}=fscanf(fid,'%f',1); %Get Blade Nodes
-BldNodes = DataOut.Val{count+1};
-DataOut.Label{count+1} = fscanf(fid,'%s',1);
+line = fgetl(fid);
+count = count + 1;
+[DataOut.Val{count}, DataOut.Label{count}] = ParseFASTInputLine( line );
+BldNodes = DataOut.Val{count};
 
-%skip the header row
+%skip the header row of table
 fgets(fid);
 
 %Now loop through and get all the data
