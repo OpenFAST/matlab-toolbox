@@ -1,7 +1,9 @@
 function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line )
 % This routine parses a line from a FAST type input file. 
-% Comment lines are assumed to start with any of the following characters:
-%   #!-=
+% Comment lines are assumed to start with any of the following individual characters:
+%   #!= 
+% or this combination of characters:
+%  --
 % If the line is not a comment, it is assumed to be of the form:
 %  value <old values> label descr
 %--------------------------------------------------------------------------
@@ -29,9 +31,10 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
     trueFalseValues = {'true','false','t','f'};
 
     % determine if this is a comment line:
-    firstChar = sscanf(strtrim(line),'%c',1); %read the first non-whitespace character
+    first2Chars = sscanf(strtrim(line),'%c',2); %read the first two not-starting-with-whitespace characters
+    firstChar   = first2Chars(1);
     
-    if ~isempty( strfind( '#!-=', firstChar ) ) %comments start with any of these characters: # ! - =
+    if ~isempty( strfind( '#!=', firstChar ) ) || strcmp( first2Chars, '--' ) %comments start with any of these characters: # ! - =
         value = strtrim(line);
         label = '';
         isComment = true;
