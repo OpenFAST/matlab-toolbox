@@ -1,12 +1,23 @@
-% Fast2Matlab
+function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
+%% Fast2Matlab
 % Function for reading FAST input files in to a MATLAB struct.
 %
 %
-%This function returns a structure DataOut, which contains 2 cell arrays,
-%.Val: An array of values
-%.Label: An array of matching labels
-%.OutList: An array of variables to output
-%.HdrLines: An array of the header lines (size specified at input)
+%This function returns a structure DataOut, which contains the following 
+% cell arrays:
+%.Val              An array of values
+%.Label            An array of matching labels
+%.HdrLines         An array of the header lines (size specified at input)
+%
+% The following cell arrays may or may not be part of the DataOut structure
+% (depending on the type of file being read):
+%.OutList          An array of variables to output
+%.OutListComment   An array of descriptions of the .OutList values
+%.TowProp          A matrix of tower properties with columns .TowPropHdr 
+%.TowPropHdr       A cell array of headers corresponding to the TowProp table
+%.BldProp          A matrix of blade properties with columns .BldPropHdr
+%.BldPropHdr       A cell array of headers corresponding to the BldProp table
+%
 %These arrays are extracted from the FAST input file
 %
 % In:   FST_file    -   Name of FAST input file
@@ -17,9 +28,7 @@
 % Modified by Paul Fleming, JUNE 2011
 % Modified by Bonnie Jonkman, February 2013 (to allow us to read the 
 % platform file, too)
-
-function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
-
+%%
 if nargin < 2
     hdrLines = 0;
 end
@@ -53,100 +62,109 @@ else
 end
 
 
-while true %loop until discovering Outlist, than break
-    skipLine = false; %reset skipline
-    %Label=[]; %Re-initialize label  PF: Temp disabling this
+while true %loop until discovering Outlist or end of file, than break
     
-    
-    % Get the Value, number or string
-    testVal=fscanf(fid,'%f',1);  %First check if line begins with a number
-    if isempty(testVal)
-        testVal=fscanf(fid,'%s',1);  %If not look for a string instead
-%bjj: this won't work if we have "a space\in a file name"!!!
-
-        %now check to see if the string in test val makes sense as a value
-        if strcmpi(testVal,'false') || strcmpi(testVal,'true') || strcmp(testVal(1),'"')
-%             disp(testVal) %this is a parameter
-        else
-%             disp([ num2str(count) ' ' testVal ] )
-            skipLine = true;
-            if ~strcmp(testVal(1),'-') %test if this non parameter not a comment
-                DataOut.Label{count,1}=testVal;  %if not a comment, make the value the label
-                DataOut.Val{count,1}=' ';
-                count=count+1;
-            end
-            
-        end
-%     else
-%         disp([count testVal])
-    end    
-    
-    % Check to see if the value is Outlist
-    if strcmpi(testVal,'OutList')
-        fgets(fid); %Advance to the next line
-        break; %testval is OutList, break the loop
-    end
-
-    if ~skipLine %if this is actually a parameter line add it
-        DataOut.Val{count,1}=testVal; %assign Val
-        
-        
-        % Now get the label, some looping is necessary because often
-        % times, old values for FAST parameters and kept next to new
-        % ones seperated by a space and need to be ignored
-        test=0;
-        while test==0
-            testVal=fscanf(fid,'%f',1);
-            if isempty(testVal) %if we've reached something besides a number
-                testVal=fscanf(fid,'%s',1);
-                if testVal(1)==',' %commas are an indication that this parameter is a list
-                    %handle list case by appending list
-                    DataOut.Val{count,1}=[DataOut.Val{count,1} str2num(testVal)];
-                elseif ~strcmpi(testVal,'false') && ~strcmpi(testVal,'true')                        
-                    test=1;
-                end
-            end
-        end
-        DataOut.Label{count,1}=testVal; %Now save label
-        
-        
-%         if isempty(Label)==0
-
-%         end
-        count=count+1;
-    end %endif
-    
-    fgets(fid); %Advance to the next line (read the remaining part of the line)
-    
-end %end while
-
-%Now loop and read in the OutList
-outCount = 0;
-while true
     line = fgetl(fid);
-    [outVarC, position] = textscan(line,'%q',1); %we need to get the entire quoted line
-    outVar  = outVarC{1}{1};
-%     [outVar, numRead] = fscanf(fid,'%q',1);
-%     fgets(fid); %Advance to the next line
+    
+    if isnumeric(line) % we reached the end of the file
+        break
+    end
+    
+        % Check to see if the value is Outlist
+    if ~isempty(strfind(upper(line),upper('OutList'))) 
+        [DataOut.OutList DataOut.OutListComment] = ParseFASTOutList(fid);
+        break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
+    end         
+        
+    [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line );    
+    
 
-    if isnumeric(line) %loop until we reach the word END or hit the end of the file
-        break;
-    else
-        indx = strfind(upper(outVar),'END');
-        if (~isempty(indx) && indx == 1)
-            break;
-        else
-            outCount = outCount + 1;
-            DataOut.OutList{outCount,1} = ['"' outVar '"'];
-            if position < length(line)
-              DataOut.OutListComment{outCount,1} = line((position+1):end);
-            else
-              DataOut.OutListComment{outCount,1} = ' ';
-            end
+    if ~isComment
+        
+        if strcmpi(value,'"HtFract"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)
+            NTwInpSt = GetFastPar(DataOut,'NTwInpSt');        
+            [DataOut.TowProp, DataOut.TowPropHdr] = ParseFASTTable(line, fid, NTwInpSt);
+            continue; %let's continue reading the file
+        elseif strcmpi(value,'"BlFract"') %we've reached the distributed blade properties table (and we think it's a string value so it's in quotes)
+            NBlInpSt = GetFastPar(DataOut,'NBlInpSt');        
+            [DataOut.BldProp, DataOut.BldPropHdr] = ParseFASTTable(line, fid, NBlInpSt);
+            continue; %let's continue reading the file
+        else                
+            DataOut.Label{count,1} = label;
+            DataOut.Val{count,1}   = value;
+            count = count + 1;
         end
     end
+    
 end %end while
 
 fclose(fid); %close file
 
+return
 end %end function
+%%
+function [OutList OutListComment] = ParseFASTOutList( fid )
+
+    %Now loop and read in the OutList
+    
+    outCount = 0;
+    while true
+        line = fgetl(fid);
+        [outVarC, position] = textscan(line,'%q',1); %we need to get the entire quoted line
+        outVar  = outVarC{1}{1};    % this will not have quotes around it anymore...
+
+        if isnumeric(line) %loop until we reach the word END or hit the end of the file
+            break;
+        else
+            indx = strfind(upper(outVar),'END');
+            if (~isempty(indx) && indx == 1) %we found "END" so that's the end of the file
+                break;
+            else
+                outCount = outCount + 1;
+                OutList{outCount,1} = ['"' outVar '"'];
+                if position < length(line)
+                  OutListComment{outCount,1} = line((position+1):end);
+                else
+                  OutListComment{outCount,1} = ' ';
+                end
+            end
+        end
+    end %end while   
+
+    if outCount == 0
+        disp( 'WARNING: no outputs found in OutList' );
+        OutList = [];
+        OutListComment = '';
+    end
+    
+end %end function
+%%
+function [Table, Headers] = ParseFASTTable( line, fid, InpSt  )
+
+    % we've read the line of the table that includes the header 
+    % let's parse it now, getting the number of columns as well:
+    TmpHdr  = textscan(line,'%s');
+    Headers = TmpHdr{1};
+    nc = length(Headers);
+
+    % read the units line:
+    fgetl(fid); 
+        
+    % now initialize Table and read its values from the file:
+    Table = zeros(InpSt, nc);   %this is the size table we'll read
+    i = 0;                      % this the line of the table we're reading    
+    while i < InpSt
+        
+        line = fgetl(fid);
+        if isnumeric(line)      % we reached the end prematurely
+            break
+        end        
+
+        i = i + 1;
+        Table(i,:) = sscanf(line,'%f',nc);       
+
+    end
+    
+end %end function
+
+

@@ -5,7 +5,10 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
 % or this combination of characters:
 %  --
 % If the line is not a comment, it is assumed to be of the form:
-%  value <old values> label descr
+%  value [,Array values] <old values> label descr
+% If the value is an array, it must be separated by commas.
+% If there are multiple values separated by white space, it is assumed to
+%   contain old values (instead of an array)
 %--------------------------------------------------------------------------
 % Inputs:
 %   line        - a line of text
@@ -44,7 +47,7 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
         isComment = false;
 
         % Get the Value, number or string
-        [value, cnt, ~, nextindex] = sscanf(line,'%f',1);  %First check if line begins with a number
+        [value, cnt, ~, nextindex] = sscanf(line,'%f', 1);  %First check if line begins with a number
 
         if cnt == 0 % we didn't find a number so...
             [testVal, position] = textscan(line,'%q',1);  %look for a string instead
@@ -75,20 +78,31 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
             line = line(nextindex:end);
 
             [~, cnt, ~, nextindex] =sscanf(line,'%f',1);
-            if cnt == 0 %if we've reached something besides a number
+            if cnt == 0 %if we've reached something besides a number - or we're at the end of the line
 
                 [testVal, cnt, ~, nextindex] = sscanf(line,'%s',1);
-                if any( strcmpi(testVal,trueFalseValues) )
-                    %this is a logical input
-                else
-                    IsLabel = true;
-                    label = testVal;
-                    descr = strtrim(line(nextindex:end));
+                if cnt == 1
+                    if any( strcmpi(testVal,trueFalseValues) )
+                        %this is a logical input
+                    elseif strcmpi(testVal(1),',') 
+                        % commas are an indication that this parameter is a list
+                        if strcmpi(fieldType, 'Numeric') 
+                            [testVal, cnt, ~, nextindex] = sscanf(line(2:end),'%f',1);
+                            if cnt == 1
+                                value = [value; testVal];
+                            end
+                        end
+                    else
+                        IsLabel = true;
+                        label = testVal;
+                        descr = strtrim(line(nextindex:end));
+                    end
                 end
             end
 
         end %while 
             
     end %not a comment
-
+           
+    
 return
