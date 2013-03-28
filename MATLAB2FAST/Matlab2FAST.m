@@ -161,10 +161,10 @@ end
 if ContainsOutList
     if isfield(FastPar,'OutList')
         OutListChar = char(FastPar.OutList);  %this will line up the comments nicer
-        spaces      = repmat(' ',1,max(1,30-size(OutListChar,2)));
+        spaces      = repmat(' ',1,max(1,28-size(OutListChar,2)));
         %Now add the Outlist
         for io = 1:length(FastPar.OutList)
-            fprintf(fidOUT,[OutListChar(io,:) spaces FastPar.OutListComment{io} newline]);
+            fprintf(fidOUT,[OutListChar(io,:) spaces FastPar.OutListComments{io} newline]);
         end
     else
         disp( 'WARNING: OutList was not found in the FAST data structure. The OutList field will be empty.' );        

@@ -12,7 +12,7 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 % The following cell arrays may or may not be part of the DataOut structure
 % (depending on the type of file being read):
 %.OutList          An array of variables to output
-%.OutListComment   An array of descriptions of the .OutList values
+%.OutListComments  An array of descriptions of the .OutList values
 %.TowProp          A matrix of tower properties with columns .TowPropHdr 
 %.TowPropHdr       A cell array of headers corresponding to the TowProp table
 %.BldProp          A matrix of blade properties with columns .BldPropHdr
@@ -72,7 +72,7 @@ while true %loop until discovering Outlist or end of file, than break
     
         % Check to see if the value is Outlist
     if ~isempty(strfind(upper(line),upper('OutList'))) 
-        [DataOut.OutList DataOut.OutListComment] = ParseFASTOutList(fid);
+        [DataOut.OutList DataOut.OutListComments] = ParseFASTOutList(fid);
         break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end         
         
@@ -103,7 +103,7 @@ fclose(fid); %close file
 return
 end %end function
 %%
-function [OutList OutListComment] = ParseFASTOutList( fid )
+function [OutList OutListComments] = ParseFASTOutList( fid )
 
     %Now loop and read in the OutList
     
@@ -123,9 +123,9 @@ function [OutList OutListComment] = ParseFASTOutList( fid )
                 outCount = outCount + 1;
                 OutList{outCount,1} = ['"' outVar '"'];
                 if position < length(line)
-                  OutListComment{outCount,1} = line((position+1):end);
+                  OutListComments{outCount,1} = line((position+1):end);
                 else
-                  OutListComment{outCount,1} = ' ';
+                  OutListComments{outCount,1} = ' ';
                 end
             end
         end
@@ -134,7 +134,7 @@ function [OutList OutListComment] = ParseFASTOutList( fid )
     if outCount == 0
         disp( 'WARNING: no outputs found in OutList' );
         OutList = [];
-        OutListComment = '';
+        OutListComments = '';
     end
     
 end %end function
