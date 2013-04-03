@@ -1,5 +1,5 @@
 function [OutListAry, CommentAry] = GetOutListVars(OutList, OutListComments)
-%[OutListAry] = getOutListVars(OutList)
+%[OutListAry, CommentAry] = getOutListVars(OutList, Comment)
 % This routine parses the OutList field into individual variables (the
 % input value may contain several variables per line)
 %Inputs: 
