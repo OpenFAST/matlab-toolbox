@@ -1,5 +1,5 @@
 ------- SERVODYN V1.00.* INPUT FILE --------------------------------------------
-Controls inputs for blah blah blah.
+Controls inputs
 ---------------------- SIMULATION CONTROL --------------------------------------
 False         Echo         - Echo input data to <RootName>.ech (flag)
    0.0125     DT           - Communication interval for controllers (s)
