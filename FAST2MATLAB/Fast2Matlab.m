@@ -17,6 +17,8 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.TowPropHdr       A cell array of headers corresponding to the TowProp table
 %.BldProp          A matrix of blade properties with columns .BldPropHdr
 %.BldPropHdr       A cell array of headers corresponding to the BldProp table
+%.DLLProp          A matrix of properties for the Bladed DLL Interface with columns .DLLPropHdr
+%.DLLPropHdr       A cell array of headers corresponding to the DLLProp table
 %
 %These arrays are extracted from the FAST input file
 %
@@ -56,7 +58,8 @@ end
 %Stop once we've reached the OutList which this function is the last
 %occuring thing before the EOF
 if nargin == 3
-    count = max(length(DataOut.Label),length(DataOut.Var))+1;
+    
+    count = max(length(DataOut.Label),length(DataOut.Val))+1;
 else
     count = 1;
 end
@@ -89,6 +92,10 @@ while true %loop until discovering Outlist or end of file, than break
             NBlInpSt = GetFastPar(DataOut,'NBlInpSt');        
             [DataOut.BldProp, DataOut.BldPropHdr] = ParseFASTTable(line, fid, NBlInpSt);
             continue; %let's continue reading the file
+        elseif strcmpi(value,'"GenSpd_TLU"') %we've reached the DLL torque-speed lookup table (and we think it's a string value so it's in quotes)
+            DLL_NumTrq = GetFastPar(DataOut,'DLL_NumTrq');        
+            [DataOut.DLLProp, DataOut.DLLPropHdr] = ParseFASTTable(line, fid, DLL_NumTrq);
+            continue; %let's continue reading the file
         else                
             DataOut.Label{count,1} = label;
             DataOut.Val{count,1}   = value;
@@ -110,6 +117,9 @@ function [OutList OutListComments] = ParseFASTOutList( fid )
     outCount = 0;
     while true
         line = fgetl(fid);
+        if isempty(line) %Fortran allows blank lines in this list
+            continue; 
+        end
         [outVarC, position] = textscan(line,'%q',1); %we need to get the entire quoted line
         outVar  = outVarC{1}{1};    % this will not have quotes around it anymore...
 

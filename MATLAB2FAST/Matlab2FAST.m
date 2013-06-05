@@ -52,7 +52,7 @@ for hi = 1:hdrLines
     end
 
         % print appropriate header lines:
-    if isfield(FastPar, 'HdrLines') && hi ~= 1
+    if isfield(FastPar, 'HdrLines') && hi ~= 1 %first line always comes from template file
         fprintf(fidOUT,'%s',FastPar.HdrLines{hi,1}); %does not contain the line ending
         fprintf(fidOUT,newline);                     %so print it here instead
     else
@@ -108,6 +108,16 @@ while true
                 WriteFASTTable(line, fidIN, fidOUT, FastPar.BldProp, FastPar.BldPropHdr, newline);
                 continue; %let's continue reading the template file            
             end
+            
+        elseif strcmpi(value,'"GenSpd_TLU"') %we've reached the DLL torque-speed lookup table (and we think it's a string value so it's in quotes)
+            if ~isfield(FastPar,'DLLProp')
+                disp( 'WARNING: Bladed Interface torque-speed look-up table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.DLLProp, FastPar.DLLPropHdr, newline);
+                continue; %let's continue reading the template file            
+            end            
+            
         else
 
             indx = strcmpi( FastPar.Label, label );
@@ -164,7 +174,7 @@ if ContainsOutList
         spaces      = repmat(' ',1,max(1,28-size(OutListChar,2)));
         %Now add the Outlist
         for io = 1:length(FastPar.OutList)
-            fprintf(fidOUT,[OutListChar(io,:) spaces FastPar.OutListComments{io} newline]);
+            fprintf(fidOUT,'%s',[OutListChar(io,:) spaces FastPar.OutListComments{io} newline]);
         end
     else
         disp( 'WARNING: OutList was not found in the FAST data structure. The OutList field will be empty.' );        

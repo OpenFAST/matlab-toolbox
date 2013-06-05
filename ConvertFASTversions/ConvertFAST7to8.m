@@ -80,7 +80,7 @@ end
         PlatformFile = GetFastPar(FP,'PtfmFile');
         inputfile = GetFullFileName(PlatformFile,oldDir);
         
-        if ( ~isempty(inputfile) )
+        if ( ~isempty(inputfile) )                        
             FP = Fast2Matlab(inputfile,3, FP); %add Platform Parameters to FP, specify 3 lines of header
             setPtfmVals = false;
         end                   
