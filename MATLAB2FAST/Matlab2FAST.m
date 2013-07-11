@@ -171,7 +171,7 @@ end
 if ContainsOutList
     if isfield(FastPar,'OutList')
         OutListChar = char(FastPar.OutList);  %this will line up the comments nicer
-        spaces      = repmat(' ',1,max(1,28-size(OutListChar,2)));
+        spaces      = repmat(' ',1,max(1,26-size(OutListChar,2)));
         %Now add the Outlist
         for io = 1:length(FastPar.OutList)
             fprintf(fidOUT,'%s',[OutListChar(io,:) spaces FastPar.OutListComments{io} newline]);
