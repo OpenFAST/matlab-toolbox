@@ -5,8 +5,8 @@
 %
 % Knud A. Kragh
 
-function OutData=GetFastPar(FastPar,Par)
-
+function [OutData,err]=GetFastPar(FastPar,Par)
+err = false;
 OutData=[];
 for i=1:length(FastPar.Label)
     if strcmp(FastPar.Label{i},Par)==1
@@ -16,4 +16,5 @@ end
 
 if isempty(OutData)
     disp(['ERROR in GetFastPar: Parameter ' Par ' not found.'])
+    err = true;
 end
