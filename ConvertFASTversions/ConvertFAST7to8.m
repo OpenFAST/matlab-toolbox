@@ -1,8 +1,8 @@
 function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat)
 %function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat)
-% by Bonnie Jonkman
+% by Bonnie Jonkman, National Renewable Energy Laboratory
 %
-%Conversion of FAST v 7.x files to FAST v8.0.0
+%Conversion of FAST v 7.x files to FAST v8.3.x
 %  based on "Demonstration of fast file manipuation" by Paul Fleming
 % (c) 2011, 2013 National Renewable Energy Laboratory
 %--------------------------------------------------------------------------
@@ -10,7 +10,7 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat)
 %  oldFSTName - the name of the old (v6 or 7) primary FAST input file,
 %               including full path name
 %  newDir     - the new directory that will contain converted input files 
-%               (FAST 8.0.0, ElastoDyn (primary, blade, and tower files), 
+%               (FAST 8.3.x, ElastoDyn (primary, blade, and tower files), 
 %               ServoDyn; AeroDyn and HydroDyn input files will not be 
 %               copied or moved.
 % Optional inputs:
@@ -39,8 +39,16 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat)
 
 thisFile    = which('ConvertFAST7to8');
 thisDir     = fileparts(thisFile);
-templateDir = strcat(thisDir,filesep, 'TemplateFiles', filesep, 'V8.00.x');
+templateDir = strcat(thisDir,filesep, 'TemplateFiles');
+
+FAST_template = strcat(templateDir,filesep,'v8.03.x',filesep,'FAST_Primary_v8.03.x.dat');
+ED_template   = strcat(templateDir,filesep,'v8.03.x',filesep,'ED_Primary_v1.01.x.dat');
+SrvD_template = strcat(templateDir,filesep,'v8.03.x',filesep,'SrvD_Primary_v1.01.x.dat');
+templateDir   = strcat(templateDir,filesep,'v8.00.x');
+
 XLS_file    = strcat(templateDir, filesep,'OutListParameters.xlsx');
+
+addpath( strcat(thisDir,filesep, 'InputConversions') ); %directory containing the conversions...
 
 
 [~, ~, ~, ServoDyn_Channels ] = GetOutListParameters( XLS_file, 'ServoDyn' );
@@ -72,22 +80,7 @@ end
     
     inputfile = [oldDir filesep baseFileName];      
     FP = Fast2Matlab(inputfile,4); %FP are Fast Parameters, specify 4 lines of header
-
-    % platform file: PtfmFile (optional)
-    PtfmModel = GetFastPar(FP,'PtfmModel');
-    setPtfmVals = true;
-    if ( PtfmModel ~= 0 ) 
-        PlatformFile = GetFastPar(FP,'PtfmFile');
-        inputfile = GetFullFileName(PlatformFile,oldDir);
-        
-        if ( ~isempty(inputfile) )                        
-            FP = Fast2Matlab(inputfile,3, FP); %add Platform Parameters to FP, specify 3 lines of header
-            setPtfmVals = false;
-        end                   
-    end
-    
-
-    NumBl = GetFastPar(FP,'NumBl');
+   
     %----------------------------------------------------------------------
     % Get blade and tower data, too...
     %----------------------------------------------------------------------
@@ -99,6 +92,7 @@ end
     TP = Fast2Matlab(OldTwrFile,3); %get the old tower parameters with 3 header lines
     
     % Blade files: (we'll modify this later)
+    NumBl = GetFastPar(FP,'NumBl');
     BldFile        = cell(1,NumBl);
     BldWasRelative = true(1,NumBl);
     for k=1:NumBl
@@ -112,12 +106,17 @@ end
     %----------------------------------------------------------------------
     % Add fields for FAST/ElastoDyn/ServoDyn and convert old ones as necessary
     %----------------------------------------------------------------------
+
+    %....................................
+    [FP] = newInputs_ED_v1_00(FP,oldDir);
+    [FP] = newInputs_ED_v1_01(FP);
+    %....................................
+    
 %     FP = SetFastPar(FP,'ADAMSPrep',1);          % Adams isn't available in this version
 %     FP = SetFastPar(FP,'AnalMode', 1);          % Linearization isn't available in this version
 %     FP = SetFastPar(FP,'CompNoise','False');    % Noise isn't available in this version
 
 % FP = SetFastPar(FP,'Echo','True');      % For preliminary testing purposes...
-    FP = SetFastPar(FP,'Furling','False');      % Furling isn't available in this version            
     
     DT_Out = GetFastPar(FP,'DT') * GetFastPar(FP,'DecFact');
     
@@ -129,11 +128,6 @@ end
         SetFastPar(FP,'TwrFile', [ '"' TwrFile '"' ]);
     end
     
-    if setPtfmVals
-        PtfmCM = 0;
-    else
-        PtfmCM = GetFastPar(FP,'PtfmCM');
-    end
     
     for k=1:NumBl
         if ~BldWasRelative(k)
@@ -148,6 +142,7 @@ end
     end
     
         % add a new CompUserPtfmLd line
+    PtfmModel = GetFastPar(FP,'PtfmModel');
     if PtfmModel > 0
         Platform = 'True';
     else
@@ -173,31 +168,7 @@ end
                     'CompSub',       'False';
                     'SDFile',        '"unused"'; 
                     'CompHydro',     'False';
-                    'HDFile',        '"unused"';
-                    'PtfmCMzt',      -PtfmCM;
-                    'PtfmCMxt',       0;
-                    'PtfmCMyt',       0;       };                   
-    if setPtfmVals %these were the defaults when the platform file was not used
-        NewFieldVals = [ NewFieldVals;
-                      {'PtfmSgDOF',       'False';    
-                       'PtfmSwDOF',       'False'; 
-                       'PtfmHvDOF',       'False'; 
-                       'PtfmRDOF',        'False'; 
-                       'PtfmPDOF',        'False'; 
-                       'PtfmYDOF',        'False';  
-                       'PtfmSurge',        0;                        
-                       'PtfmSway',         0;                        
-                       'PtfmHeave',        0;                                               
-                       'PtfmRoll',         0;                                               
-                       'PtfmPitch',        0;                                               
-                       'PtfmYaw',          0;                         
-                       'TwrDraft',         0;                           
-                       'PtfmRef',          0;                        
-                       'PtfmMass',         0;                        
-                       'PtfmRIner',        0;                        
-                       'PtfmPIner',        0;                        
-                       'PtfmYIner',        0;  } ];     
-    end
+                    'HDFile',        '"unused"';      };                   
         % set the rates based on values from CalculateYawAndPitchRates.m
     if ( nargin > 2 )
         if YawManRat ~= 0.0
@@ -222,20 +193,6 @@ end
         FP.Val{n}   = NewFieldVals{k,2};
     end
     
-        % modify GBRatio based on the removed GBRevers variable
-    GBRevers = GetFastPar(FP,'GBRevers');
-    if strcmpi(GBRevers,'t')
-        GBRevers = true;
-    elseif strcmpi(GBRevers,'f')
-        GBRevers = false;
-    else
-        GBRevers = eval(lower(GBRevers)); % convert "true"/"false" text to a logical value
-    end
-    
-    if GBRevers 
-        GBRatio = -1*GBRatio;
-        disp('GBRatio sign being reversed.')
-    end
     
         % Change AeroCent from the blade file table to PitchAxis
     for k=1:NumBl
@@ -266,21 +223,11 @@ end
                 disp( ['WARNING: output channel ' OutList{ch} ' is no longer valid.']);
             end
         end %
-               
-        
-        
+                               
     else
-        disp(['WARNING: there are no outputs to be generated.'])
+        disp('WARNING: there are no outputs to be generated.')
     end
-            
-%....................................
-% TO DO           
-%....................................
-%modify control settings (i.e., "none", "simple",etc...)
-
-% set YawManRat
-% set PitManRat
-   
+               
         %....................................
         % fix the headers for the new files:
         %....................................
@@ -295,27 +242,28 @@ end
         BP{k}.HdrLines{2} = BP{k}.HdrLines{3};      
     end
     
+
+    
+    
 %%  %----------------------------------------------------------------------
     % Write new model data to the FAST, ElastoDyn, and ServoDyn input files:
     %----------------------------------------------------------------------
+    
         % FAST
-    template   = [templateDir filesep 'FAST_Primary.dat'];  %template for primary file
     outputFile = newFSTname; 
-    Matlab2FAST(FP,template,outputFile, 2); %contains 2 header lines
+    Matlab2FAST(FP,FAST_template,outputFile, 2); %contains 2 header lines
 
         % ServoDyn
-    template   = [templateDir filesep 'SrvD_Primary.dat'];  %template for ServoDyn primary file
     outputFile = [newDir filesep SrvDFile];
     FP.OutList         = OutList(SD_Channel);
     FP.OutListComments = OutListComments(SD_Channel);
-    Matlab2FAST(FP,template,outputFile, 2); %contains 2 header lines
+    Matlab2FAST(FP,SrvD_template,outputFile, 2); %contains 2 header lines
 
         % ElastoDyn (primary)
-    template   = [templateDir filesep 'ED_Primary.dat'];  %template for ElastoDyn primary file
     outputFile = [newDir filesep EDFile];
     FP.OutList         = OutList(ED_Channel);
     FP.OutListComments = OutListComments(ED_Channel);
-    Matlab2FAST(FP,template,outputFile, 2); %contains 2 header lines
+    Matlab2FAST(FP,ED_template,outputFile, 2); %contains 2 header lines
         
         % ElastoDyn (tower)
     template   = [templateDir filesep 'ED_Tower.dat'];  %template for ElastoDyn tower file
