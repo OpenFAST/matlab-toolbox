@@ -1,5 +1,5 @@
-function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat)
-%function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat)
+function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL)
+%function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL)
 % by Bonnie Jonkman, National Renewable Energy Laboratory
 %
 %Conversion of FAST v 7.x files to FAST v8.3.x
@@ -14,10 +14,12 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat)
 %               ServoDyn; AeroDyn and HydroDyn input files will not be 
 %               copied or moved.
 % Optional inputs:
-%  YawManRat  - the new yaw maneuver rate, calculated from the old output
-%               values (see CalculateYawAndPitchRates.m)
-%  PitManRat  - an array of new pitch maneuver rates, calculated from the 
-%               old output values (see CalculateYawAndPitchRates.m)
+%  YawManRat     - the new yaw maneuver rate, calculated from the old 
+%                  output values (see CalculateYawAndPitchRates.m)
+%  PitManRat     - an array of new pitch maneuver rates, calculated from  
+%                  the old output values (see CalculateYawAndPitchRates.m)
+%  usedBladedDLL - a logical determining if this input file was for FAST 
+%                  compiled with the BladedDLLInterface.f90 source file
 %
 % File requirements/assumptions for oldFSTName: 
 % 1) Comment lines are assumed to start with any of the following four 
@@ -36,6 +38,10 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat)
 %       commas
 
 %% let's get the directory that contains the template files  
+
+if nargin < 5
+    usedBladedDLL = false;
+end
 
 thisFile    = which('ConvertFAST7to8');
 thisDir     = fileparts(thisFile);
@@ -110,7 +116,12 @@ end
     %....................................
     [FP] = newInputs_ED_v1_00(FP,oldDir);
     [FP] = newInputs_ED_v1_01(FP);
-    %....................................
+    %....................................  
+    if usedBladedDLL
+        [FP] = newInputs_SrvD_v1_01(FP,usedBladedDLL);
+    end
+    %....................................  
+    
     
 %     FP = SetFastPar(FP,'ADAMSPrep',1);          % Adams isn't available in this version
 %     FP = SetFastPar(FP,'AnalMode', 1);          % Linearization isn't available in this version
