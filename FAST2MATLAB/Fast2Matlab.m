@@ -39,7 +39,7 @@ end
 fid = fopen(FST_file,'r');
 
 if fid == -1
-    error(['FST file, ' FST_file ', could not be found'])
+    error(['FST file, ' FST_file ', could not be opened for reading. Check if the file exists or is locked.'])
 end
 
 %skip hdr
