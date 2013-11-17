@@ -64,10 +64,8 @@ end
 if fieldmask(8)
     Mesh.RotationAcc    = fread( fid,   [3, Mesh.Nnodes], nbits );
 end
-if fieldmask(9) %ADDED MASS
-    %Mesh.AddedMass     = reshape( fread( fid, 6*6*Mesh.Nnodes, nbits ), 6, 6, Mesh.Nnodes ); 
-end
-if fieldmask(10)
+
+if fieldmask(9)
     Mesh.Scalars        = fread( fid,   [3, Mesh.Nnodes], nbits );
 end
     
