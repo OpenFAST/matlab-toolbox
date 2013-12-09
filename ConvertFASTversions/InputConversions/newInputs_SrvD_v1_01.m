@@ -13,7 +13,7 @@ function [SrvDP] = newInputs_SrvD_v1_01(SrvDPar,usedBladed)
     %----------------------------------------------------------------------
     % Modify fields for ServoDyn v1.01.x:
     %----------------------------------------------------------------------      
-    %n = length(SrvDP.Label);    
+    n = length(SrvDP.Label);    
     
     ControlMode_DLL    = 5;      
     
@@ -32,7 +32,34 @@ function [SrvDP] = newInputs_SrvD_v1_01(SrvDPar,usedBladed)
             % and we don't want to change these values again.    
             
         if err1  
-            
+            n = n + 1;
+            SrvDP.Label{n} = 'DLL_FileName';
+            SrvDP.Val{n}   = 'DISCON.dll';
+
+            NewLabels={'Ptch_SetPnt';
+                       'Ptch_Min';
+                       'Ptch_Max';
+                       'PtchRate_Min';
+                       'PtchRate_Max';
+                       'NacYaw_North';
+                       'Ptch_Cntrl';                       
+                       'Gain_OM';
+                       'GenSpd_MinOM';
+                       'GenSpd_MaxOM';
+                       'GenSpd_Dem';
+                       'GenTrq_Dem';
+                       'GenPwr_Dem';
+                       'DLL_NumTrq' };
+
+            for i_label = 1:length(NewLabels)
+                n = n + 1;
+                SrvDP.Label{n} = NewLabels{i_label};
+                SrvDP.Val{n}   = 0;
+            end
+                     
+            SrvDP.DLLProp    = zeros(0, 2);
+            SrvDP.DLLPropHdr = {'GenSpd_TLU','GenTrq_TLU'};
+                        
             % find all the user-defined from Bladed DLL switches and make
             % them ControlMode_DLL (i.e., 5)
             

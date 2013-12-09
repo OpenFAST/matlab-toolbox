@@ -90,7 +90,6 @@ end
     %----------------------------------------------------------------------
     % Get blade and tower data, too...
     %----------------------------------------------------------------------
-    
     % Tower file: (we'll modify this later)
     TwrFile = GetFastPar(FP,'TwrFile');    
     TwrFile = strrep(TwrFile,'"',''); %let's remove the quotes so we can actually use this file name
@@ -174,8 +173,15 @@ end
                     'SrvDFile',      [ '"' SrvDFile '"' ];
                     'DT_Out',        DT_Out;
                     'OutFile',       1;
+                    'AbortLevel',    'FATAL';
+                    'InterpOrder',   0;
+                    'NumCrctn',      0;
+                    'DT_UJac',       99999;
+                    'UJacSclFact',   1000000;
                     'CompUserPtfmLd',Platform; 
                     'CompUserTwrLd', CompUserTwrLd;
+                    'CompMAP',       'False';
+                    'MAPFile',       '"unused"'; 
                     'CompSub',       'False';
                     'SDFile',        '"unused"'; 
                     'CompHydro',     'False';

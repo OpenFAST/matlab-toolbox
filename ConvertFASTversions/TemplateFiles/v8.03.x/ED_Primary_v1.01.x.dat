@@ -114,10 +114,10 @@ True          TabDelim    - Use tab delimiters in text tabular output file? (fla
 "ES10.3E2"    OutFmt      - Format used for text tabular output (except time).  Resulting field should be 10 characters. (quoted string)  [not checked for validity!] (currently unused)
   30.0        TStart      - Time to begin tabular output (s) (currently unused)
    1          DecFact     - Decimation factor for tabular output {1: output every time step} (-) (currently unused)
-   3          NTwGages    - Number of tower nodes that have strain gages for output [0 to 9] (-)
-10,19,28      TwrGagNd    - List of tower nodes that have strain gages [1 to TwrNodes] (-) [unused if NTwGages=0]
-   3          NBlGages    - Number of blade nodes that have strain gages for output [0 to 9] (-)
- 5,9,13       BldGagNd    - List of blade nodes that have strain gages [1 to BldNodes] (-) [unused if NBlGages=0]
+   2          NTwGages    - Number of tower nodes that have strain gages for output [0 to 9] (-)
+1,2           TwrGagNd    - List of tower nodes that have strain gages [1 to TwrNodes] (-) [unused if NTwGages=0]
+   2          NBlGages    - Number of blade nodes that have strain gages for output [0 to 9] (-)
+ 2,3          BldGagNd    - List of blade nodes that have strain gages [1 to BldNodes] (-) [unused if NBlGages=0]
               OutList     - The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
 "ExOut1, ExOut2"          - Two example outputs
 END of ElastoDyn input file (the word "END" must appear in the first 3 columns of this last line).

@@ -1,21 +1,36 @@
-function [Mesh] = ReadFASTmesh(FileName)
-%[Mesh] = ReadFASTbinary(FileName)
+function [Mesh] = ReadFASTmesh(FileID)
+%[Mesh] = ReadFASTmesh(FileName)
 % Author: Bonnie Jonkman, National Renewable Energy Laboratory
 % (c) 2013, National Renewable Energy Laboratory
 %
 %
 % Input:
-%  FileName      - string: contains file name to open
+%  FileID        - either:
+%                   (1) integer: contains file identifier to file opened
+%                           for reading binary
+%                   (2) string: contains name of file to open
 %
 % Output:
 %  Mesh          - data structure with mesh information
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 
-fid  = fopen( FileName );
-if fid < 1
-    error(['ReadFASTmesh:: Could not open file: ' FileName ]);
+if isnumeric(FileID)
+    fid = FileID;
+    if fid < 1
+        error('ReadFASTmesh:: FileID must be an identifier connected to an open file or a vaild file name.');
+    end
+    closeFile = false;
+else
+    FileName = FileID;
+    [fid, message] = fopen( FileName );
+    if fid < 1
+        error(['ReadFASTmesh:: Error opening file: ' FileName '. ' message]);
+    end
+    closeFile = true;
 end
+
+%% -----------------------------------------------------------------
 
 ReKi = fread( fid, 1, 'int32');
 if (ReKi == 4)
@@ -68,15 +83,21 @@ end
 if fieldmask(9)
     Mesh.Scalars        = fread( fid,   [3, Mesh.Nnodes], nbits );
 end
-    
-Mesh.Element(Mesh.NElemList,1).Xelement = 0;
-for i = 1:Mesh.NElemList
-    Mesh.Element(i).Xelement = fread( fid, 1,         'int32');
-    ElemNodes                = fread( fid, 1,         'int32');
-    Mesh.Element(i).Nodes    = fread( fid, ElemNodes, 'int32');
 
+if Mesh.NElemList > 0
+    Mesh.Element(Mesh.NElemList,1).Xelement = 0;
+    for i = 1:Mesh.NElemList
+        Mesh.Element(i).Xelement = fread( fid, 1,         'int32');
+        ElemNodes                = fread( fid, 1,         'int32');
+        Mesh.Element(i).Nodes    = fread( fid, ElemNodes, 'int32');
+
+    end
 end
 
+%% -----------------------------------------------------------------
+if (closeFile)
+    fclose(fid);
+end
 
 return;
 
