@@ -1,9 +1,11 @@
 function [Channels, ChanName, ChanUnit, FileID] = ReadFASTbinary(FileName)
 %[Channels, ChannelNames, ChannelUnits] = ReadFASTbinary(FileName)
 % Author: Bonnie Jonkman, National Renewable Energy Laboratory
-% (c) 2012, National Renewable Energy Laboratory
+% (c) 2012, 2013 National Renewable Energy Laboratory
 %
-%  Edited for FAST v7.02.00b-bjj  22-Oct-2012
+% 22-Oct-2012: Edited for FAST v7.02.00b-bjj
+% 25-Nov-2013: Edited for faster performance, as noted from 
+%              https://wind.nrel.gov/forum/wind/viewtopic.php?f=4&t=953
 %
 % Input:
 %  FileName      - string: contains file name to open
@@ -92,12 +94,13 @@ if fid > 0
     % Scale the packed binary to real data
     %-------------------------
     
-    ip = 1;
+%     ip = 1;
     for it = 1:NT
-        for ic = 1:NumOutChans
-            Channels(it,ic+1) = ( PackedData(ip) - ColOff(ic) ) / ColScl(ic) ;
-            ip = ip + 1;
-        end % ic       
+        Channels(it,2:end) = (PackedData(1+NumOutChans*(it-1):NumOutChans*it) - ColOff)./ColScl;
+%         for ic = 1:NumOutChans
+%             Channels(it,ic+1) = ( PackedData(ip) - ColOff(ic) ) / ColScl(ic) ;
+%             ip = ip + 1;
+%         end % ic       
     end %it
 
     if FileID == FileFmtID.WithTime
