@@ -306,7 +306,7 @@ end
 
 function WriteHDAddMatrices( fidIN, fidOUT, AddF0, AddCLin, AddBLin, AddBQuad, newline)
 
-   ColIndx = ones(1,6);
+   ColIndx = [1:6];
     
       % now we'll write the AddF0:
     
