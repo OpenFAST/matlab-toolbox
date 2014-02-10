@@ -34,7 +34,7 @@ function ConvertFAST8_3to5(oldFSTName, newDir)
 
 thisFile    = which('ConvertFAST8_0to3');
 thisDir     = fileparts(thisFile);
-templateDir = strcat(thisDir,filesep, 'TemplateFiles', filesep, 'v8.03.x');
+templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
 
         % Primary input file:
 

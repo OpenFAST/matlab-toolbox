@@ -1,4 +1,4 @@
-function [Channels, ChanName, ChanUnit] = ReadFASTtext(FileName, delim, HeaderRows, NameLine, UnitsLine )
+function [Channels, ChanName, ChanUnit,DescStr] = ReadFASTtext(FileName, delim, HeaderRows, NameLine, UnitsLine )
 %[Channels, ChanName, ChanUnit] = ReadFASTtext(FileName)
 % Author: Bonnie Jonkman, National Renewable Energy Laboratory
 % (c) 2012, National Renewable Energy Laboratory
@@ -23,6 +23,7 @@ function [Channels, ChanName, ChanUnit] = ReadFASTtext(FileName, delim, HeaderRo
 %%
 LenName = 10;  % number of characters per channel name
 LenUnit = 10;  % number of characters per unit name
+DescStr = '';
 
 switch nargin;
     case 1
@@ -95,7 +96,8 @@ else
                 end
                 ChanUnit = ChanUnit{1};
                 nCols2 = length(ChanUnit);
-
+            elseif i == NameLine-2
+                DescStr=line;
             end %if i
 
         end %for i

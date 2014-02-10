@@ -47,9 +47,9 @@ thisFile    = which('ConvertFAST7to8');
 thisDir     = fileparts(thisFile);
 templateDir = strcat(thisDir,filesep, 'TemplateFiles');
 
-FAST_template = strcat(templateDir,filesep,'v8.03.x',filesep,'FAST_Primary_v8.03.x.dat');
-ED_template   = strcat(templateDir,filesep,'v8.03.x',filesep,'ED_Primary_v1.01.x.dat');
-SrvD_template = strcat(templateDir,filesep,'v8.03.x',filesep,'SrvD_Primary_v1.01.x.dat');
+FAST_template = strcat(templateDir,filesep,'FAST_Primary_v8.03.x.dat');
+ED_template   = strcat(templateDir,filesep,'ED_Primary_v1.01.x.dat');
+SrvD_template = strcat(templateDir,filesep,'SrvD_Primary_v1.01.x.dat');
 templateDir   = strcat(templateDir,filesep,'v8.00.x');
 
 XLS_file    = strcat(templateDir, filesep,'OutListParameters.xlsx');

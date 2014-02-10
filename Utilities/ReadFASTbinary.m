@@ -1,4 +1,4 @@
-function [Channels, ChanName, ChanUnit, FileID] = ReadFASTbinary(FileName)
+function [Channels, ChanName, ChanUnit, FileID, DescStr] = ReadFASTbinary(FileName)
 %[Channels, ChannelNames, ChannelUnits] = ReadFASTbinary(FileName)
 % Author: Bonnie Jonkman, National Renewable Energy Laboratory
 % (c) 2012, 2013 National Renewable Energy Laboratory
