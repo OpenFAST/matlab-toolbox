@@ -15,8 +15,9 @@ function PlotFASToutput(FASTfiles,FASTfilesDesc,Channels)
 %                 listed in FASTfiles, used in the plot legend. If omitted,  
 %                 the routine will list them as File 1, File 2, etc.
 % Channels      - an array of channel numbers, indicating which channels
-%                 from File 1 should be plotted. If omitted, all channels 
-%                 except time (the first one) are plotted.
+%                 from File 1 should be plotted. If omitted, or if
+%                 Channels = 'all', all channels except time (the first 
+%                 one) are plotted.
 % Note: the channels in the files need not be in the same order, but the
 %  channel names must be identical. (i.e., it does not search for alternate
 %  column names)
