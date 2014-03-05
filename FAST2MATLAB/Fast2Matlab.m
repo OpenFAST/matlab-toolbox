@@ -19,7 +19,12 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.BldPropHdr       A cell array of headers corresponding to the BldProp table
 %.DLLProp          A matrix of properties for the Bladed DLL Interface with columns .DLLPropHdr
 %.DLLPropHdr       A cell array of headers corresponding to the DLLProp table
-%
+%.FoilNm           A Cell array of foil names
+%.BldNodesHdr      A cell array of headers corresponding to the BldProp table BldNodes
+%.BldNodes         A matrix of blade nodes with columns RNodes, AeroTwst DRNodes Chord and Nfoil
+%.PrnElm           An array determining whether or not to print a given element
+
+
 %These arrays are extracted from the FAST input file
 %
 % In:   FST_file    -   Name of FAST input file
@@ -77,7 +82,8 @@ while true %loop until discovering Outlist or end of file, than break
     if ~isempty(strfind(upper(line),upper('OutList'))) 
         [DataOut.OutList DataOut.OutListComments] = ParseFASTOutList(fid);
         break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
-    end         
+    end      
+
         
     [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line );    
     
@@ -86,16 +92,24 @@ while true %loop until discovering Outlist or end of file, than break
         
         if strcmpi(value,'"HtFract"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)
             NTwInpSt = GetFastPar(DataOut,'NTwInpSt');        
-            [DataOut.TowProp, DataOut.TowPropHdr] = ParseFASTTable(line, fid, NTwInpSt);
+            [DataOut.TowProp, DataOut.TowPropHdr] = ParseFASTNumTable(line, fid, NTwInpSt);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"BlFract"') %we've reached the distributed blade properties table (and we think it's a string value so it's in quotes)
             NBlInpSt = GetFastPar(DataOut,'NBlInpSt');        
-            [DataOut.BldProp, DataOut.BldPropHdr] = ParseFASTTable(line, fid, NBlInpSt);
+            [DataOut.BldProp, DataOut.BldPropHdr] = ParseFASTNumTable(line, fid, NBlInpSt);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"GenSpd_TLU"') %we've reached the DLL torque-speed lookup table (and we think it's a string value so it's in quotes)
             DLL_NumTrq = GetFastPar(DataOut,'DLL_NumTrq');        
-            [DataOut.DLLProp, DataOut.DLLPropHdr] = ParseFASTTable(line, fid, DLL_NumTrq);
+            [DataOut.DLLProp, DataOut.DLLPropHdr] = ParseFASTNumTable(line, fid, DLL_NumTrq);
             continue; %let's continue reading the file
+        elseif strcmpi(label,'FoilNm') %note NO quotes because it's a label
+            NumFoil = GetFastPar(DataOut,'NumFoil');
+            [DataOut.FoilNm] = ParseFASTFileList( line, fid, NumFoil );
+            continue; %let's continue reading the file  
+        elseif strcmpi(value,'"RNodes"')
+            BldNodes = GetFastPar(DataOut,'BldNodes');  
+            [DataOut.BldNodes, DataOut.BldNodesHdr] = ParseFASTFmtTable( line, fid, BldNodes, false );
+            continue;
         else                
             DataOut.Label{count,1} = label;
             DataOut.Val{count,1}   = value;
@@ -149,8 +163,10 @@ function [OutList OutListComments] = ParseFASTOutList( fid )
     
 end %end function
 %%
-function [Table, Headers] = ParseFASTTable( line, fid, InpSt  )
+function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt  )
 
+    % read a numeric table from the FAST file
+    
     % we've read the line of the table that includes the header 
     % let's parse it now, getting the number of columns as well:
     TmpHdr  = textscan(line,'%s');
@@ -176,5 +192,67 @@ function [Table, Headers] = ParseFASTTable( line, fid, InpSt  )
     end
     
 end %end function
+%%
+function [Table, Headers] = ParseFASTFmtTable( line, fid, InpSt, unitsLine )
+
+    % we've read the line of the table that includes the header 
+    % let's parse it now, getting the number of columns as well:
+    TmpHdr  = textscan(line,'%s');
+    Headers = TmpHdr{1};
+    nc = length(Headers);
+
+    if nargin < 4 || unitsLine
+        % read the units line:
+        fgetl(fid); 
+    end
+        
+    % now initialize Table and read its values from the file:
+    Table = cell(InpSt,nc);   % this is the size table we'll read
+    i = 0;                    % this the line of the table we're reading    
+    while i < InpSt
+        
+        line = fgetl(fid);
+        if isnumeric(line)      % we reached the end prematurely
+            break
+        end        
+
+        i = i + 1;
+        TmpValue  = textscan(line,'%s',nc); 
+        for j=1:nc
+            [testVal, cnt] = sscanf(TmpValue{1}{j},'%f',1);
+            if cnt == 0
+                Table{i,j}=TmpValue{1}{j};
+            else
+                Table{i,j}=testVal;
+            end
+        end
+        %Table(i,:) = TmpValue{1};       
+
+    end
+    
+end %end function
+
+%%
+function [fileList] = ParseFASTFileList( line, fid, nRows  )
+
+    % we've read the line of the file that includes the first 
+    % list of (airfoil) file names:
+    fileList = cell(nRows,1);
+
+    TmpValue  = textscan(line,'%s',1);
+    fileList{1} = TmpValue{1}{1};
+
+    for i=2:nRows
+        line = fgetl(fid);
+        if isnumeric(line)      % we reached the end prematurely
+            break
+        end
+        
+        TmpValue  = textscan(line,'%s',1);
+        fileList{i} = TmpValue{1}{1};
+    end
+    
+end %end function
+
 
 

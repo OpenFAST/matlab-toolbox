@@ -66,7 +66,7 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
         % Now get the label     
 
             % Some looping is necessary because often times,
-            % old values for FAST parameters and kept next to new
+            % old values for FAST parameters are kept next to new
             % ones seperated by a space and need to be ignored
 
 
@@ -77,8 +77,8 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
         while ~IsLabel && length(line) >= nextindex
             line = line(nextindex:end);
 
-            [~, cnt, ~, nextindex] =sscanf(line,'%f',1);
-            if cnt == 0 %if we've reached something besides a number - or we're at the end of the line
+            [tmpVal, cnt, ~, nextindex] =sscanf(line,'%f',1);
+            if cnt == 0 || ~isfinite(tmpVal) %if we've reached something besides a number (or we read text as "Inf") - or we're at the end of the line
 
                 [testVal, cnt, ~, nextindex] = sscanf(line,'%s',1);
                 if cnt == 1
@@ -92,6 +92,9 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
                                 value = [value; testVal];
                             end
                         end
+                    elseif strcmpi(testVal(1),'"')
+                        [testVal, position] = textscan(line,'%q',1);  %look for a string in quotes
+                        nextindex = position + 1;
                     else
                         IsLabel = true;
                         label = testVal;

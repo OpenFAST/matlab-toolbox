@@ -89,7 +89,7 @@ while true
     
     [value, label, isComment, ~, ~] = ParseFASTInputLine(line);
             
-    if ~isComment && length(label) > 0        
+    if ~printTable && ~isComment && length(label) > 0        
         
         if strcmpi(value,'"HtFract"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)            
             if ~isfield(FastPar,'TowProp')
@@ -118,6 +118,25 @@ while true
                 continue; %let's continue reading the template file            
             end            
             
+        elseif strcmpi(label,'FoilNm') %we've reached the DLL torque-speed lookup table (and we think it's a string value so it's in quotes)
+            if ~isfield(FastPar,'FoilNm')
+                disp( 'WARNING: AeroDyn airfoil list not found in the FAST data structure.' );
+                printTable = true;
+            else
+                WriteFASTFileList(line, fidIN, fidOUT, FastPar.FoilNm, label, newline);
+                continue; %let's continue reading the template file            
+            end            
+             
+        elseif strcmpi(value,'"RNodes"') %we've reached the AeroDyn Blade properies table (and we think it's a string value so it's in quotes)
+            if ~isfield(FastPar,'BldNodes')
+                disp( 'WARNING: AeroDyn blade not properties table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, false);
+                continue; %let's continue reading the template file            
+            end   
+        elseif strcmpi(label,'NOPRINT') || strcmpi(label,'PRINT')
+            continue;  % this comes from AeroDyn BldNodes table                                    
         else
 
             indx = strcmpi( FastPar.Label, label );
@@ -154,7 +173,7 @@ while true
             end
 
         end
-    else % isComment || length(label) == 0 
+    else % isComment || length(label) == 0 || printTable (i.e. tables must end with comments
         if isComment
             printTable = false;     % we aren't reading a table (if we were, we reached the end) 
         else
@@ -191,7 +210,7 @@ fclose(fidIN);
 fclose(fidOUT);
 end %end function
 
-function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
+function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printUnits )
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
@@ -200,7 +219,9 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
     nc = length(TemplateHeaders);
 
     fprintf(fidOUT,'%s',HdrLine);           % print the new headers
-    fprintf(fidOUT,'%s',fgets(fidIN));      % print the new units (we're assuming they are the same)
+    if nargin < 7 || printUnits
+        fprintf(fidOUT,'%s',fgets(fidIN));      % print the new units (we're assuming they are the same)
+    end
     
     % let's figure out which columns in the old Table match the headers
     % in the new table:
@@ -221,10 +242,50 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
     
     
     % now we'll write the table:
-    for i=1:size(Table,1) 
-        fprintf(fidOUT, '%11.7E  ', Table(i,ColIndx) );  %write all of the columns
-        fprintf(fidOUT, newline);
-    end
-              
+    if iscell(Table)
+        for i=1:size(Table,1)
+            for j=ColIndx
+                if isnumeric(Table{i,j})
+                    fprintf(fidOUT, '%11.7E  ', Table{i,j} );
+                else
+                    fprintf(fidOUT, '%s ', Table{i,j} );
+                end
+            end
+            fprintf(fidOUT, newline);
+        end        
+    else        
+        for i=1:size(Table,1) 
+            fprintf(fidOUT, '%11.7E  ', Table(i,ColIndx) );  %write all of the columns
+            fprintf(fidOUT, newline);
+        end
+    end    
 end
 
+
+function WriteFASTFileList( line, fidIN, fidOUT, List, label, newline )
+
+    val2Write = List{1};
+        % print the old value at the start of the line,
+        % using an appropriate format
+    if isnumeric(val2Write)
+        writeVal = sprintf('%11G',val2Write(1));
+        if ~isscalar(val2Write) %Check for the special case of an array
+            writeVal = [writeVal sprintf(',%11G',val2Write(2:end)) ' '];
+        end
+    else
+        writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
+    end
+
+    idx = strfind( line, label ); %let's just take the line starting where the label is first listed            
+    line = [writeVal '   ' line(idx(1):end)];    
+
+    fprintf(fidOUT,'%s',line);              % print the first value in the list, including the label
+    for i=2:length(List)
+        if isnumeric(List{i})
+            fprintf(fidOUT,'%11G',List{i});
+        else
+            fprintf(fidOUT,'%s',List{i});         
+        end
+        fprintf(fidOUT,newline);
+    end
+end
