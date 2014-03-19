@@ -10,7 +10,7 @@ function ConvertFAST8_3to5(oldFSTName, newDir)
 %  oldFSTName - the name of the old (v8) primary FAST input file,
 %               including full path name
 %  newDir     - the new directory that will contain converted input files 
-%               (FAST 8.3.0, ElastoDyn (primary, blade, and tower files), 
+%               (FAST 8.5.0, ElastoDyn (primary, blade, and tower files), 
 %               ServoDyn; AeroDyn and HydroDyn input files will not be 
 %               copied or moved.
 %
@@ -32,7 +32,7 @@ function ConvertFAST8_3to5(oldFSTName, newDir)
 
 %% let's get the directory that contains the template files  
 
-thisFile    = which('ConvertFAST8_0to3');
+thisFile    = which('ConvertFAST8_3to5');
 thisDir     = fileparts(thisFile);
 templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
 
@@ -70,7 +70,7 @@ end
     % Write new model data to the FAST input files:
     %----------------------------------------------------------------------
         % FAST
-    template   = [templateDir filesep 'FAST_Primary_v8.05.x.dat'];  %template for primary file    
+    template   = [templateDir filesep 'FAST_Primary_v8.06.x.dat'];  %template for primary file    
     Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
     
 return    
