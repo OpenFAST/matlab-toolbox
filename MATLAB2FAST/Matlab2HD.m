@@ -152,7 +152,7 @@ while true
                 disp( 'WARNING: the simple hydrodynamic coefficients table not found in the HD data structure.' );
                 printTable = true;
             else
-                frmt = '%10.2f %10.2f %10.2f %10.2f %10.2f %10.2f';
+                frmt = '%10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.SmplProp, HDPar.SmplPropHdr, newline, frmt);
                 continue; %let's continue reading the template file            
             end
@@ -163,7 +163,7 @@ while true
                 disp( 'WARNING: the member depth-based hydrodynamic coefficients table not found in the HD data structure.' );
                 printTable = true;
             else
-                frmt = '%8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f';
+                frmt = '%8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.DpthProp, HDPar.DpthPropHdr, newline, frmt);
                 continue; %let's continue reading the template file            
             end
@@ -191,7 +191,7 @@ while true
                 disp( 'WARNING: the member-based hydrodynamic coefficients table not found in the HD data structure.' );
                 printTable = true;
               else
-                 frmt = ' %4i %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f';
+                 frmt = ' %4i %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.MemberProp, HDPar.MemberPropHdr, newline, frmt);
                 continue; %let's continue reading the template file            
               end
