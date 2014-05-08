@@ -82,7 +82,7 @@ False         PtfmYDOF    - Platform yaw rotation DOF (flag)
    0.0        PtfmMass    - Platform mass (kg)
    0.0        PtfmRIner   - Platform inertia for roll tilt rotation about the platform CM (kg m^2)
    0.0        PtfmPIner   - Platform inertia for pitch tilt rotation about the platform CM (kg m^2)
-   0.0        PtfmYIner   - Platfrom inertia for yaw rotation about the platform CM (kg m^2)
+   0.0        PtfmYIner   - Platform inertia for yaw rotation about the platform CM (kg m^2)
 ---------------------- BLADE ---------------------------------------------------
 "NRELOffshrBsline5MW_Blade.dat"      BldFile(1)  - Name of file containing properties for blade 1 (quoted string)
 "NRELOffshrBsline5MW_Blade.dat"      BldFile(2)  - Name of file containing properties for blade 2 (quoted string)
