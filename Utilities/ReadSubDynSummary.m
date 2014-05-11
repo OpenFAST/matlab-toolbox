@@ -86,8 +86,20 @@ fclose(fid);
 return
 end
 
-function [M] = readSDMatrix(fid)
+function [M] = readSDMatrix(fid,nlines)
 
+    line = fgetl(fid);
+    colHdr = textscan(line);
+    nc = size( colHdr{1} );
+    
+    M = zeros(nlines,nc);
+    
+    for nr=1:nlines
+        line=fgetl(fid);
+        row = textscan(line,['%s ' repmat('%f',1,nc)],1 );
+        M(nr,:) = row{1}{2}(:);
+    end
+    
 return
 end
 

@@ -1,5 +1,5 @@
 function ConvertHDto2_00_05(oldHDName, newDir, template)
-%function ConvertHDv2_00_00to2_00_03(oldHDName, newDir)
+%function ConvertHDv2_00_00to2_00_03(oldHDName, newDir, template)
 % Feb 6 2014 Greg Hayman
 % based on work by Bonnie Jonkman
 %
@@ -31,8 +31,8 @@ function ConvertHDto2_00_05(oldHDName, newDir, template)
 
 %% let's get the directory that contains the template files  
 
-thisFile    = which('ConvertHD2_00_00to2_00_03');
-thisDir     = fileparts(thisFile);
+% thisFile    = which('ConvertHD2_00_00to2_00_03');
+% thisDir     = fileparts(thisFile);
 %templateDir = strcat(thisDir,filesep, 'TemplateFiles', filesep, 'HDv2.00.03');
 
         % Primary input file:
