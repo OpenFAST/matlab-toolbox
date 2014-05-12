@@ -1,4 +1,4 @@
-function PlotFASToutput(FASTfiles,FASTfilesDesc,Channels,ShowLegend)
+function PlotFASToutput(FASTfiles,FASTfilesDesc,Channels,ShowLegend,CustomHdr)
 %..........................................................................
 %function PlotFASToutput(FASTfiles,FASTfilesDesc,Channels)
 %
@@ -27,8 +27,13 @@ if numFiles < 1
     disp('PlotFASToutput:No files to plot.')
     return
 end
-if nargin < 4
+if nargin < 4 || isempty(ShowLegend) 
     ShowLegend = true;
+end
+if nargin < 5
+    useCustomHdr=false;
+else
+    useCustomHdr=true;
 end
 
 ReferenceFile = numFiles;
@@ -37,13 +42,25 @@ ReferenceFile = numFiles;
 %% -----------------------------------------------------------
 % Read the FAST file(s):
 % ------------------------------------------------------------
+data         = cell(numFiles,1);
+columnTitles = cell(numFiles,1);
+columnUnits  = cell(numFiles,1);
+DescStr      = cell(numFiles,1);
 
 for iFile=1:numFiles
 
     if length(FASTfiles{iFile}) > 4 && strcmpi( FASTfiles{iFile}((end-4):end),'.outb' )
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile}, ~, DescStr{iFile}] = ReadFASTbinary(FASTfiles{iFile});
-    else
+    elseif ~useCustomHdr
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile},    DescStr{iFile}] = ReadFASTtext(FASTfiles{iFile});        
+    else % allow other files 
+        delim     = CustomHdr{1};
+        HeaderRows= CustomHdr{2};
+        NameLine  = CustomHdr{3};
+        UnitsLine = CustomHdr{4};
+        DescStr{iFile} = '';
+        
+        [data{iFile}, columnTitles{iFile}, columnUnits{iFile} ] = ReadFASTtext(FASTfiles{iFile}, delim, HeaderRows, NameLine, UnitsLine );    
     end
     
 end
