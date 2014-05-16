@@ -1,4 +1,4 @@
-function PlotFASToutput(FASTfiles,FASTfilesDesc,Channels,ShowLegend,CustomHdr)
+function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr)
 %..........................................................................
 %function PlotFASToutput(FASTfiles,FASTfilesDesc,Channels)
 %
@@ -14,29 +14,45 @@ function PlotFASToutput(FASTfiles,FASTfilesDesc,Channels,ShowLegend,CustomHdr)
 % FASTfilesDesc - a cell array of strings describing the FAST files 
 %                 listed in FASTfiles, used in the plot legend. If omitted,  
 %                 the routine will list them as File 1, File 2, etc.
-% Channels      - an array of channel numbers, indicating which channels
-%                 from File 1 should be plotted. If omitted, all channels 
-%                 except time (the first one) are plotted.
+% ReferenceFile - scalar (index into FASTfiles) that denotes which file is 
+%                 considered the reference. The channels from this file 
+%                 will be plotted, and the channel names from this file 
+%                 will be used. If omitted, ReferenceFile is the last file 
+%                 in FASTfiles. 
+% Channels      - an array of channel numbers or cell array of names, 
+%                 indicating which channels from the ReferenceFile
+%                 should be plotted. If omitted, or is the string 'all', 
+%                 all channels except time (the first one) are plotted.
+%                 
 % Note: the channels in the files need not be in the same order, but the
 %  channel names must be identical. (i.e., it does not search for alternate
 %  column names)
 %..........................................................................
+
 
 numFiles = length(FASTfiles);
 if numFiles < 1 
     disp('PlotFASToutput:No files to plot.')
     return
 end
-if nargin < 4 || isempty(ShowLegend) 
-    ShowLegend = true;
-end
-if nargin < 5
+
+if nargin < 6
     useCustomHdr=false;
 else
     useCustomHdr=true;
 end
-
-ReferenceFile = numFiles;
+if nargin < 5 || isempty(ShowLegend) 
+    ShowLegend = true;
+end
+if nargin < 4
+    Channels = 'all';
+end
+if nargin < 3 || (ReferenceFile < 1) || (ReferenceFile > numFiles)
+    ReferenceFile = numFiles;
+end
+if nargin < 2 
+    FASTfilesDesc = ''; %empty string
+end
 
 
 %% -----------------------------------------------------------
@@ -68,7 +84,7 @@ end
 %% -----------------------------------------------------------
 % Set some default values, if it wasn't input to this routine:
 % ------------------------------------------------------------
-if nargin < 3 || (~iscell(Channels) && strcmpi(Channels,'all'))
+if ~iscell(Channels) && strcmpi(Channels,'all')
     Channels = 2:size(data{ReferenceFile},2); % use the number of columns        
 elseif ~isnumeric(Channels)
     if iscell(Channels)
@@ -82,7 +98,7 @@ elseif ~isnumeric(Channels)
     end
 end
     
-if nargin < 2 || isempty(FASTfilesDesc)
+if isempty(FASTfilesDesc)
     for i=1:numFiles
         FASTfilesDesc{i} = sprintf('File %i',i);
     end
@@ -139,7 +155,7 @@ for iChannel = Channels
         [ChannelIndx, err] = getColIndx( ChannelName, columnTitles{iFile}, FASTfiles{iFile} );
         if err 
             plot(0,NaN, ...
-                'DisplayName', [strrep(FASTfiles{iFile},'\','_\'), ' (' ChannelName ' not found)'],...
+                'DisplayName', [strrep(strrep(FASTfiles{iFile},'\','\\'),'_','\_'), ' (' ChannelName ' not found)'],...
                 'LineStyle','none',...
                 'Marker','.');
         else
@@ -166,7 +182,6 @@ for iChannel = Channels
     set(f,'Name',columnTitles{ReferenceFile}{iChannel} ...
          ,'paperorientation','landscape' ...
          ,'paperposition',[0.25 0.25 10.5 8]);   
-%      xlim([0, .02])
 end
 
 %             if savePlts

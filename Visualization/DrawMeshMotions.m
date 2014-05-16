@@ -30,7 +30,12 @@ function DrawMeshMotions(Mesh, MarkerColor, CoordSize,DisplacedOnly )
     for iNode = 1:Mesh.Nnodes
 %         Mesh.Position(:,iNode)
 %         [iNode Mesh.TranslationDisp(:,iNode)']
-        Field   = Mesh.Orientation(:,:,iNode)*CoordSize;  %multiply Field by CoordSize to make vectors a certain length in meters
+        if isfield(Mesh,'orientation')
+            Field = Mesh.Orientation(:,:,iNode);  
+        else
+            Field = Mesh.RefOrientation(:,:,iNode);
+        end
+        Field = Field * CoordSize; %multiply Field by CoordSize to make vectors a certain length in meters
 
         quiver3( repmat(origin(1,iNode),3,1),   repmat(origin(2,iNode),3,1),  repmat(origin(3,iNode),3,1),...
                   Field(:,1),                    Field(:,2),                   Field(:,3),...
