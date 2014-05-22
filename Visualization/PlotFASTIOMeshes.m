@@ -1,4 +1,4 @@
-function [Mesh1_I,Mesh1_O,Mesh2_I,Mesh2_O, f, MotionMap, LoadMap] ...
+function [Mesh1_I,Mesh1_O,Mesh2_I,Mesh2_O, f] ...
     = PlotFASTIOMeshes( Mesh1_Input, Mesh1_Output,Mesh2_Input,Mesh2_Output, exportFigure )
 %%
 %
@@ -8,7 +8,7 @@ if nargin < 5
     exportFigure = 0;
 end
 
-if exportFigure > 0
+if exportFigure ~= 0
     fig_start = 1;
     fig_end   = 2;
 else
@@ -33,6 +33,9 @@ Mesh1_O = ReadFASTmesh(Mesh1_Output);
 Mesh2_I = ReadFASTmesh(Mesh2_Input);
 Mesh2_O = ReadFASTmesh(Mesh2_Output); 
 
+if (isnumeric(Mesh1_Output))
+    fclose(fid);
+end
 
 %%
 
@@ -81,6 +84,7 @@ end
 m_exp =max( 1, log10( maxMotion ));
 m_exp = round(m_exp*10)/10; %round to one decimal place
 ScaleSize = 10^(-m_exp);
+%ScaleSize = 1;
 disp(['Motions scaled by ' num2str(ScaleSize) ' for plotting.']);
 %.............................
 
@@ -93,11 +97,20 @@ maxLoad = max( [ max(abs(Mesh1_I.Force( :)));
                  max(abs(Mesh2_O.Force(:)));
                  max(abs(Mesh2_O.Moment(:))); ] );
              
-f_exp = floor(max( 1, log10( maxLoad ))); 
-f_exp = floor( maxLoad*10^(-f_exp) )*10^(f_exp); % 1 digit of precision
+% f_exp = floor(max( 1, log10( maxLoad ))); 
+% f_exp = floor( maxLoad*10^(-f_exp) )*10^(f_exp); % 1 digit of precision
 
-ForceSize = 1/f_exp;
-disp(['Loads scaled by ' num2str(ForceSize) ' for plotting.']);
+f_exp =max( 1, log10( maxLoad ));
+f_exp = round(f_exp*10)/10; %round to one decimal place
+ForceSize  = 10^(-f_exp);
+%ForceSize  = 1*10^-6;
+%MomentSize = 1*10^-4;
+MomentSize = ForceSize;
+
+% ForceSize = 1/f_exp;
+disp(['Forces scaled by ' num2str(ForceSize) ' for plotting.']);
+disp(['Moments scaled by ' num2str(MomentSize) ' for plotting.']);
+scltxt = [num2str(ForceSize) ' (forces), ',num2str(MomentSize) ' (moments)' ];
 %.............................
 
 
@@ -128,8 +141,8 @@ IndividualFigs=zeros(6,1);
         hold on;
         DrawMesh(Mesh1_O, RefColor, ScaleSize );   
         DrawMeshMotions(Mesh1_O, MotionsColor, ScaleSize, DisplacedOnly )
-        DrawMeshLoads(Mesh1_I, Mesh1_O, ForceSize )
-        setAxisValues('Mesh1: Calculated Inputs (Loads)',i==1,exportFigure, ForceSize); 
+        DrawMeshLoads(Mesh1_I, Mesh1_O, [ForceSize MomentSize])
+        setAxisValues('Mesh1: Calculated Inputs (Loads)',i==1,exportFigure, scltxt); 
         if i < fig_end; IndividualFigs(5)=figure; subplot(1,1,1); end
     end
    
@@ -158,8 +171,8 @@ IndividualFigs=zeros(6,1);
         hold on;
         DrawMesh(Mesh2_I, RefColor, ScaleSize );   
         DrawMeshMotions(Mesh2_I, MotionsColor, ScaleSize, DisplacedOnly )
-        DrawMeshLoads(Mesh2_O, Mesh2_I, ForceSize )
-        setAxisValues('\bfMesh2: Outputs (Loads)',i==1,exportFigure, ForceSize); 
+        DrawMeshLoads(Mesh2_O, Mesh2_I, [ForceSize MomentSize] )
+        setAxisValues('\bfMesh2: Outputs (Loads)',i==1,exportFigure, scltxt); 
         if i < fig_end; IndividualFigs(6)=figure; subplot(1,1,1); end 
     end
     
@@ -229,10 +242,14 @@ function setAxisValues(titleTxt,showLgnd,exportFig,ScaleFactor)
     axis equal; %         axis vis3d ;
     camproj('perspective') 
     if nargin>0
-        if nargin < 4 || ScaleFactor == 1
+        if nargin < 4 || (isnumeric(ScaleFactor) && ScaleFactor == 1)
             title(titleTxt)
         else
-            title( {titleTxt, ['\rmscaled by ' num2str(ScaleFactor) ' units']} );
+            if isnumeric(ScaleFactor)
+                title( { titleTxt, ['\rmscaled by ' num2str(ScaleFactor) ' units']} );
+            else
+                title( { titleTxt, ['\rmscaled by ' ScaleFactor ' units']} );
+            end 
         end
     end
     grid on
@@ -245,7 +262,7 @@ function setAxisValues(titleTxt,showLgnd,exportFig,ScaleFactor)
     
     
     
-    if exportFig == 1
+    if exportFig == 1 % this particular model needs these properties:
 %         xlim([-1 7])
 %         ylim([-1 2])
 %         zlim([-1 2])

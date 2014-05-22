@@ -12,8 +12,8 @@ function DrawMeshLoads(Mesh, MotionMesh, CoordSize )
     origin  = Mesh.Position + MotionMesh.TranslationDisp;
 
     %% Force
-    if isfield(Mesh,'Moment')
-        Field   = Mesh.Force*CoordSize;  %multiply Field by CoordSize to make vectors a certain length in meters
+    if isfield(Mesh,'Force')
+        Field   = Mesh.Force*CoordSize(1);  %multiply Field by CoordSize to make vectors a certain length in meters
         quiver3( origin(1,:),      origin(2,:),      origin(3,:),...
                   Field(1,:),       Field(2,:),       Field(3,:),...
                  0, ...        %no automatic scaling
@@ -42,7 +42,11 @@ function DrawMeshLoads(Mesh, MotionMesh, CoordSize )
     if isfield(Mesh,'Moment')
         % because I can't figure out how to make a better arrow (with 2 heads
         % or 2 lines), I'm going to draw two arrows for the moments:
-
+        
+        if length(CoordSize) > 1 % allow different scaling for moments
+            CoordSize = CoordSize(2);
+        end
+        
         Field   = [Mesh.Moment*CoordSize, 0.9*Mesh.Moment*CoordSize];  %multiply Field by CoordSize to make vectors a certain length in meters           
         quiver3( [origin(1,:),origin(1,:)], [origin(2,:),origin(2,:)], [origin(3,:),origin(3,:)],...
                   Field(1,:),                Field(2,:),               Field(3,:),...

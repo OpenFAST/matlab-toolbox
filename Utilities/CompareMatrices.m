@@ -1,5 +1,7 @@
 function CompareMatrices(MatTitle,CellMat,caseDescr)
+% function CompareMatrices(MatTitle,CellMat,caseDescr)
 % this plots up to 2 dimensions of matrices stored in cell array Mat
+% (CellMat can also be a structure with field MatTitle)
 %%
 refMat = 1;
 nMat   = length(CellMat); % number of matrices to compare/plot
@@ -55,17 +57,20 @@ MatTitle = strrep(MatTitle,'_','\_'); %for nicer printing on plots
 
 subplot(2,1,1);
 bar(thisData);
+% plot(1:size(thisData,1),thisData);
 title([MatTitle ': ' num2str(nr) ' x ' num2str(nc) ]);
 legend(caseDescr{:},'Location','Best');
 setLimits(xLab);
 
 subplot(4,1,3);
 bar(thisData./refData);
+% plot(1:size(thisData,1),thisData./refData);
 title([MatTitle ' normalized by values in ' caseDescr{1}]);
 setLimits(xLab);
 
 subplot(4,1,4);
 bar(thisData - refData);
+% plot(1:size(thisData,1),thisData - refData);
 title([MatTitle ' differences from ' caseDescr{1}]);
 xlabel('matrix entry')
 setLimits(xLab);

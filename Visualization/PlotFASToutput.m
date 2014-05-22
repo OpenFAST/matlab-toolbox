@@ -152,7 +152,7 @@ for iChannel = Channels
 %              [ChannelName,scaleFact] = getFASTv7ChannelName(ChannelName);
 %         end
         
-        [ChannelIndx, err] = getColIndx( ChannelName, columnTitles{iFile}, FASTfiles{iFile} );
+        [ChannelIndx, err, ChannelName, scaleFact] = getColIndx( ChannelName, columnTitles{iFile}, FASTfiles{iFile} );
         if err 
             plot(0,NaN, ...
                 'DisplayName', [strrep(strrep(FASTfiles{iFile},'\','\\'),'_','\_'), ' (' ChannelName ' not found)'],...
@@ -205,9 +205,22 @@ end
            
 %% possibly use this to make sure the channel names are the same....
 %% ------------------------------------------------------------------------
-function [Indx,err] = getColIndx( ColToFind, colNames, fileName )
+function [Indx,err,ColToFind,scaleFact] = getColIndx( ColToFind, colNames, fileName )
     err = false;
+    scaleFact = 1;
     Indx = find( strcmpi(ColToFind, colNames), 1, 'first' );
+    
+    if isempty(Indx) % let's try the negative of this column        
+        if strncmp(ColToFind,'-',1)
+            ColToFind = ColToFind(2:end);
+            scaleFact = -1;
+        else
+            ColToFind = strcat('-',ColToFind);
+            scaleFact = -1;
+        end        
+        Indx = find( strcmpi(ColToFind, colNames), 1, 'first' );
+    end
+        
     if isempty(Indx)
         disp(['Error: ' ColToFind ' not found in ' fileName ]);
         err = true;
