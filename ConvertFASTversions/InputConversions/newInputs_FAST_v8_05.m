@@ -71,6 +71,16 @@ function [FASTP] = newInputs_FAST_v8_05(FASTPar)
             end % isALogical
         end        
     end    
+
+    %----------------------------------------------------------------------       
+    % InterpOrder no longer allowed to be 0:
+    %..............................
+    % if InterpOrder == 0, InterpOrder = 2 
+    %----------------------------------------------------------------------  
+    [InterpOrder, err] = GetFastPar(FASTP,'InterpOrder');
+    if ~err && InterpOrder == 0
+        FASTP = SetFastPar(FASTP,'InterpOrder',2); % set InterpOrder = 2 if it was 0 before
+    end
     
 return    
 end 
