@@ -1,4 +1,4 @@
-function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr)
+function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs)
 %..........................................................................
 %function PlotFASToutput(FASTfiles,FASTfilesDesc,Channels)
 %
@@ -36,7 +36,10 @@ if numFiles < 1
     return
 end
 
-if nargin < 6
+if nargin < 7 || isempty(PlotPSDs)
+    PlotPSDs = false;
+end
+if nargin < 6 || isempty(CustomHdr)
     useCustomHdr=false;
 else
     useCustomHdr=true;
@@ -44,10 +47,10 @@ end
 if nargin < 5 || isempty(ShowLegend) 
     ShowLegend = true;
 end
-if nargin < 4
+if nargin < 4 || isempty(Channels) 
     Channels = 'all';
 end
-if nargin < 3 || (ReferenceFile < 1) || (ReferenceFile > numFiles)
+if nargin < 3 || isempty(ReferenceFile) || (ReferenceFile < 1) || (ReferenceFile > numFiles)
     ReferenceFile = numFiles;
 end
 if nargin < 2 
@@ -62,6 +65,8 @@ data         = cell(numFiles,1);
 columnTitles = cell(numFiles,1);
 columnUnits  = cell(numFiles,1);
 DescStr      = cell(numFiles,1);
+
+outData      = cell(numFiles,2);
 
 for iFile=1:numFiles
 
@@ -133,16 +138,18 @@ if ~isempty(indx)
 end
 
 %% -----------------------------------------------------------
-% Plot the time series from each file, with each channel in 
-%      a separate figure:
-% ------------------------------------------------------------
-for iChannel = Channels
+% save data for output
+for iFile=1:numFiles
+    outData{iFile,1} = data{iFile}(:,1);
+    outData{iFile,2} = zeros( length(outData{iFile,1}), length(Channels));
+end
 
-    f=figure;
+i=0;
+for iChannel = Channels
+    i = i+1;
     for iFile=1:numFiles
-        ChannelName = columnTitles{ReferenceFile}{iChannel};        
-        scaleFact   = 1;
-        
+        ChannelName = columnTitles{ReferenceFile}{iChannel};       
+        [ChannelIndx, err, ChannelName, scaleFact] = getColIndx( ChannelName, columnTitles{iFile}, FASTfiles{iFile} );
         
 %         if iFile == 1
 %             [ChannelName,scaleFact] = getOldFASTv8ChannelName(ChannelName);
@@ -152,57 +159,161 @@ for iChannel = Channels
 %              [ChannelName,scaleFact] = getFASTv7ChannelName(ChannelName);
 %         end
         
-        [ChannelIndx, err, ChannelName, scaleFact] = getColIndx( ChannelName, columnTitles{iFile}, FASTfiles{iFile} );
         if err 
-            plot(0,NaN, ...
-                'DisplayName', [strrep(strrep(FASTfiles{iFile},'\','\\'),'_','\_'), ' (' ChannelName ' not found)'],...
-                'LineStyle','none',...
-                'Marker','.');
+            outData{iFile,2}(:,i) = NaN;
+            outData{iFile,3}{i}   = [ ChannelName '(not found)'];
         else
-            plot(data{iFile}(:,1), data{iFile}(:,ChannelIndx)*scaleFact ...
-                 ,'LineStyle','-' ...
-                 ,'Marker',Markers{iFile} ...
-                 ,'MarkerSize',4 ...
-                 ,'DisplayName',[FASTfilesDesc{iFile} ' (' ChannelName ')'] ...
-                 ,'Color',LineColors{iFile} ...
-                 ,'LineWidth',LineWidthConst);
+            outData{iFile,2}(:,i) = data{iFile}(:,ChannelIndx)*scaleFact;
+            if scaleFact ~= 1
+                outData{iFile,3}{i} = [ ChannelName ' x ' num2str(scaleFact) ];
+            else
+                outData{iFile,3}{i}   = ChannelName;
+            end
         end
-        hold on;      
     end
-    set(gca,'FontSize',FntSz-2,'gridlinestyle','-');
-    ylabel({columnTitles{ReferenceFile}{iChannel}     columnUnits{ReferenceFile}{iChannel}},'FontSize',FntSz); %cell array = print on two lines
-    xlabel([columnTitles{ReferenceFile}{1       } ' ' columnUnits{ReferenceFile}{1       }],'FontSize',FntSz); %string = print on one line
-    title( titleText,'FontSize',FntSz )    
-    grid on;
-    
-    if numFiles > 1 && ShowLegend
-        legend show %(FASTfilesDesc{:});
-    end
-    
-    set(f,'Name',columnTitles{ReferenceFile}{iChannel} ...
-         ,'paperorientation','landscape' ...
-         ,'paperposition',[0.25 0.25 10.5 8]);   
 end
 
-%             if savePlts
-%                 [pathstr, name ] = fileparts(FASTfiles{1} );
-%                 if nargin < 8 
-%                     saveName = name;
-%                 end
-%                 OutFilePath = [pathstr filesep 'Plots' ];
-%                 OutFileRoot = [OutFilePath filesep saveName];
-%                     % make sure the directory exists; if not, create it
-%                 if ~exist(OutFilePath, 'dir')
-%                     mkdir( OutFilePath );
-%                 end 
-%                 
-%                 print(['-f' num2str(f)],'-dpng','-r150',[OutFileRoot '_' num2str(iPlot-1) '.png']);
-%                 close(f)
-%             end
+
+
+%% -----------------------------------------------------------
+% Plot the time series from each file, with each channel in 
+%      a separate figure:
+% ------------------------------------------------------------
+plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
+                    columnTitles{ReferenceFile}([1 Channels]), ...
+                    columnUnits{ReferenceFile}([1 Channels]), titleText, ...
+                    ShowLegend, LineWidthConst, FntSz );
+
+
+%% -----------------------------------------------------------
+% Plot the psd from each file, with each channel in 
+%      a separate figure:
+% ------------------------------------------------------------
+if PlotPSDs
+    plotPSDData( outData, FASTfilesDesc, Markers, LineColors, ...
+                        columnTitles{ReferenceFile}([1 Channels]), ...
+                        columnUnits{ReferenceFile}([1 Channels]), titleText, ...
+                        ShowLegend, LineWidthConst, FntSz );                
+end
 
 return
 end
-           
+      
+function [] = savePlots( f, outFigName, ReferenceFile )
+
+    [pathstr] = fileparts(ReferenceFile );
+    
+    OutFilePath = [pathstr filesep 'Plots' ];
+    OutFileRoot = [OutFilePath filesep outFigName];
+        % make sure the directory exists; if not, create it
+    if ~exist(OutFilePath, 'dir')
+        mkdir( OutFilePath );
+    end 
+                
+    print(['-f' num2str(f)],'-dpng','-r150',[OutFileRoot '.png']);
+    close(f)
+
+return
+end
+
+function [] = plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
+                RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz )
+
+numCols  = size(outData{1,2},2) ;
+numFiles = size(outData,1);
+% RefColumnTitles= columnTitles{ReferenceFile}(Channels);
+% RefColumnUnits = columnUnits{ReferenceFile}(Channels);
+%% -----------------------------------------------------------
+% Plot the time series from each file, with each channel in 
+%      a separate figure:
+% ------------------------------------------------------------
+    for i = 1:numCols    
+        f=figure;
+        for iFile=1:numFiles
+            plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
+                 ,'LineStyle','-' ...
+                 ,'Marker',Markers{iFile} ...
+                 ,'MarkerSize',4 ...
+                 ,'DisplayName',[FASTfilesDesc{iFile} ' (' outData{iFile,3}{i} ')' ] ...
+                 ,'Color',LineColors{iFile} ...
+                 ,'LineWidth',LineWidthConst);
+            hold on;      
+        end
+        set(gca,'FontSize',FntSz-2,'gridlinestyle','-');
+        ylabel({RefColumnTitles{i+1}     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines
+        xlabel([RefColumnTitles{1  } ' ' RefColumnUnits{1  }],'FontSize',FntSz); %string = print on one line
+        title( titleText,'FontSize',FntSz )    
+        grid on;
+
+        if numFiles > 1 && ShowLegend
+            legend show %(FASTfilesDesc{:});
+        end
+%  xlim([0,0.1])
+        set(f,'Name',RefColumnTitles{i+1} ...
+             ,'paperorientation','landscape' ...
+             ,'paperposition',[0.25 0.25 10.5 8]);   
+    end
+
+
+
+
+
+return
+end
+
+
+function [] = plotPSDData( outData, FASTfilesDesc, Markers, LineColors, ...
+                    RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz )
+numCols  = size(outData{1,2},2) ;
+numFiles = size(outData,1);
+
+%% -----------------------------------------------------------
+% Plot the psd from each file, with each channel in 
+%      a separate figure:
+% ------------------------------------------------------------
+    for i = 1:numCols    
+        f=figure;
+        for iFile=1:numFiles
+            
+            n=length(outData{iFile,2}(:,i));
+            if mod(n,2)==1
+                n=n-1;
+            end
+            
+            [ f1, Sf1 ] = getPSD( outData{iFile,2}(1:n,i), 1/outData{iFile,1}(n) );
+            semilogy(f1, Sf1 ...
+                 ,'LineStyle','-' ...
+                 ,'Marker',Markers{iFile} ...
+                 ,'MarkerSize',4 ...
+                 ,'DisplayName',[FASTfilesDesc{iFile} ' (' outData{iFile,3}{i} ')' ] ...
+                 ,'Color',LineColors{iFile} ...
+                 ,'LineWidth',LineWidthConst);
+            hold on;      
+        end
+        set(gca,'FontSize',FntSz-2,'gridlinestyle','-');
+        ylabel({' PSD of ' RefColumnTitles{i+1}     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines
+        xlabel(['1/' RefColumnUnits{1  }],'FontSize',FntSz); %string = print on one line
+        title( titleText,'FontSize',FntSz )    
+        grid on;
+
+        if numFiles > 1 && ShowLegend
+            legend show %(FASTfilesDesc{:});
+        end
+
+        set(f,'Name',[RefColumnTitles{i+1} ' PSD']...
+             ,'paperorientation','landscape' ...
+             ,'paperposition',[0.25 0.25 10.5 8]);   
+         
+%          xlim([0,60]);
+    end
+
+
+
+
+
+return
+end
+
 %% possibly use this to make sure the channel names are the same....
 %% ------------------------------------------------------------------------
 function [Indx,err,ColToFind,scaleFact] = getColIndx( ColToFind, colNames, fileName )
