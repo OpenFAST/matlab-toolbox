@@ -221,9 +221,9 @@ function [Table, Headers] = ParseFASTFmtTable( line, fid, InpSt, unitsLine )
         for j=1:nc
             [testVal, cnt] = sscanf(TmpValue{1}{j},'%f',1);
             if cnt == 0
-                Table{i,j}=TmpValue{1}{j};
+                Table{i,j}=TmpValue{1}{j}; % non-numeric value
             else
-                Table{i,j}=testVal;
+                Table{i,j}=testVal;        % numeric values
             end
         end
         %Table(i,:) = TmpValue{1};       
