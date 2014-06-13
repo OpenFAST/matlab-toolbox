@@ -1,5 +1,5 @@
-function [HDP] = newInputs_HD_v2_00_05(HDPar)
-% [HDP] = newInputs_HD_v2_00_03(HDPar)
+function [HDP] = newInputs_HD_v2_01_00(HDPar)
+% [HDP] = newInputs_HD_v2_01_00(HDPar)
 % HDP is the data structure containing already-filled parameters for
 % HydroDyn. We're going to add existing fields and based on the old ones.
 
