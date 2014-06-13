@@ -1,8 +1,8 @@
-function ConvertFAST8_3to7(oldFSTName, newDir)
-%function ConvertFAST8_3to7(oldFSTName, newDir)
+function ConvertFAST8_3to8(oldFSTName, newDir)
+%function ConvertFAST8_3to8(oldFSTName, newDir)
 % by Bonnie Jonkman
 %
-%Conversion of FAST v 8.3.x files to FAST v8.7.x
+%Conversion of FAST v 8.3.x files to FAST v8.8.x
 %  based on "Demonstration of fast file manipuation" by Paul Fleming
 % (c) 2011, 2013-2014 National Renewable Energy Laboratory
 %--------------------------------------------------------------------------
@@ -32,7 +32,7 @@ function ConvertFAST8_3to7(oldFSTName, newDir)
 
 %% let's get the directory that contains the template files
 
-thisFile    = which('ConvertFAST8_3to7');
+thisFile    = which('ConvertFAST8_3to8');
 thisDir     = fileparts(thisFile);
 templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
 
@@ -43,7 +43,7 @@ baseFileName  = strcat(baseName,ext);                 %base FAST file name
 newFSTname    = [newDir filesep baseFileName];
 
 if strcmpi(oldDir,newDir)
-    disp('ConvertFAST8_3to7 Warning:New FAST input file is overwriting old file.')
+    disp('ConvertFAST8_3to8 Warning:New FAST input file is overwriting old file.')
 end
 
 
@@ -70,7 +70,7 @@ end
     % Write new model data to the FAST input files:
     %----------------------------------------------------------------------
         % FAST
-    template   = [templateDir filesep 'FAST_Primary_v8.07.x.dat'];  %template for primary file
+    template   = [templateDir filesep 'FAST_Primary_v8.08.x.dat'];  %template for primary file
     Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
 
     
@@ -91,10 +91,10 @@ end
         [newHDDir] = fileparts(newHDName);
         
             % template file
-        template   = [templateDir filesep 'HDv2.00.05.dat'];  %template for HD file        
+        template   = [templateDir filesep 'HDv2.01.00.dat'];  %template for HD file        
             
             % now convert the file:
-        ConvertHDto2_00_05(oldHDName, newHDDir, template);
+        ConvertHDto2_01_00(oldHDName, newHDDir, template);
     end
     
     

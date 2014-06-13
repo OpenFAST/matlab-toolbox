@@ -18,6 +18,6 @@ for i=1:length(FastPar.Label)
 end
 
 if isempty(OutData)
-    disp(['ERROR in GetFastPar: Parameter ' Par ' not found.'])
+    disp(['GetFastPar:: Parameter ' Par ' not found.'])
     err = true;
 end

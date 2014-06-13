@@ -1,4 +1,4 @@
-------- FAST v8.07.* INPUT FILE ------------------------------------------------
+------- FAST v8.08.* INPUT FILE ------------------------------------------------
 Loose coupling for the XXX model
 ---------------------- SIMULATION CONTROL --------------------------------------
 False         Echo            - Echo input data to <RootName>.ech (flag)

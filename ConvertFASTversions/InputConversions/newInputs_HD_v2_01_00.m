@@ -43,19 +43,19 @@ function [HDP] = newInputs_HD_v2_00_05(HDPar)
     if err1
         n = n + 1;
         HDP.Label{n} = 'WvMnDrift';
-        HDP.Val{n}   = 0;
+        HDP.Val{n}   = 'False';
     end
     [WvDiffQTF, err1] = GetFastPar(HDP,'WvDiffQTF');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WvDiffQTF';
-        HDP.Val{n}   = 0;
+        HDP.Val{n}   = 'False';
     end
     [WvSumQTF, err1] = GetFastPar(HDP,'WvSumQTF');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WvSumQTF';
-        HDP.Val{n}   = 0;
+        HDP.Val{n}   = 'False';
     end
     [WvLowCOffD, err1] = GetFastPar(HDP,'WvLowCOffD');    
     if err1
