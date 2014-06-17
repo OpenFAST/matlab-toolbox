@@ -51,7 +51,7 @@ if nargin < 4 || isempty(Channels)
     Channels = 'all';
 end
 if nargin < 3 || isempty(ReferenceFile) || (ReferenceFile < 1) || (ReferenceFile > numFiles)
-    ReferenceFile = numFiles;
+    ReferenceFile = 1;
 end
 if nargin < 2 
     FASTfilesDesc = ''; %empty string

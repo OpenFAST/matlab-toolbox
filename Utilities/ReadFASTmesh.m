@@ -1,5 +1,5 @@
 function [Mesh] = ReadFASTmesh(FileID)
-%[Mesh] = ReadFASTmesh(FileName)
+%[Mesh] = ReadFASTmesh(FileID)
 % Author: Bonnie Jonkman, National Renewable Energy Laboratory
 % (c) 2013, National Renewable Energy Laboratory
 %
