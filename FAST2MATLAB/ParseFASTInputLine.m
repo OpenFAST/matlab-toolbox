@@ -48,8 +48,10 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
 
         % Get the Value, number or string
         [value, cnt, ~, nextindex] = sscanf(line,'%f', 1);  %First check if line begins with a number
-
-        if cnt == 0 % we didn't find a number so...
+% disp ([ '"' line(nextindex:end) '"']);
+        
+        if cnt == 0 || ...  % we didn't find a number so...
+           ( nextindex < length(line) && ~isempty(strtrim(line(nextindex))) ) % this would happen if a string started with a number and wasn't empty afterwards: e.g. "1P0.0" gets read as "1", but the next character is "P", not a space separating it from a label
             [testVal, position] = textscan(line,'%q',1);  %look for a string instead
             if any( strcmpi(testVal{1}{1},trueFalseValues) )
                 value = testVal{1}{1};                %this is a logical input

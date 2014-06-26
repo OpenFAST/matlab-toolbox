@@ -1,4 +1,4 @@
-------- HydroDyn v2.01.x Input File --------------------------------------------
+------- HydroDyn v2.01.* Input File --------------------------------------------
 NREL 5.0 MW offshore baseline floating platform HydroDyn input properties for the OC3 Hywind.
 TRUE             Echo           - Echo the input file data (flag)
 ---------------------- ENVIRONMENTAL CONDITIONS --------------------------------
@@ -106,24 +106,24 @@ PropSetID    PropD         PropThck
     1        9.40000        0.00010
     2        6.50000        0.00010
 ---------------------- SIMPLE HYDRODYNAMIC COEFFICIENTS (model 1) --------------
-SimplCd      SimplCdMG    SimplCa     SimplCaMG      SimplCp     SimplCpMG   SimplAxCa     SimplAxCaMG      SimplAxCp     SimplAxCpMG
-(-)           (-)           (-)         (-)            (-)         (-)          (-)           (-)              (-)            (-)
-      0.60       0.00       0.00       0.00       1.00       1.00       1.00       1.00       1.00       1.00
+     SimplCd    SimplCdMG    SimplCa    SimplCaMG    SimplCp    SimplCpMG   SimplAxCa  SimplAxCaMG  SimplAxCp   SimplAxCpMG
+       (-)         (-)         (-)         (-)         (-)         (-)         (-)         (-)         (-)         (-)
+       1.00        0.00        1.00        0.00        1.00        0.00        1.00        0.00        1.00        0.00
 ---------------------- DEPTH-BASED HYDRODYNAMIC COEFFICIENTS (model 2) ---------
              0   NCoefDpth       - Number of depth-dependent coefficients (-)
 Dpth      DpthCd   DpthCdMG   DpthCa   DpthCaMG       DpthCp   DpthCpMG   DpthAxCa   DpthAxCaMG       DpthAxCp   DpthAxCpMG
 (m)       (-)      (-)        (-)      (-)            (-)      (-)          (-)        (-)              (-)         (-)
 ---------------------- MEMBER-BASED HYDRODYNAMIC COEFFICIENTS (model 3) --------
              0   NCoefMembers       - Number of member-based coefficients (-)
-MemberID   MemberCd1   MemberCd2   MemberCdMG1   MemberCdMG2   MemberCa1   MemberCa2   MemberCaMG1   MemberCaMG2    MemberCp1  MemberCp2   MemberCpMG1   MemberCpMG2  MemberAxCa1   MemberAxCa2   MemberAxCaMG1   MemberAxCaMG2    MemberAxCp1  MemberAxCp2   MemberAxCpMG1   MemberAxCpMG2
-(-)        (-)         (-)         (-)           (-)           (-)         (-)         (-)           (-)             (-)         (-)           (-)           (-)          (-)           (-)           (-)             (-)              (-)          (-)           (-)             (-)
----------------------- MEMBERS -------------------------------------------------
+MemberID    MemberCd1     MemberCd2    MemberCdMG1   MemberCdMG2    MemberCa1     MemberCa2    MemberCaMG1   MemberCaMG2    MemberCp1     MemberCp2    MemberCpMG1   MemberCpMG2   MemberAxCa1   MemberAxCa2  MemberAxCaMG1 MemberAxCaMG2  MemberAxCp1  MemberAxCp2   MemberAxCpMG1   MemberAxCpMG2
+   (-)         (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)           (-)
+-------------------- MEMBERS -------------------------------------------------
              3   NMembers       - Number of members (-)
-MemberID   MJointID1   MJointID2   MPropSetID1  MPropSetID2   MDivSize  MCoefMod  PropWAMIT   [MCoefMod=1: use simple coeff table, 2: use depth-based coeff table, 3: use member-based coeff table] [ PropWAMIT = TRUE if member is modeled in WAMIT]
-(-)        (-)         (-)         (-)          (-)           (m)       (switch)    (flag)
-    1         1          2           1            1         0.5000     1        TRUE
-    2         2          3           1            2         0.5000     1        TRUE
-    3         3          4           2            2         0.5000     1        TRUE
+MemberID  MJointID1  MJointID2  MPropSetID1  MPropSetID2  MDivSize   MCoefMod  PropWAMIT   [MCoefMod=1: use simple coeff table, 2: use depth-based coeff table, 3: use member-based coeff table] [ PropWAMIT = TRUE if member is modeled in WAMIT]
+  (-)        (-)        (-)         (-)          (-)        (m)      (switch)   (flag)
+    1         1          2           1            1         1.0000      3        TRUE
+    2         2          3           1            2         0.5000      1        TRUE
+    3         3          4           2            2         0.5000      1        TRUE
 ---------------------- FILLED MEMBERS ------------------------------------------
              0   NFillGroups     - Number of filled member groups (-) [If FillDens = DEFAULT, then FillDens = WtrDens; FillFSLoc is related to MSL2SWL]
 FillNumM FillMList             FillFSLoc     FillDens

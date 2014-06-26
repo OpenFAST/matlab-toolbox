@@ -152,7 +152,7 @@ while true
                 disp( 'WARNING: the simple hydrodynamic coefficients table not found in the HD data structure.' );
                 printTable = true;
             else
-                frmt = '%10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f';
+                frmt = repmat( '%11.2f ', 1, 10 );
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.SmplProp, HDPar.SmplPropHdr, newline, frmt);
                 continue; %let's continue reading the template file            
             end
@@ -191,7 +191,8 @@ while true
                 disp( 'WARNING: the member-based hydrodynamic coefficients table not found in the HD data structure.' );
                 printTable = true;
               else
-                 frmt = ' %4i %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f';
+                 frmt = [' %4i' repmat(' %13.2f', 1, 20) ];
+                 % '%11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.MemberProp, HDPar.MemberPropHdr, newline, frmt);
                 continue; %let's continue reading the template file            
               end
@@ -382,7 +383,7 @@ function WriteMembersTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
         fprintf(fidOUT, ' %4i %9i %10i %11i %12i ', Table(i,1:5) );
        
         fprintf(fidOUT, '%14.4f', Table(i,6) );  %write all of the columns
-        fprintf(fidOUT, '%6i ', Table(i,7) );
+        fprintf(fidOUT, '%7i ', Table(i,7) );
         fprintf(fidOUT, '       %s',logic);
         fprintf(fidOUT, newline);
     end
