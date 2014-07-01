@@ -2,9 +2,9 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL
 %function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL)
 % by Bonnie Jonkman, National Renewable Energy Laboratory
 %
-%Conversion of FAST v 7.x files to FAST v8.5.x
+%Conversion of FAST v 7.x files to FAST v8.8.x
 %  based on "Demonstration of fast file manipuation" by Paul Fleming
-% (c) 2011, 2013, 2014 National Renewable Energy Laboratory
+% (c) 2011, 2013-2014 National Renewable Energy Laboratory
 %--------------------------------------------------------------------------
 % Required inputs:
 %  oldFSTName - the name of the old (v6 or 7) primary FAST input file,
@@ -47,7 +47,7 @@ thisFile    = which('ConvertFAST7to8');
 thisDir     = fileparts(thisFile);
 templateDir = strcat(thisDir,filesep, 'TemplateFiles');
 
-FAST_template = strcat(templateDir,filesep,'FAST_Primary_v8.05.x.dat');
+FAST_template = strcat(templateDir,filesep,'FAST_Primary_v8.08.x.dat');
 ED_template   = strcat(templateDir,filesep,'ED_Primary_v1.01.x.dat');
 SrvD_template = strcat(templateDir,filesep,'SrvD_Primary_v1.01.x.dat');
 templateDir   = strcat(templateDir,filesep,'v8.00.x');
