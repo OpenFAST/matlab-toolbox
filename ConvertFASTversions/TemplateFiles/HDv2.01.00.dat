@@ -55,10 +55,10 @@ TRUE             HasWAMIT       - Using WAMIT (flag)
             60   RdtnTMax       - Analysis time for wave radiation kernel calculations (sec) [determines RdtnDOmega=Pi/RdtnTMax in the cosine transform]  [MAKE SURE THIS IS LONG ENOUGH FOR THE RADIATION IMPULSE RESPONSE FUNCTIONS TO DECAY TO NEAR-ZERO FOR THE GIVEN PLATFORM!]
          0.005   RdtnDT         - Time step for wave radiation kernel calculations (sec) [DT<=RdtnDT<=0.1 recommended] [determines RdtnOmegaMax=Pi/RdtnDT in the cosine transform]
 ---------------------- 2ND-ORDER FLOATING PLATFORM FORCES ----------------------
-   8             MnDrift        - Mean-drift 2nd-order forces computed                              {0: None; [7, 8, 9, 10, 11, or 12]: WAMIT file to use} [Only one of MnDrift, NewmanApp, or DiffQTF can be non-zero]
-   0             NewmanApp      - Slow-drift 2nd-order forces computed with Newman's approximation  {0: None; [7, 8, 9, 10, 11, or 12]: WAMIT file to use} [Only one of MnDrift, NewmanApp, or DiffQTF can be non-zero. Used only when WaveDirMod=0]
-   0             DiffQTF        - Full difference-frequency 2nd-order forces computed with full QTF {0: None; [10, 11, or 12]: WAMIT file to use}          [Only one of MnDrift, NewmanApp, or DiffQTF can be non-zero]
-   0             SumQTF         - Full summation -frequency 2nd-order forces computed with full QTF {0: None; [10, 11, or 12]: WAMIT file to use}
+   8             MnDrift        - Mean-drift 2nd-order forces computed                                       {0: None; [7, 8, 9, 10, 11, or 12]: WAMIT file to use} [Only one of MnDrift, NewmanApp, or DiffQTF can be non-zero]
+   0             NewmanApp      - Mean- and slow-drift 2nd-order forces computed with Newman's approximation {0: None; [7, 8, 9, 10, 11, or 12]: WAMIT file to use} [Only one of MnDrift, NewmanApp, or DiffQTF can be non-zero. Used only when WaveDirMod=0]
+   0             DiffQTF        - Full difference-frequency 2nd-order forces computed with full QTF          {0: None; [10, 11, or 12]: WAMIT file to use}          [Only one of MnDrift, NewmanApp, or DiffQTF can be non-zero]
+   0             SumQTF         - Full summation -frequency 2nd-order forces computed with full QTF          {0: None; [10, 11, or 12]: WAMIT file to use}
 ---------------------- FLOATING PLATFORM FORCE FLAGS  --------------------------
 True             PtfmSgF        - Platform horizontal surge translation force (flag) or DEFAULT
 True             PtfmSwF        - Platform horizontal sway translation force (flag) or DEFAULT
