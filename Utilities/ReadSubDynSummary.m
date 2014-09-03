@@ -1,4 +1,7 @@
 function [data] = ReadSubDynSummary(fileName)
+% [data] = ReadSubDynSummary(fileName)
+% fileName is the SubDyn summary file to read
+% data is a data structure containing the values from the summary file
 
 fid   = fopen( fileName );
 
