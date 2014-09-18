@@ -94,7 +94,7 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
                     hold on;
                     subplot(1,1,1);
 
-                    DrawMesh( MeshData, LineColors(i,:) );
+                    DrawMesh( MeshData, LineColors(i,:), '', MeshName{i} );
 
                     axis equal;
                     camproj('perspective') 

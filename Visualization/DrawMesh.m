@@ -1,13 +1,24 @@
-function DrawMesh(Mesh, MarkerColor, CoordSize )
+function DrawMesh(Mesh, MarkerColor, CoordSize, MeshDesc )
 
     if nargin < 2
         MarkerColor = [.001,.001,.001]; %black
         CoordSize = 1;
+        MeshDesc = '';
     elseif nargin < 3
         CoordSize = 1;
+        MeshDesc = '';
+    elseif nargin < 4
+        MeshDesc = '';
     end
 
-
+    if isempty(CoordSize)
+        CoordSize = 1;
+    end
+    
+    if length(MeshDesc) > 1
+        MeshDesc = [ MeshDesc ' ' ];
+    end
+    
     %% draw the reference orientation markers
     hold on;
 %     xlabel('X (m)');
@@ -28,7 +39,7 @@ function DrawMesh(Mesh, MarkerColor, CoordSize )
                   Field(:,1),             Field(:,2),             Field(:,3),...
                  0, ...        %no automatic scaling
                 'linewidth',2, 'MaxHeadSize',0.5,'AutoScale','Off','color',MarkerColor, ...
-                'DisplayName', [ 'Node ' num2str(iNode) ' reference position/orientation' ] );   
+                'DisplayName', [ MeshDesc 'Node ' num2str(iNode) ' reference position/orientation' ] );   
     end % iNode
 
     

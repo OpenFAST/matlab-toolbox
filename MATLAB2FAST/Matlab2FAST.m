@@ -93,7 +93,7 @@ while true
         
         if strcmpi(value,'"HtFract"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)            
             if ~isfield(FastPar,'TowProp')
-                disp(  ['WARNING: tower properties table not found in the FAST data structure.'] );
+                disp(  'WARNING: tower properties table not found in the FAST data structure.' );
                 printTable = true;
             else
                 WriteFASTTable(line, fidIN, fidOUT, FastPar.TowProp, FastPar.TowPropHdr, newline);
@@ -154,9 +154,9 @@ while true
                     % print the old value at the start of the line,
                     % using an appropriate format
                 if isnumeric(val2Write)
-                    writeVal = sprintf('%11G',val2Write(1));
-                    if ~isscalar(val2Write) %Check for the special case of an array
-                        writeVal = [writeVal sprintf(',%11G',val2Write(2:end)) ' '];
+                    writeVal= getNumericVal2Write( val2Write, '%11G' );
+                    if any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
+                        writeVal=getNumericVal2Write( val2Write, '%15G' );
                     end
                 else
                     writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
@@ -208,7 +208,16 @@ end
 
 fclose(fidIN);
 fclose(fidOUT);
+return;
 end %end function
+
+function [writeVal] = getNumericVal2Write( val2Write, fmt )
+    writeVal = sprintf(fmt,val2Write(1));
+    if ~isscalar(val2Write) %Check for the special case of an array
+        writeVal = [writeVal sprintf([',' fmt],val2Write(2:end)) ' '];
+    end
+    return;
+end
 
 function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printUnits )
 
@@ -268,10 +277,11 @@ function WriteFASTFileList( line, fidIN, fidOUT, List, label, newline )
         % print the old value at the start of the line,
         % using an appropriate format
     if isnumeric(val2Write)
-        writeVal = sprintf('%11G',val2Write(1));
-        if ~isscalar(val2Write) %Check for the special case of an array
-            writeVal = [writeVal sprintf(',%11G',val2Write(2:end)) ' '];
+        writeVal = getNumericVal2Write( val2Write, '%11G' );
+        if any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
+            writeVal=getNumericVal2Write( val2Write, '%15G' );
         end
+
     else
         writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
     end

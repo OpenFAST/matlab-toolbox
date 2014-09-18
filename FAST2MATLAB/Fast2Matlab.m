@@ -69,12 +69,10 @@ else
     count = 1;
 end
 
-
 while true %loop until discovering Outlist or end of file, than break
     
     line = fgetl(fid);
-    
-    if isnumeric(line) % we reached the end of the file
+    if isnumeric(line) % we reached the end of the file\
         break
     end
     
