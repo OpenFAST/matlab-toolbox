@@ -345,7 +345,7 @@ function WriteMemberOutputTable( HdrLine, fidIN, fidOUT, Table, Headers, newline
         fprintf(fidOUT, '%4i ', Table(i).ID );  
         fprintf(fidOUT, '%10i ', Table(i).NOutLoc );
         fprintf(fidOUT, '     ');
-        fprintf(fidOUT, '%7.3f',Table(i).NodeLocs(ColIndx));           
+        fprintf(fidOUT, '%5i',Table(i).NodeLocs(ColIndx));           
         fprintf(fidOUT, newline);
     end
               
