@@ -95,13 +95,15 @@ while true %loop until discovering Outlist or end of file, than break
         continue; % break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end   
     
+    if ~isempty(strfind(upper(line),upper('ADDITIONAL STIFFNESS')))
+          [DataOut.AddF0, DataOut.AddCLin, DataOut.AddBLin, DataOut.AddBQuad] = ParseHDAddMatrices(fid);
+          continue;
+    end
+       
     [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line );    
     
     if isComment      
-       if ~isempty(strfind(upper(line),upper('ADDITIONAL STIFFNESS')))
-          [DataOut.AddF0, DataOut.AddCLin, DataOut.AddBLin, DataOut.AddBQuad] = ParseHDAddMatrices(fid);
-          continue;
-       end
+       
     elseif ~isComment
         
         
