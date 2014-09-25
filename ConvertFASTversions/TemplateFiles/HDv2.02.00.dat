@@ -1,4 +1,4 @@
-------- HydroDyn v2.01.* Input File --------------------------------------------
+------- HydroDyn v2.02.* Input File --------------------------------------------
 NREL 5.0 MW offshore baseline floating platform HydroDyn input properties for the OC3 Hywind.
 TRUE             Echo           - Echo the input file data (flag)
 ---------------------- ENVIRONMENTAL CONDITIONS --------------------------------
