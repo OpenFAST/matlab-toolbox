@@ -2,7 +2,7 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL
 %function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL)
 % by Bonnie Jonkman, National Renewable Energy Laboratory
 %
-%Conversion of FAST v 7.x files to FAST v8.8.x
+%Conversion of FAST v 7.x files to FAST v8.9.x
 %  based on "Demonstration of fast file manipuation" by Paul Fleming
 % (c) 2011, 2013-2014 National Renewable Energy Laboratory
 %--------------------------------------------------------------------------
@@ -10,7 +10,7 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL
 %  oldFSTName - the name of the old (v6 or 7) primary FAST input file,
 %               including full path name
 %  newDir     - the new directory that will contain converted input files 
-%               (FAST 8.3.x, ElastoDyn (primary, blade, and tower files), 
+%               (FAST 8.8.x, ElastoDyn (primary, blade, and tower files), 
 %               ServoDyn; AeroDyn and HydroDyn input files will not be 
 %               copied or moved.
 % Optional inputs:

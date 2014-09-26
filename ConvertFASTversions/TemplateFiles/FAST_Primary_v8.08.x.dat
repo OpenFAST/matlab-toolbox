@@ -1,4 +1,4 @@
-------- FAST v8.08.* INPUT FILE ------------------------------------------------
+------- FAST v8.09.* INPUT FILE ------------------------------------------------
 Description line that will be printed in the output file and written to the screen.
 ---------------------- SIMULATION CONTROL --------------------------------------
 False         Echo            - Echo input data to <RootName>.ech (flag)
