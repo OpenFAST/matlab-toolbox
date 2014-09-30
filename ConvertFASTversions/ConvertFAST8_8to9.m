@@ -111,7 +111,7 @@ end
         [newSDDir] = fileparts(newSDName);
         
             % template file
-        template   = [templateDir filesep 'SDv1.01.00.dat'];  %template for SD file        
+        template   = [templateDir filesep 'SDv1.01.x.dat'];  %template for SD file        
             
             % now convert the file:
         ConvertSDto1_01_00(oldSDName, newSDDir, template);
