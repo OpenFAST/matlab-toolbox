@@ -87,7 +87,7 @@ end
         [newHDDir] = fileparts(newHDName);
         
             % template file
-        template   = [templateDir filesep 'HDv2.02.00.dat'];  %template for HD file        
+        template   = [templateDir filesep 'HDv2.02.x.dat'];  %template for HD file        
             
             % now convert the file:
         ConvertHDto2_02_00(oldHDName, newHDDir, template);

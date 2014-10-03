@@ -28,7 +28,7 @@ TRUE             WaveNDAmp      - Flag for normally distributed amplitudes (flag
              0   WaveElevxi     - List of xi-coordinates for points where the incident wave elevations can be output (meters) [NWaveElev points, separated by commas or white space; usused if NWaveElev = 0]
              0   WaveElevyi     - List of yi-coordinates for points where the incident wave elevations can be output (meters) [NWaveElev points, separated by commas or white space; usused if NWaveElev = 0]
 ---------------------- 2ND-ORDER WAVES -----------------------------------------
-         FALSE   WvDiffQTF      - Full difference-frequency 2nd-order wave kinematics (flag) [only one of WvMnDrift or WvDiffQTF can be TRUE]
+         FALSE   WvDiffQTF      - Full difference-frequency 2nd-order wave kinematics (flag)
          FALSE   WvSumQTF       - Full summation-frequency  2nd-order wave kinematics (flag)
    0             WvLowCOffD     - Low  frequency cutoff used in the difference-frequencies (rad/s) [Only used with a difference-frequency method]
    3.5           WvHiCOffD      - High frequency cutoff used in the difference-frequencies (rad/s) [Only used with a difference-frequency method]
