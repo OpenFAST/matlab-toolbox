@@ -2,7 +2,7 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL
 %function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL)
 % by Bonnie Jonkman, National Renewable Energy Laboratory
 %
-%Conversion of FAST v 7.x files to FAST v8.9.x
+%Conversion of FAST v 7.x files to FAST v8.10.x
 %  based on "Demonstration of fast file manipuation" by Paul Fleming
 % (c) 2011, 2013-2014 National Renewable Energy Laboratory
 %--------------------------------------------------------------------------
@@ -49,7 +49,7 @@ templateDir = strcat(thisDir,filesep, 'TemplateFiles');
 
 FAST_template = strcat(templateDir,filesep,'FAST_Primary_v8.08.x.dat');
 ED_template   = strcat(templateDir,filesep,'ED_Primary_v1.01.x.dat');
-SrvD_template = strcat(templateDir,filesep,'SrvD_Primary_v1.01.x.dat');
+SrvD_template = strcat(templateDir,filesep,'SrvD_Primary_v1.02.x.dat');
 templateDir   = strcat(templateDir,filesep,'v8.00.x');
 
 XLS_file    = strcat(templateDir, filesep,'OutListParameters.xlsx');
@@ -119,6 +119,7 @@ end
     if usedBladedDLL
         [FP] = newInputs_SrvD_v1_01(FP,usedBladedDLL);
     end
+    [FP] = newInputs_SrvD_v1_02(FP);
     %....................................  
     
     
