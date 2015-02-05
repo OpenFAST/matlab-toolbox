@@ -59,7 +59,7 @@ True          GenTiStp     - Method to stop the generator {T: timed using TimGen
    0.0        NacYawF      - Final yaw angle for override yaw maneuvers (degrees)
 ---------------------- TUNED MASS DAMPER ---------------------------------------
 False         CompNTMD     - Compute nacelle tuned mass damper {true/false} (flag)
-"unused"      NTMDfile     - File for nacelle tuned mass damper (quoted string) [unused when CompNTMD is false]
+"unused"      NTMDfile     - Name of the file for nacelle tuned mass damper (quoted string) [unused when CompNTMD is false]
 ---------------------- BLADED INTERFACE ----------------------------------------
 "DISCON.dll"  DLL_FileName - Name/location of the dynamic library {.dll [Windows] or .so [Linux]} in the Bladed-DLL format (-) [used only with Bladed Interface]
 0.0           NacYaw_North - Reference yaw angle of the nacelle when the upwind end points due North (deg) [used only with Bladed Interface]
