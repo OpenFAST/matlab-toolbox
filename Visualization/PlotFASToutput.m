@@ -1,6 +1,7 @@
 function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs)
 %..........................................................................
 %function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels)
+%function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs)
 %
 % (c) 2014 National Renewable Energy Laboratory
 %  Author: B. Jonkman, NREL/NWTC
