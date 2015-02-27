@@ -44,7 +44,7 @@ True          GenTiStp     - Method to stop the generator {T: timed using TimGen
 9999.9        TEC_RLR      - Rotor leakage reactance (ohms) [used only when VSContrl=0 and GenModel=2]
 9999.9        TEC_MR       - Magnetizing reactance (ohms) [used only when VSContrl=0 and GenModel=2]
 ---------------------- HIGH-SPEED SHAFT BRAKE ----------------------------------
-   1          HSSBrMode    - HSS brake model {1: simple, 3: user-defined from routine UserHSSBr, 4: user-defined from Labview, 5: user-defined from Bladed-style DLL} (switch)
+   1          HSSBrMode    - HSS brake model {1: simple, 3: user-defined from routine UserHSSBr, 4: user-defined from Simulink/Labview, 5: user-defined from Bladed-style DLL} (switch)
 9999.9        THSSBrDp     - Time to initiate deployment of the HSS brake (s)
    0.6        HSSBrDT      - Time for HSS-brake to reach full deployment once initiated (sec) [used only when HSSBrMode=1]
   28.1162E3   HSSBrTqF     - Fully deployed HSS-brake torque (N-m)
