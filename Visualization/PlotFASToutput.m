@@ -27,7 +27,7 @@ function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels
 %                 
 % Note: the channels in the files need not be in the same order, but the
 %  channel names must be identical. (i.e., it does not search for alternate
-%  column names)
+%  column names [except for the negative])
 %..........................................................................
 
 
@@ -323,16 +323,26 @@ function [Indx,err,ColToFind,scaleFact] = getColIndx( ColToFind, colNames, fileN
     Indx = find( strcmpi(ColToFind, colNames), 1, 'first' );
     
     if isempty(Indx) % let's try the negative of this column        
-        if strncmp(ColToFind,'-',1)
-            ColToFind = ColToFind(2:end);
-            scaleFact = -1;
-        else
-            ColToFind = strcat('-',ColToFind);
-            scaleFact = -1;
-        end        
-        Indx = find( strcmpi(ColToFind, colNames), 1, 'first' );
-    end
         
+        [Indx,scaleFact,ColToFind] = getNewColIndx(ColToFind, colNames);
+        
+        if isempty(Indx)
+            if strncmp(ColToFind,'-',1)
+                ColToFind = ColToFind(2:end);
+                scaleFact = -1;
+            else
+                ColToFind = strcat('-',ColToFind);
+                scaleFact = -1;
+            end        
+            Indx = find( strcmpi(ColToFind, colNames), 1, 'first' );
+            
+            if isempty(Indx) % let's try the negative of this column              
+                [Indx,scaleFact,ColToFind] = getNewColIndx(ColToFind, colNames);
+            end            
+        end
+        
+    end
+    
     if isempty(Indx)
         disp(['Error: ' ColToFind ' not found in ' fileName ]);
         err = true;
@@ -340,6 +350,81 @@ function [Indx,err,ColToFind,scaleFact] = getColIndx( ColToFind, colNames, fileN
 return
 end
 
+
+function [Indx,scaleFact,ColToFind] = getNewColIndx( ColToFind, colNames )
+    scaleFact = 1;
+ 
+    [newColNames, scaleFact] = MooringColNames( ColToFind, colNames );
+%     disp( [colNames newColNames])
+
+    Indx = find( strcmpi(ColToFind, newColNames), 1, 'first' );
+    
+    
+    if isempty(Indx) % let's try the negative of this column        
+        
+        if strncmp(ColToFind,'-',1)
+            ColToFind = ColToFind(2:end);
+            scaleFact = -1*scaleFact;
+        else
+            ColToFind = strcat('-',ColToFind);
+            scaleFact = -1*scaleFact;
+        end        
+        Indx = find( strcmpi(ColToFind, newColNames), 1, 'first' );
+                    
+    end
+    
+    if ~isempty(Indx)
+        ColToFind = colNames{Indx};
+    end
+    
+return
+end
+
+function [colNames,scalefact] = MooringColNames( ColToFind, colNames )
+    scalefact = 1;
+    
+    if strncmpi(ColToFind, 'TFair',5) || strncmpi(ColToFind, 'TAnch',5) || ...
+       strncmpi(ColToFind,'-TFair',6) || strncmpi(ColToFind,'-TAnch',6) || ...
+       strncmpi(ColToFind,'MTFair',6) || strncmpi(ColToFind,'MTAnch',6)
+          
+%        colNames = strrep(colNames,'TFair','T');
+%        colNames = strrep(colNames,'TAnch','T_a');
+       colNames = strrep(colNames,'FAIRTEN','TFair[');
+       colNames = strrep(colNames,'ANCHTEN','TAnch['); %Bjj: watch out for case
+       for i=1:length(colNames)
+           colNames{i} = strcat(colNames{i},']');
+       end       
+       scalefact = 1E-3;
+       
+    elseif strncmpi(ColToFind, 'FairTen',7) || strncmpi(ColToFind, 'AnchTen',7) || ...
+           strncmpi(ColToFind,'-FairTen',8) || strncmpi(ColToFind,'-AnchTen',8) || ...
+           strncmpi(ColToFind,'MFairTen',8) || strncmpi(ColToFind,'MAnchTen',8)
+           
+       colNames = strrep(colNames,'TFair[','FairTen');
+       colNames = strrep(colNames,'TAnch[','AnchTen');   
+%        colNames = strrep(colNames,'T[','FairTen');
+%        colNames = strrep(colNames,'T_a[','AnchTen');   
+       colNames = strrep(colNames,']',''); 
+       
+       scalefact = 1E3;
+       
+    elseif strncmpi(ColToFind, 'T[',2) || strncmpi(ColToFind, 'T_a[',4) || ...
+           strncmpi(ColToFind,'-T[',3) || strncmpi(ColToFind,'-T_a[',5) || ...
+           strncmpi(ColToFind,'MT[',3) || strncmpi(ColToFind,'MT_a[',5)
+           
+       colNames = strrep(colNames,'FAIRTEN','T[');
+       colNames = strrep(colNames,'ANCHTEN','T_a[');   
+       for i=1:length(colNames)
+           colNames{i} = strcat(colNames{i},']');
+       end       
+       scalefact = 1E-3;
+       
+    end
+    
+end
+
+
+        
 function [ChannelName_old,scaleFact] = getFASTv7ChannelName(ChannelName)
 
     scaleFact = 1.0;

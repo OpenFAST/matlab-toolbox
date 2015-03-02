@@ -29,11 +29,13 @@ for iCol = 1:size(raw,2)
             Units = raw(2:end,iCol);
         elseif strfind( raw{1,iCol}, 'Invalid Channel Criteria' )
             InvalidCriteria = raw(2:end,iCol);
+        elseif strfind( raw{1,iCol}, 'Category' )
+            Category = raw(2:end,iCol);
         end
     end
     
 end
-Category = raw{:,1};
+%Category = raw{:,1};
 
 
 %%
