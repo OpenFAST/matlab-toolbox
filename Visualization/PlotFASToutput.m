@@ -1,7 +1,7 @@
-function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs)
+function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs,OnePlot)
 %..........................................................................
 %function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels)
-%function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs)
+%function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs,OnePlot)
 %
 % (c) 2014 National Renewable Energy Laboratory
 %  Author: B. Jonkman, NREL/NWTC
@@ -35,6 +35,10 @@ numFiles = length(FASTfiles);
 if numFiles < 1 
     disp('PlotFASToutput:No files to plot.')
     return
+end
+
+if nargin < 8 || isempty(OnePlot)
+    OnePlot = false;
 end
 
 if nargin < 7 || isempty(PlotPSDs)
@@ -180,10 +184,16 @@ end
 % Plot the time series from each file, with each channel in 
 %      a separate figure:
 % ------------------------------------------------------------
+if OnePlot
+    figNo=figure;
+else
+    figNo = -1';
+end
+
 plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
                     columnTitles{ReferenceFile}([1 Channels]), ...
                     columnUnits{ReferenceFile}([1 Channels]), titleText, ...
-                    ShowLegend, LineWidthConst, FntSz );
+                    ShowLegend, LineWidthConst, FntSz, figNo );
 
 
 %% -----------------------------------------------------------
@@ -217,8 +227,8 @@ function [] = savePlots( f, outFigName, ReferenceFile )
 return
 end
 
-function [] = plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
-                RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz )
+function [f] = plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
+                RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz, figNo )
 
 numCols  = size(outData{1,2},2) ;
 numFiles = size(outData,1);
@@ -228,8 +238,14 @@ numFiles = size(outData,1);
 % Plot the time series from each file, with each channel in 
 %      a separate figure:
 % ------------------------------------------------------------
+
     for i = 1:numCols    
-        f=figure;
+        if figNo < 0
+            f=figure;
+        else
+            f=figNo;
+            figure(f);
+        end
         for iFile=1:numFiles
             plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
                  ,'LineStyle','-' ...
@@ -241,7 +257,9 @@ numFiles = size(outData,1);
             hold on;      
         end
         set(gca,'FontSize',FntSz-2,'gridlinestyle','-');
+    if figNo < 0
         ylabel({RefColumnTitles{i+1}     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines
+    end
         xlabel([RefColumnTitles{1  } ' ' RefColumnUnits{1  }],'FontSize',FntSz); %string = print on one line
         title( titleText,'FontSize',FntSz )    
         grid on;
