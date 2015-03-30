@@ -96,13 +96,19 @@ end
 % ------------------------------------------------------------
 if ~iscell(Channels) && strcmpi(Channels,'all')
     Channels = 2:size(data{ReferenceFile},2); % use the number of columns        
-elseif ~isnumeric(Channels)
+elseif ~isnumeric(Channels)    
     if iscell(Channels)
         ChannelIndx = zeros(1,length(Channels));
         for i=1:length(Channels)
-            ChannelIndx(i) = getColIndx( Channels{i}, columnTitles{ReferenceFile}, FASTfiles{ReferenceFile} );            
+            tmp = getColIndx( Channels{i}, columnTitles{ReferenceFile}, FASTfiles{ReferenceFile} );            
+            if ~isempty(tmp)
+                ChannelIndx(i) = tmp;
+            else
+                disp(['Error: ' Channels{i} ' not found in reference file.']);
+            end
+            
         end
-        Channels = ChannelIndx;
+        Channels = ChannelIndx(ChannelIndx ~= 0);
     else
         Channels = getColIndx( Channels, columnTitles{ReferenceFile}, FASTfiles{ReferenceFile} );
     end
@@ -151,11 +157,16 @@ end
 
 i=0;
 for iChannel = Channels
-    i = i+1;
+    i = i+1;    
     for iFile=1:numFiles
-        ChannelName = columnTitles{ReferenceFile}{iChannel};       
-        [ChannelIndx, err, ChannelName, scaleFact] = getColIndx( ChannelName, columnTitles{iFile}, FASTfiles{iFile} );
         
+        if iChannel<1 
+            err = true;
+            ChannelName = ['Input Channel ' num2str(i)];
+        else        
+            ChannelName = columnTitles{ReferenceFile}{iChannel};       
+            [ChannelIndx, err, ChannelName, scaleFact] = getColIndx( ChannelName, columnTitles{iFile}, FASTfiles{iFile} );
+        end
 %         if iFile == 1
 %             [ChannelName,scaleFact] = getOldFASTv8ChannelName(ChannelName);
 %         elseif iFile == 2
@@ -179,6 +190,7 @@ for iChannel = Channels
 end
 
 
+Channels = max(Channels,1); %if any channel was missing, we'll say it's channel 1
 
 %% -----------------------------------------------------------
 % Plot the time series from each file, with each channel in 
@@ -418,13 +430,14 @@ function [colNames,scalefact] = MooringColNames( ColToFind, colNames )
            strncmpi(ColToFind,'-FairTen',8) || strncmpi(ColToFind,'-AnchTen',8) || ...
            strncmpi(ColToFind,'MFairTen',8) || strncmpi(ColToFind,'MAnchTen',8)
            
-       colNames = strrep(colNames,'TFair[','FairTen');
-       colNames = strrep(colNames,'TAnch[','AnchTen');   
-%        colNames = strrep(colNames,'T[','FairTen');
-%        colNames = strrep(colNames,'T_a[','AnchTen');   
+%        colNames = strrep(colNames,'TFair[','FairTen');
+%        colNames = strrep(colNames,'TAnch[','AnchTen');   
+%       scalefact = 1E3;
+        colNames = strrep(colNames,'T[','FairTen');
+        colNames = strrep(colNames,'T_a[','AnchTen');   
+        scalefact = 1;
        colNames = strrep(colNames,']',''); 
        
-       scalefact = 1E3;
        
     elseif strncmpi(ColToFind, 'T[',2) || strncmpi(ColToFind, 'T_a[',4) || ...
            strncmpi(ColToFind,'-T[',3) || strncmpi(ColToFind,'-T_a[',5) || ...
@@ -435,7 +448,7 @@ function [colNames,scalefact] = MooringColNames( ColToFind, colNames )
        for i=1:length(colNames)
            colNames{i} = strcat(colNames{i},']');
        end       
-       scalefact = 1E-3;
+       scalefact = 1;
        
     end
     
