@@ -52,7 +52,7 @@ for hi = 1:hdrLines
     end
 
         % print appropriate header lines:
-    if isfield(FastPar, 'HdrLines') && hi ~= 1 %first line always comes from template file
+    if isfield(FastPar, 'HdrLines') && hi ~= 1 && hi <= length(FastPar.HdrLines) %first line always comes from template file
         fprintf(fidOUT,'%s',FastPar.HdrLines{hi,1}); %does not contain the line ending
         fprintf(fidOUT,newline);                     %so print it here instead
     else

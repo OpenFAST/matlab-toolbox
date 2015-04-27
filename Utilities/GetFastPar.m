@@ -9,11 +9,13 @@ function [OutData,err,Indx]=GetFastPar(FastPar,Par)
 err = false;
 OutData=[];
 Indx=0;
-for i=1:length(FastPar.Label)
-    if strcmp(FastPar.Label{i},Par)==1
-        OutData=FastPar.Val{i};
-        Indx = i;
-        return
+if isfield(FastPar, 'Label')
+    for i=1:length(FastPar.Label)
+        if strcmp(FastPar.Label{i},Par)==1
+            OutData=FastPar.Val{i};
+            Indx = i;
+            return
+        end
     end
 end
 

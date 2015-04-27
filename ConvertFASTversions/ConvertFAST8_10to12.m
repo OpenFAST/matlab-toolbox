@@ -62,6 +62,99 @@ end
     inputfile = [oldDir filesep baseFileName];
     FP = Fast2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
 
+
+%%  %----------------------------------------------------------------------
+    % Get old ED Data:
+    %----------------------------------------------------------------------
+    FullEDFile = GetFastPar(FP,'EDFile');
+    FullEDFile = strrep(FullEDFile,'"',''); %let's remove the quotes so we can actually use this file name
+    [FullEDFile] = GetFullFileName( FullEDFile, oldDir );
+    EDPar = Fast2Matlab(FullEDFile,3); % get ElastoDyn data (3 header lines)
+    
+
+%%  %----------------------------------------------------------------------
+    % Get old AD Data:
+    %----------------------------------------------------------------------
+    CompAero = GetFastPar(FP,'CompAero'); 
+% In FAST v8.10, we read the AeroDyn input file for ElastoDyn, so we have to
+% convert it to the new format regardless of CompAero          
+    AeroFile = GetFastPar(FP,'AeroFile');                                   
+    FullAeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name
+    [newADName]    = GetFullFileName( FullAeroFile, newDir ); % new path + name
+    [FullAeroFile] = GetFullFileName( FullAeroFile, oldDir ); % old path + name
+    ADPar = Fast2Matlab(FullAeroFile,1); % get AeroDyn data (1 header line)
+        
+    
+%%  %----------------------------------------------------------------------
+    % Write new model data to the AeroDyn input file:
+    %----------------------------------------------------------------------               
+    [~, err1] = GetFastPar(ADPar,'TwrShadow');
+
+    if err1
+        template   = [templateDir filesep 'AD_Primary_v14.04.x.dat'];  %template for AD file without NEWTOWER        
+    else
+        template   = [templateDir filesep 'AD_Primary_NT_v14.04.x.dat'];  %template for AD file with NEWTOWER        
+    end
+    Matlab2FAST(ADPar, template, newADName, 2); %contains 2 header lines            
+
+    
+%%  %----------------------------------------------------------------------
+    % Write new model data to the InflowWind input file:
+    %----------------------------------------------------------------------        
+    [InflowFile, err1] = GetFastPar(FP,'InflowFile');  
+    if (err1)
+        CompInflow = CompAero;
+        
+        if CompInflow
+            % get name of new file:
+            InflowFile = strrep(AeroFile,'AeroDyn','InflowWind');
+            if strcmp( AeroFile, InflowFile )
+                InflowFile = strrep(AeroFile,'.','_InflowWind.');
+                if strcmp( AeroFile, InflowFile )
+                    InflowFile = [ AeroFile '_InflowWind' ];
+                end
+            end   
+        else
+            InflowFile = '"unused"';            
+        end
+        
+        % add some new fields to the primary FAST data type
+        n=length(FP.Label);
+        
+        n = n + 1;
+        FP.Label{n} = 'CompInflow';
+        FP.Val{n}   = CompAero;
+
+        n = n + 1;
+        FP.Label{n} = 'InflowFile';
+        FP.Val{n}   = InflowFile;        
+        
+        
+    else
+        [CompInflow] = GetFastPar(FP,'CompInflow');        
+    end
+    
+        %.............        
+
+    if CompInflow == 1 % use InflowWind in this model        
+
+        % get values to put into new file:
+        InflowFileNoQuotes = strrep(InflowFile,'"',''); %let's remove the quotes so we can actually use this file name                                    
+        [newIfWname] = GetFullFileName( InflowFileNoQuotes, newDir ); % Get name of new InflowWind input file   
+        [IfWP, err2] = newInputs_IfW_v3_00(ADPar, EDPar);        
+        
+        if (err2) % try to read the data from the InflowWind file instead
+            [oldIfWName] = GetFullFileName( InflowFileNoQuotes, oldDir );
+            IfWP = Fast2Matlab(oldIfWName,3); % 3 header lines   
+        end
+                    
+            % write new InflowWind file
+        template = [templateDir filesep 'IfW_v3.00.x.dat'];  %template for new IfW file       
+        Matlab2FAST(IfWP, template, newIfWname, 3); %contains 3 header lines            
+        
+    end
+    
+    
 %%  %----------------------------------------------------------------------
     % Write new model data to the FAST input files:
     %----------------------------------------------------------------------
@@ -70,30 +163,6 @@ end
     Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
 
 
-%%  %----------------------------------------------------------------------
-    % Write new model data to the ServoDyn input file:
-    %----------------------------------------------------------------------
-   
-%     CompServo = GetFastPar(FP,'CompServo');    
-%     
-%     if CompServo == 1 % use ServoDyn in this model
-%             % Name of (old) ServoDyn input file:  
-%         ServoFile = GetFastPar(FP,'ServoFile');    
-%         ServoFile = strrep(ServoFile,'"',''); %let's remove the quotes so we can actually use this file name
-%         [oldSrvDName] = GetFullFileName( ServoFile, oldDir );
-%         
-%             % Get name of new ServoDyn input file:  
-%         [newSrvDName] = GetFullFileName( ServoFile, newDir );        
-% 
-%             % get ServoDyn data and convert it to new version:
-%         SrvDP = Fast2Matlab(oldSrvDName,2); 
-%         [SrvDP] = newInputs_SrvD_v1_02(SrvDP);            
-%         
-%             % write new ServoDyn file
-%         template   = [templateDir filesep 'SrvD_Primary_v1.02.x.dat'];  %template for SrvD file        
-%         Matlab2FAST(SrvDP, template, newSrvDName, 2); %contains 2 header lines                
-%     end
-    
     
 return
 
