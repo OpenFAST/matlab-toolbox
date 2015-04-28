@@ -82,8 +82,7 @@ end
     FullAeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name
     [newADName]    = GetFullFileName( FullAeroFile, newDir ); % new path + name
     [FullAeroFile] = GetFullFileName( FullAeroFile, oldDir ); % old path + name
-    ADPar = Fast2Matlab(FullAeroFile,1); % get AeroDyn data (1 header line)
-        
+    ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (]2 header lines [2nd one is actually SI input])        
     
 %%  %----------------------------------------------------------------------
     % Write new model data to the AeroDyn input file:

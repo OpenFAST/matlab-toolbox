@@ -132,7 +132,8 @@ while true
                 disp( 'WARNING: AeroDyn blade not properties table not found in the FAST data structure.' );
                 printTable = true;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, false);
+                IntegerCols = {'NFoil'};
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, false, IntegerCols);
                 continue; %let's continue reading the template file            
             end   
         elseif strcmpi(label,'NOPRINT') || strcmpi(label,'PRINT')
@@ -219,7 +220,7 @@ function [writeVal] = getNumericVal2Write( val2Write, fmt )
     return;
 end
 
-function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printUnits )
+function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printUnits, IntegerCols )
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
@@ -232,10 +233,16 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printU
         fprintf(fidOUT,'%s',fgets(fidIN));      % print the new units (we're assuming they are the same)
     end
     
+    colFmtR='%11.7E  ';
+    colFmtI='%9i      ';
+    if nargin < 8
+        IntegerCols={};
+    end
+    
     % let's figure out which columns in the old Table match the headers
     % in the new table:
     ColIndx = ones(1,nc);
-    
+    colIsInteger = false(1,nc);
 
     for i=1:nc
         indx = strcmpi(TemplateHeaders{i}, Headers);
@@ -244,21 +251,30 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printU
             if sum(indx) ~= 1
                 disp( ['WARNING: Multiple instances of ' TemplateHeaders{i} ' column found in FAST table.'] );
             end
+            
+            indx2 = strcmpi(TemplateHeaders{i},IntegerCols);
+            colIsInteger(i) = sum(indx2)>0;
+            
         else
            error( [ TemplateHeaders{i} ' column not found in FAST table. Cannot write the table.'] );
         end                
     end
     
     
-    % now we'll write the table:
+    % now we'll write the table:    
     if iscell(Table)
         for i=1:size(Table,1)
             for j=ColIndx
                 if isnumeric(Table{i,j})
-                    fprintf(fidOUT, '%11.7E  ', Table{i,j} );
-                else
-                    fprintf(fidOUT, '%s ', Table{i,j} );
+                    if colIsInteger(j)
+                        fmt = colFmtI;
+                    else
+                        fmt = colFmtR;
+                    end
+                else                    
+                    fmt = '%s ';
                 end
+                fprintf(fidOUT, fmt, Table{i,j} );
             end
             fprintf(fidOUT, newline);
         end        
