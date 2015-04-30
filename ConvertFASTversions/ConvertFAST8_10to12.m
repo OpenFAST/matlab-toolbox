@@ -92,7 +92,7 @@ end
     if err1
         template   = [templateDir filesep 'AD_Primary_v14.04.x.dat'];  %template for AD file without NEWTOWER        
     else
-        template   = [templateDir filesep 'AD_Primary_NT_v14.04.x.dat'];  %template for AD file with NEWTOWER        
+        template   = [templateDir filesep 'AD_Primary_v14.04.x_NT.dat'];  %template for AD file with NEWTOWER        
     end
     Matlab2FAST(ADPar, template, newADName, 2); %contains 2 header lines            
 
