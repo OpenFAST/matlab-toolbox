@@ -4,10 +4,8 @@ Description line that will be printed in the output file and written to the scre
     True            Echo               - Echo the input to "<rootname>.AD.ech"?  (flag)
  default            DTAero             - Time interval for aerodynamic calculations {or "default"} (s)
        1            WakeMod            - Type of wake/induction model (switch) {0=none, 1=BEMT}
-       1            AFAeroBladeMod     - Type of blade airfoil aerodynamics model (switch) {1=steady model, 2=Beddoes-Leishman unsteady model}
-       1            AFAeroTwrMod       - Type of tower airfoil aerodynamics model (switch) {1=steady model, 2=Beddoes-Leishman unsteady model}
-   True             TwrPotent          - Calculate tower influence on wind based on potential flow around the tower? (flag)
-   False            TwrShadow          - Calculate downstream tower shadow? (flag)
+       1            AFAeroMod          - Type of blade airfoil aerodynamics model (switch) {1=steady model, 2=Beddoes-Leishman unsteady model}
+       0            TwrInflnc          - Type of tower influence model (switch) {0=none, 1=potential flow, 2=tower shadow}
    False            TwrAero            - Calculate tower aerodynamic loads? (flag)
 ======  Environmental Conditions  ===================================================================
        1.246        AirDens            - Air density (kg/m^3)
@@ -38,17 +36,16 @@ Description line that will be printed in the output file and written to the scre
 "AeroDyn_Blade.dat" ADBlFile(1)        - Name of file containing distributed aerodynamic properties for Blade #1 (-)
 "AeroDyn_Blade.dat" ADBlFile(2)        - Name of file containing distributed aerodynamic properties for Blade #2 (-)
 "AeroDyn_Blade.dat" ADBlFile(3)        - Name of file containing distributed aerodynamic properties for Blade #3 (-) [unused if NumBl < 3]
-======  Tower Influence and Aerodynamics ============================================================= [used only when TwrPotent=True, TwrShadow=True, or TwrAero=True]
- 0.0                TwrWakeCnst        - Tower wake constant (-) {0.0 - full potential flow, 0.1 - Bak model} [used only when TwrPotent=True]
-False               TwrUseCm           - Include aerodynamic pitching moment in tower aerodynamic load calculations?  (flag) [used only when TwrAero=True]
-     5              NumTwrNds          - Number of tower nodes used in the analysis  (-)
-TwrElev   TwrTwist   TwrChord   TwrAFID
-(m)       (deg)      (m)        (-)
- 0.0      0.0        6.0         5
-20.0      0.0        5.5         5
-40.0      0.0        5.0         6
-60.0      0.0        4.5         6
-80.0      0.0        4.0         6
+======  Tower Influence and Aerodynamics ============================================================= [used only when TwrInflnc/=0, or TwrAero=True]
+False               TwrPFBak           – Include Bak correction to potential flow? (flag) [used only when TwrInflnc=1]
+     5              NumTwrNds          - Number of tower nodes used in the analysis  (-) [used only when TwrInflnc/=0, or TwrAero=True]
+TwrElev        TwrDiam        TwrCd
+(m)              (m)           (-)
+ 0.0            6.0            0.0
+20.0            5.5            0.0
+40.0            5.0            0.0
+60.0            4.5            0.0
+80.0            4.0            0.0
 ======  Outputs  ====================================================================================
  True              SumPrint            - Generate a summary file listing input options and interpolated properties to "<rootname>.AD.sum"?  (flag)
     4              NBlOuts             - Number of blade node outputs [0 - 9] (-)

@@ -22,6 +22,8 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.FoilNm           A Cell array of foil names
 %.BldNodesHdr      A cell array of headers corresponding to the BldProp table BldNodes
 %.BldNodes         A matrix of blade nodes with columns RNodes, AeroTwst DRNodes Chord and Nfoil
+%.CasesHdr         A cell array of headers corresponding to the Cases table
+%.Cases            A matrix of properties for individual cases in a driver file
 %.PrnElm           An array determining whether or not to print a given element
 
 
@@ -92,6 +94,10 @@ while true %loop until discovering Outlist or end of file, than break
             NTwInpSt = GetFastPar(DataOut,'NTwInpSt');        
             [DataOut.TowProp, DataOut.TowPropHdr] = ParseFASTNumTable(line, fid, NTwInpSt);
             continue; %let's continue reading the file
+        elseif strcmpi(value,'"TwrElev"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)
+            NumTwrNds = GetFastPar(DataOut,'NumTwrNds');        
+            [DataOut.TowProp, DataOut.TowPropHdr] = ParseFASTNumTable(line, fid, NumTwrNds);
+            continue; %let's continue reading the file
         elseif strcmpi(value,'"BlFract"') %we've reached the distributed blade properties table (and we think it's a string value so it's in quotes)
             NBlInpSt = GetFastPar(DataOut,'NBlInpSt');        
             [DataOut.BldProp, DataOut.BldPropHdr] = ParseFASTNumTable(line, fid, NBlInpSt);
@@ -104,10 +110,18 @@ while true %loop until discovering Outlist or end of file, than break
             NumFoil = GetFastPar(DataOut,'NumFoil');
             [DataOut.FoilNm] = ParseFASTFileList( line, fid, NumFoil );
             continue; %let's continue reading the file  
+        elseif strcmpi(label,'AFNames') %note NO quotes because it's a label
+            NumFoil = GetFastPar(DataOut,'NumAFfiles');
+            [DataOut.FoilNm] = ParseFASTFileList( line, fid, NumFoil );
+            continue; %let's continue reading the file  
         elseif strcmpi(value,'"RNodes"')
             BldNodes = GetFastPar(DataOut,'BldNodes');  
             [DataOut.BldNodes, DataOut.BldNodesHdr] = ParseFASTFmtTable( line, fid, BldNodes, false );
             continue;
+        elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
+            NumCases = GetFastPar(DataOut,'NumCases');        
+            [DataOut.Cases, DataOut.CasesHdr] = ParseFASTNumTable(line, fid, NumCases);
+            continue; %let's continue reading the file
         else                
             DataOut.Label{count,1} = label;
             DataOut.Val{count,1}   = value;

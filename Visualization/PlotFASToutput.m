@@ -25,6 +25,16 @@ function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels
 %                 should be plotted. If omitted, or is the string 'all', 
 %                 all channels except time (the first one) are plotted.
 %                 
+% CustomHdr     - cell array describing file format:
+%     CustomHdr{1} = delim: delimiter for channel columns; if
+%                    empty ([]), columns are delimited by whitespace
+%     CustomHdr{2} = HeaderRows: number of rows in the file header, before
+%                    data is encountered
+%     CustomHdr{3} = NameLine: scalar value denoting line containing
+%                    channel names
+%     CustomHdr{4} = UnitsLine: scalar value denoting line containing
+%                    channel units
+
 % Note: the channels in the files need not be in the same order, but the
 %  channel names must be identical. (i.e., it does not search for alternate
 %  column names [except for the negative])

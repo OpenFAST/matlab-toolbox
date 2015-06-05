@@ -1,4 +1,4 @@
-% Matlab2FAST
+% Matlab2FAST(FastPar,TemplateFile,OutputFilename,hdrLines)
 % Function for creating a new FAST file given:
 % 1) An input template file
 % 2) A FAST parameter structure
@@ -91,7 +91,7 @@ while true
             
     if ~printTable && ~isComment && length(label) > 0        
         
-        if strcmpi(value,'"HtFract"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)            
+        if strcmpi(value,'"HtFract"') || strcmpi(value,'"TwrElev"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)            
             if ~isfield(FastPar,'TowProp')
                 disp(  'WARNING: tower properties table not found in the FAST data structure.' );
                 printTable = true;
@@ -118,24 +118,34 @@ while true
                 continue; %let's continue reading the template file            
             end            
             
-        elseif strcmpi(label,'FoilNm') %we've reached the DLL torque-speed lookup table (and we think it's a string value so it's in quotes)
+        elseif strcmpi(label,'FoilNm') || strcmpi(label,'AFNames') %we've reached the airfoil names
             if ~isfield(FastPar,'FoilNm')
                 disp( 'WARNING: AeroDyn airfoil list not found in the FAST data structure.' );
                 printTable = true;
             else
                 WriteFASTFileList(line, fidIN, fidOUT, FastPar.FoilNm, label, newline);
                 continue; %let's continue reading the template file            
-            end            
-             
+            end                                     
+            
         elseif strcmpi(value,'"RNodes"') %we've reached the AeroDyn Blade properies table (and we think it's a string value so it's in quotes)
             if ~isfield(FastPar,'BldNodes')
-                disp( 'WARNING: AeroDyn blade not properties table not found in the FAST data structure.' );
+                disp( 'WARNING: AeroDyn blade properties table not found in the FAST data structure.' );
                 printTable = true;
             else
                 IntegerCols = {'NFoil'};
                 WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, false, IntegerCols);
                 continue; %let's continue reading the template file            
             end   
+            
+        elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
+            if ~isfield(FastPar,'Cases')
+                disp( 'WARNING: AeroDyn driver cases properties table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.Cases, FastPar.CasesHdr, newline);
+                continue; %let's continue reading the template file            
+            end   
+                                    
         elseif strcmpi(label,'NOPRINT') || strcmpi(label,'PRINT')
             continue;  % this comes from AeroDyn BldNodes table                                    
         else
@@ -156,7 +166,7 @@ while true
                     % using an appropriate format
                 if isnumeric(val2Write)
                     writeVal= getNumericVal2Write( val2Write, '%11G' );
-                    if any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
+                    if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
                         writeVal=getNumericVal2Write( val2Write, '%15G' );
                     end
                 else
