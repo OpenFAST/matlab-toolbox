@@ -5,7 +5,8 @@ Description line that will be printed in the output file and written to the scre
  default            DTAero             - Time interval for aerodynamic calculations {or "default"} (s)
        1            WakeMod            - Type of wake/induction model (switch) {0=none, 1=BEMT}
        1            AFAeroMod          - Type of blade airfoil aerodynamics model (switch) {1=steady model, 2=Beddoes-Leishman unsteady model}
-       0            TwrInflnc          - Type of tower influence model (switch) {0=none, 1=potential flow, 2=tower shadow}
+       0            TwrPotent          - Type tower influence on wind based on potential flow around the tower (switch) {0=none, 1=baseline potential flow, 2=potential flow with Bak correction}
+   False            TwrShadow          – Calculate tower influence on wind based on downstream tower shadow? (flag)
    False            TwrAero            - Calculate tower aerodynamic loads? (flag)
 ======  Environmental Conditions  ===================================================================
        1.246        AirDens            - Air density (kg/m^3)
@@ -37,7 +38,6 @@ Description line that will be printed in the output file and written to the scre
 "AeroDyn_Blade.dat" ADBlFile(2)        - Name of file containing distributed aerodynamic properties for Blade #2 (-)
 "AeroDyn_Blade.dat" ADBlFile(3)        - Name of file containing distributed aerodynamic properties for Blade #3 (-) [unused if NumBl < 3]
 ======  Tower Influence and Aerodynamics ============================================================= [used only when TwrInflnc/=0, or TwrAero=True]
-False               TwrPFBak           – Include Bak correction to potential flow? (flag) [used only when TwrInflnc=1]
      5              NumTwrNds          - Number of tower nodes used in the analysis  (-) [used only when TwrInflnc/=0, or TwrAero=True]
 TwrElev        TwrDiam        TwrCd
 (m)              (m)           (-)
