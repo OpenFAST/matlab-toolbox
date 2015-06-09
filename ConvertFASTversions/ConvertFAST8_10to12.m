@@ -158,7 +158,7 @@ end
     % Write new model data to the FAST input files:
     %----------------------------------------------------------------------
         % FAST
-    template   = [templateDir filesep 'FAST_Primary_v8.11.x.dat'];  %template for primary file
+    template   = [templateDir filesep 'FAST_Primary_v8.12.x.dat'];  %template for primary file
     Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
 
 
