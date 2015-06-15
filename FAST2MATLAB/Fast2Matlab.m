@@ -20,7 +20,7 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.DLLProp          A matrix of properties for the Bladed DLL Interface with columns .DLLPropHdr
 %.DLLPropHdr       A cell array of headers corresponding to the DLLProp table
 %.FoilNm           A Cell array of foil names
-%.BldNodesHdr      A cell array of headers corresponding to the BldProp table BldNodes
+%.BldNodesHdr      A cell array of headers corresponding to the BldNodes table 
 %.BldNodes         A matrix of blade nodes with columns RNodes, AeroTwst DRNodes Chord and Nfoil
 %.CasesHdr         A cell array of headers corresponding to the Cases table
 %.Cases            A matrix of properties for individual cases in a driver file
@@ -118,6 +118,10 @@ while true %loop until discovering Outlist or end of file, than break
             BldNodes = GetFastPar(DataOut,'BldNodes');  
             [DataOut.BldNodes, DataOut.BldNodesHdr] = ParseFASTFmtTable( line, fid, BldNodes, false );
             continue;
+        elseif strcmpi(value,'"BlSpn"')
+            NumBlNds = GetFastPar(DataOut,'NumBlNds');  
+            [DataOut.BldNodes, DataOut.BldNodesHdr] = ParseFASTNumTable( line, fid, NumBlNds );
+            continue;            
         elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
             NumCases = GetFastPar(DataOut,'NumCases');        
             [DataOut.Cases, DataOut.CasesHdr] = ParseFASTNumTable(line, fid, NumCases);

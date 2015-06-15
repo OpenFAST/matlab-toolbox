@@ -21,8 +21,9 @@ function [IfWP, err1] = newInputs_IfW_v3_00(ADPar,EDPar)
         
     [WindFile, err1] = GetFastPar(ADPar,'WindFile');
     [RefHt, err2] = GetFastPar(ADPar,'HH');
-    
-    
+    if (err2)
+        [RefHt, err2] = GetFastPar(ADPar,'RefHt');
+    end    
 
         % if there *was* an error, WindFile does not existed, 
         % so we've likely already changed these inputs.    

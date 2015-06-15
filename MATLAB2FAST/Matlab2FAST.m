@@ -137,6 +137,17 @@ while true
                 continue; %let's continue reading the template file            
             end   
             
+        elseif strcmpi(value,'"BlSpn"') %we've reached the AeroDyn15 Blade properies table (and we think it's a string value so it's in quotes)
+            if ~isfield(FastPar,'BldNodes')
+                disp( 'WARNING: AeroDyn blade properties table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                IntegerCols = {'BlAFID'};
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, true, IntegerCols);
+                continue; %let's continue reading the template file            
+            end   
+            
+            
         elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
             if ~isfield(FastPar,'Cases')
                 disp( 'WARNING: AeroDyn driver cases properties table not found in the FAST data structure.' );

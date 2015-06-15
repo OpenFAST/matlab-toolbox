@@ -1,4 +1,4 @@
-function ConvertFAST8_10to12(oldFSTName, newDir)
+function ConvertFAST8_10to12(oldFSTName, newDir, createAD15)
 %function ConvertFAST8_10to12(oldFSTName, newDir)
 % by Bonnie Jonkman
 %
@@ -45,6 +45,9 @@ if strcmpi(oldDir,newDir)
     disp('ConvertFAST8_10to12 Warning:New FAST input file is overwriting old file.')
 end
 
+if nargin < 3
+    createAD15 = false;
+end
 
     %----------------------------------------------------------------------
     % Load in old model data from the primary FAST and ServoDyn input files:
@@ -68,6 +71,7 @@ end
     %----------------------------------------------------------------------
     FullEDFile = GetFastPar(FP,'EDFile');
     FullEDFile = strrep(FullEDFile,'"',''); %let's remove the quotes so we can actually use this file name
+    [newEDName]  = GetFullFileName( FullEDFile, newDir ); % new path + name
     [FullEDFile] = GetFullFileName( FullEDFile, oldDir );
     EDPar = Fast2Matlab(FullEDFile,3); % get ElastoDyn data (3 header lines)
     
@@ -79,20 +83,36 @@ end
 % In FAST v8.10, we read the AeroDyn input file for ElastoDyn, so we have to
 % convert it to the new format regardless of CompAero          
     AeroFile = GetFastPar(FP,'AeroFile');                                   
-    FullAeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name
+    FullAeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name    
     [newADName]    = GetFullFileName( FullAeroFile, newDir ); % new path + name
     [FullAeroFile] = GetFullFileName( FullAeroFile, oldDir ); % old path + name
-    ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (]2 header lines [2nd one is actually SI input])        
+    ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
     
 %%  %----------------------------------------------------------------------
     % Write new model data to the AeroDyn input file:
     %----------------------------------------------------------------------               
-    [~, err1] = GetFastPar(ADPar,'TwrShadow');
-
-    if err1
-        template   = [templateDir filesep 'AD_Primary_v14.04.x.dat'];  %template for AD file without NEWTOWER        
+    if (createAD15)
+        [newADPath,ADRootname] = fileparts(newADName);
+        [ADPar, newADBladeName] = newInputs_AD_v15(ADPar, ADRootname);
+                
+        % write new blade files:
+        [newADBladeName] = GetFullFileName( newADBladeName, newADPath ); % new path + name
+        template = [templateDir filesep 'AD_Blade_v15.00.x.dat'];
+        Matlab2FAST(ADPar, template, newADBladeName, 2); %contains 2 header lines            
+        
+        template = [templateDir filesep 'AD_Primary_v15.00.x.dat']; 
+        newADName = strrep(newADName,'AeroDyn','AeroDyn15');
+        newADName = strrep(newADName,'AD','AD15');
+        
     else
-        template   = [templateDir filesep 'AD_Primary_v14.04.x_NT.dat'];  %template for AD file with NEWTOWER        
+    
+        [~, err1] = GetFastPar(ADPar,'TwrShadow');
+
+        if err1
+            template   = [templateDir filesep 'AD_Primary_v14.04.x.dat'];  %template for AD file without NEWTOWER        
+        else
+            template   = [templateDir filesep 'AD_Primary_v14.04.x_NT.dat'];  %template for AD file with NEWTOWER        
+        end
     end
     Matlab2FAST(ADPar, template, newADName, 2); %contains 2 header lines            
 
@@ -153,11 +173,16 @@ end
         
     end
     
+%%  %----------------------------------------------------------------------
+    % Write new model data to the ElastoDyn input files:
+    %----------------------------------------------------------------------
+    template = [templateDir filesep 'ED_Primary_v1.03.x.dat'];  %template for primary file
+    Matlab2FAST(EDPar,template,newEDName, 2); %contains 2 header lines
+    
     
 %%  %----------------------------------------------------------------------
     % Write new model data to the FAST input files:
     %----------------------------------------------------------------------
-        % FAST
     template   = [templateDir filesep 'FAST_Primary_v8.12.x.dat'];  %template for primary file
     Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
 
