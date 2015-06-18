@@ -1,0 +1,55 @@
+! ------------ AirfoilInfo v1.00.x Input File ----------------------------------
+! Description of the Airfoil file here
+! note that this file uses Marshall Buhl's new input file processing; start all comment lines with !
+! ------------------------------------------------------------------------------
+1.0         NonDimAreA        ! The non-dimensional area of the airfoil (area/chord^2) (set to 1.0 if unsure or unneeded)
+  0         NumCoords         ! The number of coordinates in the airfoil shape file.  Set to zero if coordinates not included.
+! ......... x-y coordinates are next if NumCoords > 0 .............
+1           NumTabs           ! Number of airfoil tables in this file.  Each table must have lines for Re and Ctrl.
+! ------------------------------------------------------------------------------
+! data for table 1
+! ------------------------------------------------------------------------------
+0.75        Re                ! Reynolds numbers in millions
+0.0         Ctrl              ! Control setting (must be 0 for current AirfoilInfo)
+True        InclUAdata        ! Is unsteady aerodynamics data included in this table? If TRUE, then include 30 UA coefs below this line
+!........................................
+       0    alpha0
+       0    alpha1
+       0    alpha2
+       0    eta_e             ! Recovery factor in the range [0.85 - 0.95]
+       0    C_nalpha
+       0    T_f0              ! seconds
+       0    T_V0
+       0    T_p
+       0    T_VL
+       0    b1
+       0    b2
+       0    b5
+       0    A1
+       0    A2
+       0    A5
+       0    S1
+       0    S2
+       0    S3
+       0    S4
+       0    Cn1
+       0    Cn2
+       0    St_sh
+       0    Cd0
+       0    Cm0
+       0    k0
+       0    k1
+       0    k2
+       0    k3
+       0    k1_hat
+       0    x_cp_bar          ! Table of aerodynamics coefficients
+!........................................
+    3       NumAlf            ! Number of data lines in the following table
+!    Alpha      Cl      Cd        Cm
+!    (deg)      (-)     (-)       (-)
+  -180.00      .000    .3000      0.0
+      .00      .000    .3000      0.0
+   180.00      .000    .3000      0.0
+! ------------------------------------------------------------------------------
+! data for table 2
+! ------------------------------------------------------------------------------

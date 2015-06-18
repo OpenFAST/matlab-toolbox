@@ -159,7 +159,7 @@ if ~err1 && strcmpi(TwrShad, '"newtower"' )
     else
         TwrPotent = 1; % ignore the tower file, so that section will need to be filled out        
     end
-    [TwrPotent] = SetFastPar(ADPar,'TwrPotent',TwrPotent);     %Calculate tower potential flow (flag)
+    [ADPar] = SetFastPar(ADPar,'TwrPotent',TwrPotent);     %Calculate tower potential flow (flag)
     
     
     [CalcTwrAero] = GetFastPar(ADPar,'CalcTwrAero'); %Calculate aerodynamic drag of the tower at the ElastoDyn nodes.
