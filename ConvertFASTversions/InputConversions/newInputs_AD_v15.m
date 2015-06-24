@@ -70,9 +70,9 @@ end
 %% Unsteady Aero options:
 [StallMod] = GetFastPar(ADPar,'StallMod');        %Dynamic stall included [BEDDOES or STEADY] (unquoted string)
 if strcmpi(StallMod,'"beddoes"')
-    AFAeroMod = 1;
+    AFAeroMod = 2;
 else %steady
-    AFAeroMod = 0;
+    AFAeroMod = 1;
 end
 
 UAMod = 3; %2 is more stable at this point

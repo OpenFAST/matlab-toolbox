@@ -14,7 +14,7 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
 
     File_ID = fread( fid, 1, 'int32');
     
-    if File_ID ~= 1
+    if File_ID ~= 2 && File_ID ~= 1
         error(['Invalid File_ID in ' fileName '. Unknown file format.']);
     end
     
@@ -32,12 +32,22 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
     Mesh.HD_Morison_Lumped  = ReadFASTmesh(fid);
     Mesh.HD_WAMIT           = ReadFASTmesh(fid);
     Mesh.MAP_Fairlead       = ReadFASTmesh(fid);
+
+    if File_ID > 1
+        numBl2   = fread( fid, 1, 'int32');          
+        for k = 1:numBl2
+            Mesh.BD_RootMotion(k)= ReadFASTmesh(fid);
+            Mesh.BD_DistrLoad(k) = ReadFASTmesh(fid);
+        end
+    else
+        numBl2 = 0;
+    end 
     
     fclose( fid );
    
 %% plot meshes:
     if nargin > 1 && plotMeshes
-        NumMeshes= numBl+8;
+        NumMeshes= numBl+8+numBl2*2;
         MarkerColor=cell(NumMeshes,1);
         MeshName=cell(NumMeshes,1);
         for k = 1:numBl
@@ -69,6 +79,17 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
         MarkerColor{numBl+8}=[0.001, 1.000, 0.501];
         MeshName{   numBl+8}='MAP_Fairlead';
 
+        k = 0;
+        for j = 1:numBl2
+          k = k + 1;
+          MarkerColor{numBl+8+k} = [.1,0,.1]*j;
+          MeshName{   numBl+8+k} = ['BD_RootMotion(' num2str(j) ')'];
+          
+          k = k + 1;          
+          MarkerColor{numBl+8+k} = [.1,.1,0]*j;
+          MeshName{   numBl+8+k} = ['BD_DistrLoad(' num2str(j) ')'];
+        end    
+        
 
         LineColors=lines(NumMeshes);
 
@@ -82,7 +103,7 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
                     1 1 1];
 
 
-        for i=(numBl+1):NumMeshes
+        for i=1:NumMeshes % (numBl+1):NumMeshes
             MeshData = eval(['Mesh.' MeshName{i} ';']);
 
             if MeshData.Nnodes > 0
@@ -105,19 +126,20 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
 
                     if k == 1
                         fig(i) = figure;
+                        isfig(i) = 1;
                     end
 
         %             subplot(1,NumMeshes,i);
                 end        
             else
-                fig(i) = -1;
+                isfig(i) = -1;
             end
 
         end
     %     fclose(fid)
 
         for i=1:NumMeshes
-            if fig(i) > 0
+            if isfig(i) > 0
                 figure(fig(i));
                 xlim(currlimits(:,1))
                 ylim(currlimits(:,2))
