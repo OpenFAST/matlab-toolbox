@@ -9,7 +9,7 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
 
     [fid, message] = fopen( fileName );
     if fid < 1
-        error(['ReadFASTmesh:: Error opening file: ' fileName '. ' message]);
+        error(['ReadFASTInputMeshes:: Error opening file: ' fileName '. ' message]);
     end
 
     File_ID = fread( fid, 1, 'int32');
