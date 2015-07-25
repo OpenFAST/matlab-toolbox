@@ -48,7 +48,7 @@ else
     AIDrag = 'False';
     TIDrag = 'False';    
 end
-IndToler = AToler;
+IndToler = AToler/50;
 MaxIter  = 100;
     
 if strcmpi(TLModel,'"none"') 
@@ -164,10 +164,31 @@ if ~err1 && strcmpi(TwrShad, '"newtower"' )
     
     [CalcTwrAero] = GetFastPar(ADPar,'CalcTwrAero'); %Calculate aerodynamic drag of the tower at the ElastoDyn nodes.
     TwrAero = CalcTwrAero;
-else
+    
+elseif ~err1 && TwrShad > 0
+    
+    % create TwrDiam and TwrCd values to get tower shadow results
+    % comparable to AD14.
+   [ShadHWid] = GetFastPar(ADPar,'ShadHWid');           
+   [T_Shad_Refpt] = GetFastPar(ADPar,'T_Shad_Refpt'); 
+
+   uref = TwrShad;
+   bref = ShadHWid;
+   lref = T_Shad_Refpt;
+
+   TwrDiam = 2 * bref.^2 / lref;  % note this isn't necessarially the tower diameter, but will give similar tower shadow to AD14
+   TwrCd   = 2 * uref * bref ./ TwrDiam;
+
+   % need TwrElev from ED
+   %add this to the tower table!!! FIX ME                    
+   
+    TwrAero = 'False';        
+
+else    
+    
 % if it's not "NEWTOWER", we're going to ignore TwrShad, ShadHWid, and T_Shad_Refpt
     disp('Warning: AeroDyn v15 tower shadow model is not compatible with AeroDyn v14. Ignoring tower shadow.');
-    TwrAero   = 'False';
+    TwrAero   = 'False';        
 end
     
 %% ........................................................................
