@@ -3,7 +3,7 @@ function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels
 %function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels)
 %function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs,OnePlot)
 %
-% (c) 2014 National Renewable Energy Laboratory
+% (c) 2014-2015 National Renewable Energy Laboratory
 %  Author: B. Jonkman, NREL/NWTC
 %
 % This routine produces time-series plots of FAST output
@@ -89,6 +89,16 @@ for iFile=1:numFiles
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile}, ~, DescStr{iFile}] = ReadFASTbinary(FASTfiles{iFile});
     elseif ~useCustomHdr
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile},    DescStr{iFile}] = ReadFASTtext(FASTfiles{iFile});        
+        
+% %         if iFile>1
+% %             delim     = '';
+% %             HeaderRows= 3;
+% %             NameLine  = 2;
+% %             UnitsLine = 3;
+% %             DescStr{iFile} = '';
+% %             [data{iFile}, columnTitles{iFile}, columnUnits{iFile} ] = ReadFASTtext(FASTfiles{iFile}, delim, HeaderRows, NameLine, UnitsLine );
+% %         end
+        
     else % allow other files 
         delim     = CustomHdr{1};
         HeaderRows= CustomHdr{2};
@@ -392,9 +402,12 @@ end
 
 
 function [Indx,scaleFact,ColToFind] = getNewColIndx( ColToFind, colNames )
-    scaleFact = 1;
  
-    [newColNames, scaleFact] = MooringColNames( ColToFind, colNames );
+    [ColToFind,    scaleFact] = getAD14ChannelName(ColToFind);
+
+    [newColNames, scaleFactM] = MooringColNames( ColToFind, colNames );
+    [newColNames, scaleFactB] = BeamDynColNames( ColToFind, newColNames );    
+    scaleFact = scaleFact*scaleFactM*scaleFactB;
 %     disp( [colNames newColNames])
 
     Indx = find( strcmpi(ColToFind, newColNames), 1, 'first' );
@@ -419,6 +432,96 @@ function [Indx,scaleFact,ColToFind] = getNewColIndx( ColToFind, colNames )
     
 return
 end
+
+function [colNames,scalefact] = BeamDynColNames( ColToFind, colNames )
+    scalefact = 1;
+    
+    % from BD to ED names:
+    if strcmpi(ColToFind, 'B1RootFxr') || ...
+       strcmpi(ColToFind, 'B2RootFxr') || ...
+       strcmpi(ColToFind, 'B3RootFxr')        
+       colNames = strrep(colNames,'RootFxb1','B1RootFxr');
+       colNames = strrep(colNames,'RootFxb2','B2RootFxr');
+       colNames = strrep(colNames,'RootFxb3','B3RootFxr');
+       scalefact = 1E3;      
+    elseif strcmpi(ColToFind, 'B1RootFyr') || ...
+           strcmpi(ColToFind, 'B2RootFyr') || ...
+           strcmpi(ColToFind, 'B3RootFyr')        
+       colNames = strrep(colNames,'RootFyb1','B1RootFyr');
+       colNames = strrep(colNames,'RootFyb2','B2RootFyr');
+       colNames = strrep(colNames,'RootFyb3','B3RootFyr');
+       scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1RootFzr') || ...
+           strcmpi(ColToFind, 'B2RootFzr') || ...
+           strcmpi(ColToFind, 'B3RootFzr')        
+       colNames = strrep(colNames,'RootFzb1','B1RootFzr');
+       colNames = strrep(colNames,'RootFzb2','B2RootFzr');
+       colNames = strrep(colNames,'RootFzb3','B3RootFzr');
+       colNames = strrep(colNames,'RootFzc1','B1RootFzr');
+       colNames = strrep(colNames,'RootFzc2','B2RootFzr');
+       colNames = strrep(colNames,'RootFzc3','B3RootFzr');
+       scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1RootMxr') || ...
+           strcmpi(ColToFind, 'B2RootMxr') || ...
+           strcmpi(ColToFind, 'B3RootMxr')        
+       colNames = strrep(colNames,'RootMxb1','B1RootMxr');
+       colNames = strrep(colNames,'RootMxb2','B2RootMxr');
+       colNames = strrep(colNames,'RootMxb3','B3RootMxr');
+       scalefact = 1E3;      
+    elseif strcmpi(ColToFind, 'B1RootMyr') || ...
+           strcmpi(ColToFind, 'B2RootMyr') || ...
+           strcmpi(ColToFind, 'B3RootMyr')        
+       colNames = strrep(colNames,'RootMyb1','B1RootMyr');
+       colNames = strrep(colNames,'RootMyb2','B2RootMyr');
+       colNames = strrep(colNames,'RootMyb3','B3RootMyr');
+       scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1RootMzr') || ...
+           strcmpi(ColToFind, 'B2RootMzr') || ...
+           strcmpi(ColToFind, 'B3RootMzr')        
+       colNames = strrep(colNames,'RootMzb1','B1RootMzr');
+       colNames = strrep(colNames,'RootMzb2','B2RootMzr');
+       colNames = strrep(colNames,'RootMzb3','B3RootMzr');
+       colNames = strrep(colNames,'RootMzc1','B1RootMzr');
+       colNames = strrep(colNames,'RootMzc2','B2RootMzr');
+       colNames = strrep(colNames,'RootMzc3','B3RootMzr');
+       scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1TipTDxr') || ...
+           strcmpi(ColToFind, 'B2TipTDxr') || ...
+           strcmpi(ColToFind, 'B3TipTDxr')        
+       colNames = strrep(colNames,'TipDxb1','B1TipTDxr');
+       colNames = strrep(colNames,'TipDxb2','B2TipTDxr');
+       colNames = strrep(colNames,'TipDxb3','B3TipTDxr');
+       scalefact = 1;
+    elseif strcmpi(ColToFind, 'B1TipTDyr') || ...
+           strcmpi(ColToFind, 'B2TipTDyr') || ...
+           strcmpi(ColToFind, 'B3TipTDyr')        
+       colNames = strrep(colNames,'TipDyb1','B1TipTDyr');
+       colNames = strrep(colNames,'TipDyb2','B2TipTDyr');
+       colNames = strrep(colNames,'TipDyb3','B3TipTDyr');
+       scalefact = 1;
+    elseif strcmpi(ColToFind, 'B1TipTDzr') || ...
+           strcmpi(ColToFind, 'B2TipTDzr') || ...
+           strcmpi(ColToFind, 'B3TipTDzr')        
+       colNames = strrep(colNames,'TipDzb1','B1TipTDzr');
+       colNames = strrep(colNames,'TipDzb2','B2TipTDzr');
+       colNames = strrep(colNames,'TipDzb3','B3TipTDzr');
+       colNames = strrep(colNames,'TipDzc1','B1TipTDzr');
+       colNames = strrep(colNames,'TipDzc2','B2TipTDzr');
+       colNames = strrep(colNames,'TipDzc3','B3TipTDzr');
+       scalefact = 1;
+%     elseif strcmpi(ColToFind, 'B1TipTAXg') || ...
+%            strcmpi(ColToFind, 'B2TipTAxg') || ...
+%            strcmpi(ColToFind, 'B3TipTAxg')        
+%        colNames = strrep(colNames,'TipALxb1','B1TipTAXg');
+%        colNames = strrep(colNames,'TipALxb2','B2TipTAxg');
+%        colNames = strrep(colNames,'TipALxb3','B3TipTAxg');
+%        scalefact = 1;                     
+    end
+    
+end
+
+
+  
 
 function [colNames,scalefact] = MooringColNames( ColToFind, colNames )
     scalefact = 1;
@@ -524,6 +627,63 @@ function [ChannelName_old,scaleFact] = getOldFASTv8ChannelName(ChannelName)
     end
                                 
     return 
+
+end
+
+
+function [ChannelName_new,scaleFact] = getAD14ChannelName(ChannelName)
+       
+    scaleFact = 1.0;
+    ChannelName_new = ChannelName;
+        
+    % there isn't an easy way to get this node (i'd need to read the
+    % AD15 input file to do so)
+        
+    AD14node = '06';
+
+    if length(ChannelName) < 5 
+        return;
+    end
+
+    if strcmpi(ChannelName(1:4),'B1N2')
+        B1N2_channel = ChannelName(5:end);
+
+        if strcmpi(B1N2_channel,'Alpha')
+            ChannelName_new = [ 'Alpha' AD14node];
+        elseif strcmpi(B1N2_channel,'DynP')
+            ChannelName_new = [ 'DynPres' AD14node];
+        elseif strcmpi(B1N2_channel,'Cl')
+            ChannelName_new = [ 'Clift' AD14node];
+        elseif strcmpi(B1N2_channel,'Cd')
+            ChannelName_new = [ 'Cdrag' AD14node];
+        elseif strcmpi(B1N2_channel,'Cn')
+            ChannelName_new = [ 'CNorm' AD14node];
+        elseif strcmpi(B1N2_channel,'Ct')
+            ChannelName_new = [ 'CTang' AD14node];
+        elseif strcmpi(B1N2_channel,'Cm')
+            ChannelName_new = [ 'CMom' AD14node];
+        elseif strcmpi(B1N2_channel,'Theta')
+            ChannelName_new = [ 'Pitch' AD14node];
+        elseif strcmpi(B1N2_channel,'AxInd')
+            ChannelName_new = [ 'AxInd' AD14node];
+        elseif strcmpi(B1N2_channel,'TnInd')
+            ChannelName_new = [ 'TanInd' AD14node];
+         elseif strcmpi(B1N2_channel,'Fx')
+            ChannelName_new = [ 'ForcN' AD14node];
+            scaleFact = 1/1.2573;
+         elseif strcmpi(B1N2_channel,'Fy')
+            ChannelName_new = [ 'ForcT' AD14node];
+            scaleFact = 1/1.2573;
+         elseif strcmpi(B1N2_channel,'Mm')
+            ChannelName_new = [ 'Pmomt' AD14node];
+            scaleFact = 1/1.2573;
+         elseif strcmpi(B1N2_channel,'Re')
+            ChannelName_new = [ 'ReNum' AD14node];
+        end
+
+    end
+
+    return
 
 end
 
