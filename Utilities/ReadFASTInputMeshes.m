@@ -14,7 +14,7 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
 
     File_ID = fread( fid, 1, 'int32');
     
-    if File_ID ~= 2 && File_ID ~= 1
+    if File_ID ~= 2 && File_ID ~= 1 && File_ID ~= 3
         error(['Invalid File_ID in ' fileName '. Unknown file format.']);
     end
     
@@ -42,12 +42,21 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
     else
         numBl2 = 0;
     end 
-    
+
+    if File_ID > 2
+        numBl3   = fread( fid, 1, 'int32');          
+        for k = 1:numBl3
+            Mesh.AD_BladeMotion(k)= ReadFASTmesh(fid);
+        end
+    else
+        numBl3 = 0;
+    end 
+        
     fclose( fid );
    
 %% plot meshes:
     if nargin > 1 && plotMeshes
-        NumMeshes= numBl+8+numBl2*2;
+        NumMeshes= numBl+8+numBl2*2+numBl3;
         MarkerColor=cell(NumMeshes,1);
         MeshName=cell(NumMeshes,1);
         for k = 1:numBl
@@ -91,6 +100,13 @@ function [Mesh] = ReadFASTInputMeshes(fileName,plotMeshes)
         end    
         
 
+        for j = 1:numBl3
+          k = numBl + 8 + 2*numBl2 + j;
+          MarkerColor{k} = [.1,0,.1]*j;
+          MeshName{   k} = ['AD_BladeMotion(' num2str(j) ')'];          
+        end    
+        
+        
         LineColors=lines(NumMeshes);
 
     %     fid = fopen( fileName );

@@ -1,7 +1,7 @@
 function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs,OnePlot)
 %..........................................................................
-%function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels)
-%function PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs,OnePlot)
+%function [timeSeriesData] = PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels)
+%function [timeSeriesData] = PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs,OnePlot)
 %
 % (c) 2014-2015 National Renewable Energy Laboratory
 %  Author: B. Jonkman, NREL/NWTC
@@ -25,7 +25,8 @@ function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels
 %                 should be plotted. If omitted, or is the string 'all', 
 %                 all channels except time (the first one) are plotted.
 %                 
-% CustomHdr     - cell array describing file format:
+% CustomHdr     - cell array describing text file format. Default will use
+%                 values appropriate for FAST text output files. 
 %     CustomHdr{1} = delim: delimiter for channel columns; if
 %                    empty ([]), columns are delimited by whitespace
 %     CustomHdr{2} = HeaderRows: number of rows in the file header, before
@@ -34,10 +35,15 @@ function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels
 %                    channel names
 %     CustomHdr{4} = UnitsLine: scalar value denoting line containing
 %                    channel units
-
+% PlotPSDs      - scalar logical that determines if PSD plots will be
+%                 generated in addition to the time series plots. Default
+%                 is false (no PSD plots)
+% OnePlot       - scalar logical that determines if each time series plot
+%                 will be placed on the same or separate plots. Default
+%                 is false (many plots).
+%
 % Note: the channels in the files need not be in the same order, but the
-%  channel names must be identical. (i.e., it does not search for alternate
-%  column names [except for the negative])
+%  channel names must be the same [it does search for negatives]. 
 %..........................................................................
 
 
@@ -90,14 +96,14 @@ for iFile=1:numFiles
     elseif ~useCustomHdr
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile},    DescStr{iFile}] = ReadFASTtext(FASTfiles{iFile});        
         
-% %         if iFile>1
-% %             delim     = '';
-% %             HeaderRows= 3;
-% %             NameLine  = 2;
-% %             UnitsLine = 3;
-% %             DescStr{iFile} = '';
-% %             [data{iFile}, columnTitles{iFile}, columnUnits{iFile} ] = ReadFASTtext(FASTfiles{iFile}, delim, HeaderRows, NameLine, UnitsLine );
-% %         end
+% % if iFile>1
+% %     delim     = '';
+% %     HeaderRows= 3;
+% %     NameLine  = 2;
+% %     UnitsLine = 3;
+% %     DescStr{iFile} = '';
+% %     [data{iFile}, columnTitles{iFile}, columnUnits{iFile} ] = ReadFASTtext(FASTfiles{iFile}, delim, HeaderRows, NameLine, UnitsLine );
+% % end
         
     else % allow other files 
         delim     = CustomHdr{1};
@@ -218,15 +224,23 @@ Channels = max(Channels,1); %if any channel was missing, we'll say it's channel 
 % ------------------------------------------------------------
 if OnePlot
     figNo=figure;
+    ShowThisLegend = false;
 else
     figNo = -1';
+    ShowThisLegend = ShowLegend;
 end
 
 plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
                     columnTitles{ReferenceFile}([1 Channels]), ...
                     columnUnits{ReferenceFile}([1 Channels]), titleText, ...
-                    ShowLegend, LineWidthConst, FntSz, figNo );
-
+                    ShowThisLegend, LineWidthConst, FntSz, figNo );
+if OnePlot
+    ylabel('FAST Channels','FontSize',FntSz);
+    if size(outData,1) > 1 && ShowLegend
+        legend show
+    end
+end
+                
 
 %% -----------------------------------------------------------
 % Plot the psd from each file, with each channel in 
@@ -258,7 +272,7 @@ function [] = savePlots( f, outFigName, ReferenceFile )
 
 return
 end
-
+%%
 function [f] = plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
                 RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz, figNo )
 
@@ -312,7 +326,7 @@ numFiles = size(outData,1);
 return
 end
 
-
+%%
 function [] = plotPSDData( outData, FASTfilesDesc, Markers, LineColors, ...
                     RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz )
 numCols  = size(outData{1,2},2) ;
@@ -639,8 +653,14 @@ function [ChannelName_new,scaleFact] = getAD14ChannelName(ChannelName)
     % there isn't an easy way to get this node (i'd need to read the
     % AD15 input file to do so)
         
-    AD14node = '06';
-
+%     AD14node = '06';  %for test01
+%    dr = 1.2573;
+%     AD14node = '10'; %for test 10
+%     dr = 2.3490000E-01;
+    
+    AD14node = '07'; %for test 20
+    dr = 4.1000000E+00;
+    
     if length(ChannelName) < 5 
         return;
     end
@@ -661,7 +681,7 @@ function [ChannelName_new,scaleFact] = getAD14ChannelName(ChannelName)
         elseif strcmpi(B1N2_channel,'Ct')
             ChannelName_new = [ 'CTang' AD14node];
         elseif strcmpi(B1N2_channel,'Cm')
-            ChannelName_new = [ 'CMom' AD14node];
+            ChannelName_new = [ 'CMomt' AD14node];
         elseif strcmpi(B1N2_channel,'Theta')
             ChannelName_new = [ 'Pitch' AD14node];
         elseif strcmpi(B1N2_channel,'AxInd')
@@ -670,13 +690,13 @@ function [ChannelName_new,scaleFact] = getAD14ChannelName(ChannelName)
             ChannelName_new = [ 'TanInd' AD14node];
          elseif strcmpi(B1N2_channel,'Fx')
             ChannelName_new = [ 'ForcN' AD14node];
-            scaleFact = 1/1.2573;
+            scaleFact = 1/dr;
          elseif strcmpi(B1N2_channel,'Fy')
             ChannelName_new = [ 'ForcT' AD14node];
-            scaleFact = 1/1.2573;
+            scaleFact = 1/dr;
          elseif strcmpi(B1N2_channel,'Mm')
             ChannelName_new = [ 'Pmomt' AD14node];
-            scaleFact = 1/1.2573;
+            scaleFact = 1/dr;
          elseif strcmpi(B1N2_channel,'Re')
             ChannelName_new = [ 'ReNum' AD14node];
         end

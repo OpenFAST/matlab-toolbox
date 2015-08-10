@@ -168,7 +168,7 @@ end
         end
                     
             % write new InflowWind file
-        template = [templateDir filesep 'IfW_v3.00.x.dat'];  %template for new IfW file       
+        template = [templateDir filesep 'IfW_v3.01.x.dat'];  %template for new IfW file       
         Matlab2FAST(IfWP, template, newIfWname, 3); %contains 3 header lines            
         
     end
