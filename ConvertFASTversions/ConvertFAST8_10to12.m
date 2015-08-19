@@ -77,6 +77,16 @@ end
     
 
 %%  %----------------------------------------------------------------------
+    % Get old SrvD Data:
+    %----------------------------------------------------------------------
+    FullSrvDFile = GetFastPar(FP,'ServoFile');
+    FullSrvDFile = strrep(FullSrvDFile,'"',''); %let's remove the quotes so we can actually use this file name
+    [newSrvDName]  = GetFullFileName( FullSrvDFile, newDir ); % new path + name
+    [FullSrvDFile] = GetFullFileName( FullSrvDFile, oldDir );
+    SrvDPar = Fast2Matlab(FullSrvDFile,3); % get ElastoDyn data (3 header lines)
+    
+    
+%%  %----------------------------------------------------------------------
     % Get old AD Data:
     %----------------------------------------------------------------------
     CompAero = GetFastPar(FP,'CompAero'); 
@@ -178,6 +188,13 @@ end
     %----------------------------------------------------------------------
     template = [templateDir filesep 'ED_Primary_v1.03.x.dat'];  %template for primary file
     Matlab2FAST(EDPar,template,newEDName, 2); %contains 2 header lines
+    
+    
+%%  %----------------------------------------------------------------------
+    % Write new model data to the ServoDyn input files:
+    %----------------------------------------------------------------------
+    template = [templateDir filesep 'SrvD_Primary_v1.03.x.dat'];  %template for primary file
+    Matlab2FAST(SrvDPar,template,newSrvDName, 2); %contains 2 header lines
     
     
 %%  %----------------------------------------------------------------------
