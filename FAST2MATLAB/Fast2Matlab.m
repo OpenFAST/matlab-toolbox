@@ -24,6 +24,8 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.BldNodes         A matrix of blade nodes with columns RNodes, AeroTwst DRNodes Chord and Nfoil
 %.CasesHdr         A cell array of headers corresponding to the Cases table
 %.Cases            A matrix of properties for individual cases in a driver file
+%.AFCoeffHdr       A cell array of headers corresponding to the AFCoeff table
+%.AFCoeff          A matrix of airfoil coefficients
 %.PrnElm           An array determining whether or not to print a given element
 
 
@@ -126,6 +128,16 @@ while true %loop until discovering Outlist or end of file, than break
             NumCases = GetFastPar(DataOut,'NumCases');        
             [DataOut.Cases, DataOut.CasesHdr] = ParseFASTNumTable(line, fid, NumCases);
             continue; %let's continue reading the file
+        elseif strcmpi(label,'NumAlf')
+            DataOut.Label{count,1} = label;
+            DataOut.Val{count,1}   = value;
+            count = count + 1;
+            
+            NumAlf = value;
+            line = fgetl(fid);  % the next line is the header, and it may have comments
+            line = line(2:end);
+            [DataOut.AFCoeff, DataOut.AFCoeffHdr] = ParseFASTNumTable(line, fid, NumAlf);
+            continue; %let's continue reading the file            
         else                
             DataOut.Label{count,1} = label;
             DataOut.Val{count,1}   = value;
@@ -187,6 +199,9 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt  )
     % let's parse it now, getting the number of columns as well:
     TmpHdr  = textscan(line,'%s');
     Headers = TmpHdr{1};
+    if strcmp( Headers{1}, '!' )
+        Headers = Headers(2:end);
+    end
     nc = length(Headers);
 
     % read the units line:

@@ -27,7 +27,7 @@ True        InclUAdata        ! Is unsteady aerodynamics data included in this t
 "Default"   b5                ! Constant in the expression of K'''_q,Cm_q^nc, and k_m,q.  [from  experimental results, defaults to 5]
 "Default"   A1                ! Constant in the expression of phi_alpha^c and phi_q^c.  This value is relatively insensitive for thin airfoils, but may be different for turbine airfoils. [from experimental results, defaults to 0.3]
 "Default"   A2                ! Constant in the expression of phi_alpha^c and phi_q^c.  This value is relatively insensitive for thin airfoils, but may be different for turbine airfoils. [from experimental results, defaults to 0.7]
-"Default"   A5                ! Constant in the expression of K'''_q,Cm_q^nc, and k_m,q. [from experimental results, defaults to 1] 
+"Default"   A5                ! Constant in the expression of K'''_q,Cm_q^nc, and k_m,q. [from experimental results, defaults to 1]
        0    S1                ! Constant in the f curve best-fit for alpha0<=AOA<=alpha1; by definition it depends on the airfoil. [ignored if UAMod<>1]
        0    S2                ! Constant in the f curve best-fit for         AOA> alpha1; by definition it depends on the airfoil. [ignored if UAMod<>1]
        0    S3                ! Constant in the f curve best-fit for alpha2<=AOA< alpha0; by definition it depends on the airfoil. [ignored if UAMod<>1]
@@ -42,7 +42,7 @@ True        InclUAdata        ! Is unsteady aerodynamics data included in this t
        0    k2                ! Constant in the \hat(x)_cp curve best-fit.  [ignored if UAMod<>1]
        0    k3                ! Constant in the \hat(x)_cp curve best-fit.  [ignored if UAMod<>1]
        0    k1_hat            ! Constant in the expression of Cc due to leading edge vortex effects.  [ignored if UAMod<>1]
-"Default"   x_cp_bar          ! Constant in the expression of \hat(x)_cp^v. Default value =0.2.  [ignored if UAMod<>1, default = 0.2]
+"Default"   x_cp_bar          ! Constant in the expression of \hat(x)_cp^v. [ignored if UAMod<>1, default = 0.2]
 !........................................
 ! Table of aerodynamics coefficients
     3       NumAlf            ! Number of data lines in the following table

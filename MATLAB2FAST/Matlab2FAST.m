@@ -89,7 +89,7 @@ while true
     
     [value, label, isComment, ~, ~] = ParseFASTInputLine(line);
             
-    if ~printTable && ~isComment && length(label) > 0        
+    if ~printTable && ~isComment && ~isempty(label)        
         
         if strcmpi(value,'"HtFract"') || strcmpi(value,'"TwrElev"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)            
             if ~isfield(FastPar,'TowProp')
@@ -127,6 +127,18 @@ while true
                 continue; %let's continue reading the template file            
             end                                     
             
+        elseif strcmpi(label,'NumAlf')  %we've reached the airfoil coefficients
+            if ~isfield(FastPar,'AFCoeff')
+                disp( 'WARNING: AeroDyn airfoil coefficients not found in the FAST data structure.' );
+                printTable = true;
+            else
+                line = GetLineToWrite( line, FastPar, label );
+                fprintf(fidOUT,'%s',line);
+                line = fgets(fidIN); %get the next line from the template
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.AFCoeff, FastPar.AFCoeffHdr, newline, true);
+                continue; %let's continue reading the template file            
+            end            
+            
         elseif strcmpi(value,'"RNodes"') %we've reached the AeroDyn Blade properies table (and we think it's a string value so it's in quotes)
             if ~isfield(FastPar,'BldNodes')
                 disp( 'WARNING: AeroDyn blade properties table not found in the FAST data structure.' );
@@ -161,39 +173,8 @@ while true
             continue;  % this comes from AeroDyn BldNodes table                                    
         else
 
-            indx = strcmpi( FastPar.Label, label );
-            if any( indx )
-
-                if sum(indx) > 1 % we found more than one....
-                    disp( ['WARNING: multiple occurrences of ' label ' in the FAST data structure.'] );
-                end
-
-                % The template label matches a label in FastPar
-                %  so let's use the old value.
-                indx2 = find(indx,1,'first');       
-                val2Write = FastPar.Val{indx2}; 
-
-                    % print the old value at the start of the line,
-                    % using an appropriate format
-                if isnumeric(val2Write)
-                    writeVal= getNumericVal2Write( val2Write, '%11G' );
-                    if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
-                        writeVal=getNumericVal2Write( val2Write, '%15G' );
-                    end
-                else
-                    writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
-                end
-
-
-                idx = strfind( line, label ); %let's just take the line starting where the label is first listed            
-                line = [writeVal '   ' line(idx(1):end)];            
-
-            else
-                disp( ['WARNING: ' label ' not found in the FAST data structure. Default value listed below (from template file, ' TemplateFile ') will be used instead:'] )
-                disp( value );
-                disp( '' );            
-            end
-
+            line = GetLineToWrite( line, FastPar, label );
+            
         end
     else % isComment || length(label) == 0 || printTable (i.e. tables must end with comments
         if isComment
@@ -233,6 +214,45 @@ fclose(fidOUT);
 return;
 end %end function
 
+function [line] = GetLineToWrite( line, FastPar, label )
+
+    indx = strcmpi( FastPar.Label, label );
+    if any( indx )
+
+        if sum(indx) > 1 % we found more than one....
+            disp( ['WARNING: multiple occurrences of ' label ' in the FAST data structure.'] );
+        end
+
+        % The template label matches a label in FastPar
+        %  so let's use the old value.
+        indx2 = find(indx,1,'first');       
+        val2Write = FastPar.Val{indx2}; 
+
+            % print the old value at the start of the line,
+            % using an appropriate format
+        if isnumeric(val2Write)
+            writeVal= getNumericVal2Write( val2Write, '%11G' );
+            if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
+                writeVal=getNumericVal2Write( val2Write, '%15G' );
+            end
+        else
+            writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
+        end
+
+
+        idx = strfind( line, label ); %let's just take the line starting where the label is first listed            
+        line = [writeVal '   ' line(idx(1):end)];            
+
+    else
+        disp( ['WARNING: ' label ' not found in the FAST data structure. Default value listed below (from template file, ' TemplateFile ') will be used instead:'] )
+        disp( value );
+        disp( '' );            
+    end
+
+
+return;
+end
+
 function [writeVal] = getNumericVal2Write( val2Write, fmt )
     writeVal = sprintf(fmt,val2Write(1));
     if ~isscalar(val2Write) %Check for the special case of an array
@@ -247,6 +267,9 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printU
     % let's parse it now:
     TmpHdr = textscan(HdrLine,'%s');
     TemplateHeaders = TmpHdr{1};
+    if (strcmp(TemplateHeaders{1},'!'))
+        TemplateHeaders = TemplateHeaders(2:end);
+    end
     nc = length(TemplateHeaders);
 
     fprintf(fidOUT,'%s',HdrLine);           % print the new headers

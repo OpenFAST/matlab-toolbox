@@ -21,6 +21,10 @@ else
         isempty(strfind( fileName, ':\'    )) && ...   % No drive is specified using ':\'
         isempty(strfind( '/\', fileName(1) )) ) ...    % The file name doesn't start with '/' or '\'
 
+    
+        if isempty( relDir )
+            relDir = '.';
+        end
         fullFileName = strcat(relDir, filesep, fileName );
         wasRelative = true;
    else
