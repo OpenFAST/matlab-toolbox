@@ -74,7 +74,7 @@ if fid > 0
     Channels    = zeros(NT,NumOutChans+1);  % output channels (including time in column 1)
     
     if FileID == FileFmtID.WithTime
-        [PackedTime cnt] = fread( fid, NT, 'int32' ); % read the time data
+        [PackedTime, cnt] = fread( fid, NT, 'int32' ); % read the time data
         if ( cnt < NT ) 
             fclose(fid);
             error(['Could not read entire ' FileName ' file: read ' num2str( cnt ) ' of ' num2str( NT ) ' time values.']);
@@ -82,7 +82,7 @@ if fid > 0
     end
         
         
-    [PackedData cnt] = fread( fid, nPts, 'int16' ); % read the channel data
+    [PackedData, cnt] = fread( fid, nPts, 'int16' ); % read the channel data
     if ( cnt < nPts ) 
         fclose(fid);
         error(['Could not read entire ' FileName ' file: read ' num2str( cnt ) ' of ' num2str( nPts ) ' values.']);
