@@ -94,17 +94,7 @@ for iFile=1:numFiles
     if length(FASTfiles{iFile}) > 4 && strcmpi( FASTfiles{iFile}((end-4):end),'.outb' )
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile}, ~, DescStr{iFile}] = ReadFASTbinary(FASTfiles{iFile});
     elseif ~useCustomHdr
-        [data{iFile}, columnTitles{iFile}, columnUnits{iFile},    DescStr{iFile}] = ReadFASTtext(FASTfiles{iFile});        
-        
-% % if iFile>1
-% %     delim     = '';
-% %     HeaderRows= 3;
-% %     NameLine  = 2;
-% %     UnitsLine = 3;
-% %     DescStr{iFile} = '';
-% %     [data{iFile}, columnTitles{iFile}, columnUnits{iFile} ] = ReadFASTtext(FASTfiles{iFile}, delim, HeaderRows, NameLine, UnitsLine );
-% % end
-        
+        [data{iFile}, columnTitles{iFile}, columnUnits{iFile},    DescStr{iFile}] = ReadFASTtext(FASTfiles{iFile});                        
     else % allow other files 
         delim     = CustomHdr{1};
         HeaderRows= CustomHdr{2};
@@ -222,6 +212,7 @@ Channels = max(Channels,1); %if any channel was missing, we'll say it's channel 
 % Plot the time series from each file, with each channel in 
 %      a separate figure:
 % ------------------------------------------------------------
+[~,outFileRoot] = fileparts( FASTfiles{ReferenceFile} ); 
 if OnePlot
     figNo=figure;
     ShowThisLegend = false;
@@ -233,11 +224,10 @@ end
 plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
                     columnTitles{ReferenceFile}([1 Channels]), ...
                     columnUnits{ReferenceFile}([1 Channels]), titleText, ...
-                    ShowThisLegend, LineWidthConst, FntSz, figNo );
+                    ShowThisLegend, LineWidthConst, FntSz, figNo, outFileRoot );
 if OnePlot
-    ylabel('FAST Channels','FontSize',FntSz);
-    if size(outData,1) > 1 && ShowLegend
-        legend show
+    if ShowLegend
+       legend show
     end
 end
                 
@@ -259,6 +249,9 @@ end
 function [] = savePlots( f, outFigName, ReferenceFile )
 
     [pathstr] = fileparts(ReferenceFile );
+    if isempty(pathstr)
+        pathstr = '.';
+    end 
     
     OutFilePath = [pathstr filesep 'Plots' ];
     OutFileRoot = [OutFilePath filesep outFigName];
@@ -267,17 +260,18 @@ function [] = savePlots( f, outFigName, ReferenceFile )
         mkdir( OutFilePath );
     end 
                 
-    print(['-f' num2str(f)],'-dpng','-r150',[OutFileRoot '.png']);
+    print(f,'-dpng','-r150',[OutFileRoot '.png']);
     close(f)
 
-return
+    return
 end
 %%
 function [f] = plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
-                RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz, figNo )
+                RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz, figNo, outFileRoot )
 
 numCols  = size(outData{1,2},2) ;
 numFiles = size(outData,1);
+
 % RefColumnTitles= columnTitles{ReferenceFile}(Channels);
 % RefColumnUnits = columnUnits{ReferenceFile}(Channels);
 %% -----------------------------------------------------------
@@ -288,24 +282,33 @@ numFiles = size(outData,1);
     for i = 1:numCols    
         if figNo < 0
             f=figure;
+            for iFile=1:numFiles
+                plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
+                     ,'LineStyle','-' ...
+                     ,'Marker',Markers{iFile} ...
+                     ,'MarkerSize',4 ...
+                     ,'DisplayName',[FASTfilesDesc{iFile} ' (' outData{iFile,3}{i} ')' ] ...
+                     ,'Color',LineColors{iFile} ...
+                     ,'LineWidth',LineWidthConst);
+                hold on;      
+            end
+            ylabel({RefColumnTitles{i+1}     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines            
         else
             f=figNo;
             figure(f);
-        end
-        for iFile=1:numFiles
-            plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
-                 ,'LineStyle','-' ...
-                 ,'Marker',Markers{iFile} ...
-                 ,'MarkerSize',4 ...
-                 ,'DisplayName',[FASTfilesDesc{iFile} ' (' outData{iFile,3}{i} ')' ] ...
-                 ,'Color',LineColors{iFile} ...
-                 ,'LineWidth',LineWidthConst);
-            hold on;      
+            for iFile=1:numFiles
+                plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
+                     ,'LineStyle','-' ...
+                     ,'Marker',Markers{iFile} ...
+                     ,'MarkerSize',4 ...
+                     ,'DisplayName',[FASTfilesDesc{iFile} ' (' outData{iFile,3}{i} ', ' RefColumnUnits{i+1} ')'  ] ...
+                     ,'LineWidth',LineWidthConst);
+                hold on;      
+            end   
+            ylabel('FAST Channels','FontSize',FntSz);            
         end
         set(gca,'FontSize',FntSz-2,'gridlinestyle','-');
-    if figNo < 0
-        ylabel({RefColumnTitles{i+1}     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines
-    end
+%xlim([13.5,15])        
         xlabel([RefColumnTitles{1  } ' ' RefColumnUnits{1  }],'FontSize',FntSz); %string = print on one line
         title( titleText,'FontSize',FntSz )    
         grid on;
@@ -316,11 +319,15 @@ numFiles = size(outData,1);
 %  xlim([0,0.1])
         set(f,'Name',RefColumnTitles{i+1} ...
              ,'paperorientation','landscape' ...
-             ,'paperposition',[0.25 0.25 10.5 8]);   
+             ,'paperposition',[0.25 0.25 10.5 8]);  
+         
+         
+        if figNo < 0
+            outFigName = [outFileRoot '_' num2str(i)];
+%            savePlots( f, outFigName, '.\' ) 
+        end
+        
     end
-
-
-
 
 
 return
@@ -658,14 +665,64 @@ function [ChannelName_new,scaleFact] = getAD14ChannelName(ChannelName)
 %     AD14node = '10'; %for test 10
 %     dr = 2.3490000E-01;
     
-    AD14node = '07'; %for test 20
-    dr = 4.1000000E+00;
+%     AD14node = '07'; %for test 20
+%     dr = 4.1000000E+00;
+%     
+%     AD14node = '07'; %for test 12
+%     dr=2.2166700E+00;
+    
+%     TestNodes = [3,9,11,13,14,15,16,17,18];
+%     TestNodes = [3,9,11,13,14,15,16,17,18];
+%     drNodes = [2.7333000E+00
+% 2.7333000E+00
+% 2.7333000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 4.1000000E+00
+% 2.7333000E+00
+% 2.7333000E+00
+% 2.7333000E+00];
+%SWRT
+    TestNodes = [2, 8, 16];
+    drNodes = [1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01
+1.7310000E-01];
+
+
+
+
     
     if length(ChannelName) < 5 
         return;
     end
 
-    if strcmpi(ChannelName(1:4),'B1N2')
+    if strcmpi(ChannelName(1:3),'B1N')
+        
+        n=eval(ChannelName(4));
+        AD14n = TestNodes(n)-1;
+        dr = drNodes(AD14n);
+        AD14node = sprintf('%02.0f',AD14n);
+                    
         B1N2_channel = ChannelName(5:end);
 
         if strcmpi(B1N2_channel,'Alpha')
