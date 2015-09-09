@@ -16,10 +16,8 @@ FATAL         AbortLevel      - Error level when simulation should abort (string
    1          CompServo       - Compute control and electrical-drive dynamics (switch) {0=None; 1=ServoDyn}
    0          CompHydro       - Compute hydrodynamic loads (switch) {0=None; 1=HydroDyn}
    0          CompSub         - Compute sub-structural dynamics (switch) {0=None; 1=SubDyn}
-   0          CompMooring     - Compute mooring system (switch) {0=None; 1=MAP++; 2=FEAMooring; 3=MoorDyn}
+   0          CompMooring     - Compute mooring system (switch) {0=None; 1=MAP++; 2=FEAMooring; 3=MoorDyn; 4=OrcaFlex}
    0          CompIce         - Compute ice loads (switch) {0=None; 1=IceFloe; 2=IceDyn}
-False         CompUserPtfmLd  - Compute additional platform loading (flag) {false: none; true: user-defined from routine UserPtfmLd}
-False         CompUserTwrLd   - Compute additional tower loading (flag) {false: none; true: user-defined from routine UserTwrLd}
 ---------------------- INPUT FILES ---------------------------------------------
 "unused"      EDFile          - Name of file containing ElastoDyn input parameters (quoted string)
 "unused"      BDBldFile(1)    - Name of file containing BeamDyn input parameters for blade 1 (quoted string)
