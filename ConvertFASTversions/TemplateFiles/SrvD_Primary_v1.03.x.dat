@@ -60,10 +60,12 @@ True          GenTiStp     - Method to stop the generator {T: timed using TimGen
 ---------------------- TUNED MASS DAMPER ---------------------------------------
 False         CompNTMD     - Compute nacelle tuned mass damper {true/false} (flag)
 "unused"      NTMDfile     - Name of the file for nacelle tuned mass damper (quoted string) [unused when CompNTMD is false]
----------------------- BLADED INTERFACE ----------------------------------------
+---------------------- BLADED INTERFACE ---------------------------------------- [used only with Bladed Interface]
 "DISCON.dll"  DLL_FileName - Name/location of the dynamic library {.dll [Windows] or .so [Linux]} in the Bladed-DLL format (-) [used only with Bladed Interface]
-"DISCON.IN"   DLL_InFile   - Name of input file sent to the DLL [used only with Bladed Interface] (-)
-default       DLL_DT       - Communication interval for dynamic library [used only with Bladed Interface] (s) (or "default")
+"DISCON.IN"   DLL_InFile   - Name of input file sent to the DLL (-) [used only with Bladed Interface]
+default       DLL_DT       - Communication interval for dynamic library (s) (or "default") [used only with Bladed Interface]
+false         DLL_Ramp     - Whether a linear ramp should be used between DLL_DT time steps [introduces time shift when true] (flag) [used only with Bladed Interface]
+9999.9        BPCutoff     - Cuttoff frequency for low-pass filter on blade pitch from DLL (Hz) [used only with Bladed Interface]
 0.0           NacYaw_North - Reference yaw angle of the nacelle when the upwind end points due North (deg) [used only with Bladed Interface]
 0             Ptch_Cntrl   - Record 28: Use individual pitch control {0: collective pitch; 1: individual pitch control} (switch) [used only with Bladed Interface]
 0.0           Ptch_SetPnt  - Record  5: Below-rated pitch angle set-point (deg) [used only with Bladed Interface]

@@ -132,7 +132,7 @@ while true
                 disp( 'WARNING: AeroDyn airfoil coefficients not found in the FAST data structure.' );
                 printTable = true;
             else
-                line = GetLineToWrite( line, FastPar, label );
+                line = GetLineToWrite( line, FastPar, label, TemplateFile, value );
                 fprintf(fidOUT,'%s',line);
                 line = fgets(fidIN); %get the next line from the template
                 WriteFASTTable(line, fidIN, fidOUT, FastPar.AFCoeff, FastPar.AFCoeffHdr, newline, true);
@@ -173,7 +173,7 @@ while true
             continue;  % this comes from AeroDyn BldNodes table                                    
         else
 
-            line = GetLineToWrite( line, FastPar, label );
+            line = GetLineToWrite( line, FastPar, label, TemplateFile, value );
             
         end
     else % isComment || length(label) == 0 || printTable (i.e. tables must end with comments
@@ -214,7 +214,7 @@ fclose(fidOUT);
 return;
 end %end function
 
-function [line] = GetLineToWrite( line, FastPar, label )
+function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
 
     indx = strcmpi( FastPar.Label, label );
     if any( indx )
