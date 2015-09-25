@@ -2,7 +2,7 @@
 Controls inputs for this file.
 ---------------------- SIMULATION CONTROL --------------------------------------
 False         Echo         - Echo input data to <RootName>.ech (flag)
-   0.0125     DT           - Communication interval for controllers (s) (or "default")
+default       DT           - Communication interval for controllers (s) (or "default")
 ---------------------- PITCH CONTROL -------------------------------------------
    1          PCMode       - Pitch control mode {0: none, 3: user-defined from routine PitchCntrl, 4: user-defined from Simulink/Labview, 5: user-defined from Bladed-style DLL} (switch)
    0.0        TPCOn        - Time to enable active pitch control (s) [unused when PCMode=0]
@@ -66,21 +66,21 @@ False         CompNTMD     - Compute nacelle tuned mass damper {true/false} (fla
 default       DLL_DT       - Communication interval for dynamic library (s) (or "default") [used only with Bladed Interface]
 false         DLL_Ramp     - Whether a linear ramp should be used between DLL_DT time steps [introduces time shift when true] (flag) [used only with Bladed Interface]
 9999.9        BPCutoff     - Cuttoff frequency for low-pass filter on blade pitch from DLL (Hz) [used only with Bladed Interface]
-0.0           NacYaw_North - Reference yaw angle of the nacelle when the upwind end points due North (deg) [used only with Bladed Interface]
-0             Ptch_Cntrl   - Record 28: Use individual pitch control {0: collective pitch; 1: individual pitch control} (switch) [used only with Bladed Interface]
-0.0           Ptch_SetPnt  - Record  5: Below-rated pitch angle set-point (deg) [used only with Bladed Interface]
-0.0           Ptch_Min     - Record  6: Minimum pitch angle (deg) [used only with Bladed Interface]
-0.0           Ptch_Max     - Record  7: Maximum pitch angle (deg) [used only with Bladed Interface]
-0.0           PtchRate_Min - Record  8: Minimum pitch rate (most negative value allowed) (deg/s) [used only with Bladed Interface]
-0.0           PtchRate_Max - Record  9: Maximum pitch rate  (deg/s) [used only with Bladed Interface]
-0.0           Gain_OM      - Record 16: Optimal mode gain (Nm/(rad/s)^2) [used only with Bladed Interface]
-0.0           GenSpd_MinOM - Record 17: Minimum generator speed (rpm) [used only with Bladed Interface]
-0.0           GenSpd_MaxOM - Record 18: Optimal mode maximum speed (rpm) [used only with Bladed Interface]
-0.0           GenSpd_Dem   - Record 19: Demanded generator speed above rated (rpm) [used only with Bladed Interface]
-0.0           GenTrq_Dem   - Record 22: Demanded generator torque above rated (Nm) [used only with Bladed Interface]
-0.0           GenPwr_Dem   - Record 13: Demanded power (W) [used only with Bladed Interface]
+   0.0        NacYaw_North - Reference yaw angle of the nacelle when the upwind end points due North (deg) [used only with Bladed Interface]
+   0          Ptch_Cntrl   - Record 28: Use individual pitch control {0: collective pitch; 1: individual pitch control} (switch) [used only with Bladed Interface]
+   0.0        Ptch_SetPnt  - Record  5: Below-rated pitch angle set-point (deg) [used only with Bladed Interface]
+   0.0        Ptch_Min     - Record  6: Minimum pitch angle (deg) [used only with Bladed Interface]
+   0.0        Ptch_Max     - Record  7: Maximum pitch angle (deg) [used only with Bladed Interface]
+   0.0        PtchRate_Min - Record  8: Minimum pitch rate (most negative value allowed) (deg/s) [used only with Bladed Interface]
+   0.0        PtchRate_Max - Record  9: Maximum pitch rate  (deg/s) [used only with Bladed Interface]
+   0.0        Gain_OM      - Record 16: Optimal mode gain (Nm/(rad/s)^2) [used only with Bladed Interface]
+   0.0        GenSpd_MinOM - Record 17: Minimum generator speed (rpm) [used only with Bladed Interface]
+   0.0        GenSpd_MaxOM - Record 18: Optimal mode maximum speed (rpm) [used only with Bladed Interface]
+   0.0        GenSpd_Dem   - Record 19: Demanded generator speed above rated (rpm) [used only with Bladed Interface]
+   0.0        GenTrq_Dem   - Record 22: Demanded generator torque above rated (Nm) [used only with Bladed Interface]
+   0.0        GenPwr_Dem   - Record 13: Demanded power (W) [used only with Bladed Interface]
 ---------------------- BLADED INTERFACE TORQUE-SPEED LOOK-UP TABLE -------------
-0             DLL_NumTrq   - Record 26: No. of points in torque-speed look-up table {0 = none and use the optimal mode parameters; nonzero = ignore the optimal mode PARAMETERs by setting Record 16 to 0.0} (-) [used only with Bladed Interface]
+   0          DLL_NumTrq   - Record 26: No. of points in torque-speed look-up table {0 = none and use the optimal mode parameters; nonzero = ignore the optimal mode PARAMETERs by setting Record 16 to 0.0} (-) [used only with Bladed Interface]
  GenSpd_TLU   GenTrq_TLU
  (rpm)          (Nm)
 ---------------------- OUTPUT --------------------------------------------------
