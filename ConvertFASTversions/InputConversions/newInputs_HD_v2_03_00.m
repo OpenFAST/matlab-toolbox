@@ -35,7 +35,7 @@ function [HDP] = newInputs_HD_v2_03_00(HDPar)
         if err2
             n = n + 1;
             HDP.Label{n} = 'PotFile';
-            HDP.Val{n}   = '';
+            HDP.Val{n}   = '"unused"';
         else
             HDP.Label{idx} = 'PotFile';
             HDP.Val{idx}   = WAMITFile;
@@ -47,7 +47,7 @@ function [HDP] = newInputs_HD_v2_03_00(HDPar)
         if err2
             n = n + 1;
             HDP.Label{n} = 'WvKinFile';
-            HDP.Val{n}   = '';
+            HDP.Val{n}   = '"unused"';
         else
             HDP.Label{idx} = 'WvKinFile';
             HDP.Val{idx}   = GHWvFile;
