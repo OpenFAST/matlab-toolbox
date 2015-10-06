@@ -63,7 +63,7 @@ end
     HDpar = newInputs_HD_v2_03_00(HDpar);
            
 %%  %----------------------------------------------------------------------
-    % Write new  data to the new HydroDyn input file:
+    % Write new data to the new HydroDyn input file:
     %----------------------------------------------------------------------
          
     Matlab2HD(HDpar,template,newHDname, 2); %contains 2 header lines
