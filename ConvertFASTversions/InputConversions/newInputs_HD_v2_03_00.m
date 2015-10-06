@@ -1,5 +1,5 @@
-function [HDP] = newInputs_HD_v2_03_00(HDPar)
-% [HDP] = newInputs_HD_v2_03_00(HDPar)
+function [HDP] = newInputs_HD_v2_02_00(HDPar)
+% [HDP] = newInputs_HD_v2_02_00(HDPar)
 % HDP is the data structure containing already-filled parameters for
 % HydroDyn. We're going to add existing fields and based on the old ones.
 
@@ -10,50 +10,7 @@ function [HDP] = newInputs_HD_v2_03_00(HDPar)
     n = length(HDP.Label);
 
     
- % v2.03.00 Specification
-
-    % Name changes
-    [PotMod, err1] = GetFastPar(HDP,'PotMod');    
-    if err1
-        [HasWAMIT, err2, idx]  = GetFastPar(HDP,'HasWAMIT');
-        if err2
-            n = n + 1;
-            HDP.Label{n} = 'PotMod';
-            HDP.Val{n}   = '0';
-        else
-            HDP.Label{idx} = 'PotMod';
-            if strcmp(HasWAMIT,'TRUE') || strcmp(HasWAMIT,'t') || strcmp(HasWAMIT,'T') || strcmp(HasWAMIT,'true')          % was t/f flag.  need to convert 
-               HDP.Val{idx}   = 1;
-            else
-               HDP.Val{idx}   = 0;
-            end
-        end
-    end
-    [PotFile, err1] = GetFastPar(HDP,'PotFile');
-    if err1
-        [WAMITFile, err2, idx]  = GetFastPar(HDP,'WAMITFile');
-        if err2
-            n = n + 1;
-            HDP.Label{n} = 'PotFile';
-            HDP.Val{n}   = '"unused"';
-        else
-            HDP.Label{idx} = 'PotFile';
-            HDP.Val{idx}   = WAMITFile;
-        end
-    end
-    [WvKinFile, err1] = GetFastPar(HDP,'WvKinFile');    
-    if err1
-        [GHWvFile, err2, idx]  = GetFastPar(HDP,'GHWvFile');
-        if err2
-            n = n + 1;
-            HDP.Label{n} = 'WvKinFile';
-            HDP.Val{n}   = '"unused"';
-        else
-            HDP.Label{idx} = 'WvKinFile';
-            HDP.Val{idx}   = GHWvFile;
-        end
-    end
-    
+ % v2.02.00 Specification
     
     % WaveDirMod, WaveDirSpread, WaveNDir, WaveDirRange
     [WaveDirMod, err1] = GetFastPar(HDP,'WaveDirMod');    
@@ -146,7 +103,12 @@ function [HDP] = newInputs_HD_v2_03_00(HDPar)
         HDP.Val{n}   = 0;
     end
     
-    
+    % v2.03.00 specification GHWvFile  is replaced with WvKinFile
+    [GHWvFile, err1, Indx] = GetFastPar(HDP,'GHWvFile');    
+    if ~err1
+        HDP.Label{Indx} = 'WvKinFile';
+        HDP.Val{Indx}   = '';
+    end
     
     [NAxCoef, err1] = GetFastPar(HDP,'NAxCoef');    
     if err1
@@ -163,6 +125,22 @@ function [HDP] = newInputs_HD_v2_03_00(HDPar)
       end
     end
     
+    % v2.03.00 specification GHWvFile  is replaced with WvKinFile
+    [HasWAMIT, err1, Indx] = GetFastPar(HDP,'HasWAMIT');    
+    if ~err1
+        HDP.Label{Indx} = 'PotMod';
+        if ( strcmpi(HasWAMIT, 'FALSE') || strcmpi(HasWAMIT, 'F') )
+         HDP.Val{Indx}   = 0;
+        else
+         HDP.Val{Indx}   = 1;  
+        end
+    end
+    
+    [WAMITFile, err1, Indx] = GetFastPar(HDP,'WAMITFile');    
+    if ~err1
+        HDP.Label{Indx} = 'PotFile';
+    end
+    
     if length(HDP.AxCoefsHdr) < 4
       % v2.00.03 specification
       HDP.AxCoefsHdr{4} = 'AxCp';       
@@ -176,9 +154,6 @@ function [HDP] = newInputs_HD_v2_03_00(HDPar)
     HDP.JointsHdr{3}   = 'Jointyi';
     HDP.JointsHdr{4}   = 'Jointzi';
     HDP.JointsHdr{5}   = 'JointAxID';
-
-      % Change header labels for Members table per v2.03.00 specification
-    HDP.MembersHdr{8}  = 'PropPot';
     
     if length(HDP.SmplPropHdr) < 5
       % v2.00.03 specification
@@ -230,6 +205,9 @@ function [HDP] = newInputs_HD_v2_03_00(HDPar)
       HDP.MemberProp(1:size(HDP.MemberProp,1),14:21)     = 1.0;       
     end
     
+    if ( strcmpi(HDP.MembersHdr{8},'PropWAMIT') )
+       HDP.MembersHdr{8} = 'PropPot';
+    end
     if ~isfield(HDP,'OutList')
       if isfield(HDP,'PtfmOutList')  && isfield(HDP,'MeshOutList') 
          HDP.OutList = [HDP.PtfmOutList; HDP.MeshOutList];
