@@ -282,15 +282,17 @@ numFiles = size(outData,1);
     for i = 1:numCols    
         if figNo < 0
             f=figure;
+            lStyle = '-';
             for iFile=1:numFiles
                 plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
-                     ,'LineStyle','-' ...
+                     ,'LineStyle',lStyle ...
                      ,'Marker',Markers{iFile} ...
                      ,'MarkerSize',4 ...
                      ,'DisplayName',[FASTfilesDesc{iFile} ' (' outData{iFile,3}{i} ')' ] ...
                      ,'Color',LineColors{iFile} ...
                      ,'LineWidth',LineWidthConst);
                 hold on;      
+                lStyle = ':';
             end
             ylabel({RefColumnTitles{i+1}     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines            
         else
@@ -308,7 +310,6 @@ numFiles = size(outData,1);
             ylabel('FAST Channels','FontSize',FntSz);            
         end
         set(gca,'FontSize',FntSz-2,'gridlinestyle','-');
-%xlim([13.5,15])        
         xlabel([RefColumnTitles{1  } ' ' RefColumnUnits{1  }],'FontSize',FntSz); %string = print on one line
         title( titleText,'FontSize',FntSz )    
         grid on;
@@ -316,7 +317,7 @@ numFiles = size(outData,1);
         if numFiles > 1 && ShowLegend
             legend show %(FASTfilesDesc{:});
         end
-%  xlim([0,0.1])
+% xlim([0,0.008])
         set(f,'Name',RefColumnTitles{i+1} ...
              ,'paperorientation','landscape' ...
              ,'paperposition',[0.25 0.25 10.5 8]);  
@@ -324,7 +325,7 @@ numFiles = size(outData,1);
          
         if figNo < 0
             outFigName = [outFileRoot '_' num2str(i)];
-%            savePlots( f, outFigName, '.\' ) 
+%             savePlots( f, outFigName, '.\' ) 
         end
         
     end
@@ -424,7 +425,8 @@ end
 
 function [Indx,scaleFact,ColToFind] = getNewColIndx( ColToFind, colNames )
  
-    [ColToFind,    scaleFact] = getAD14ChannelName(ColToFind);
+    scaleFact = 1;
+%     [ColToFind,    scaleFact] = getAD14ChannelName(ColToFind);
 
     [newColNames, scaleFactM] = MooringColNames( ColToFind, colNames );
     [newColNames, scaleFactB] = BeamDynColNames( ColToFind, newColNames );    

@@ -2,15 +2,15 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL
 %function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL)
 % by Bonnie Jonkman, National Renewable Energy Laboratory
 %
-%Conversion of FAST v 7.x files to FAST v8.10.x
+%Conversion of FAST v 7.x files to FAST v8.12.x
 %  based on "Demonstration of fast file manipuation" by Paul Fleming
-% (c) 2011, 2013-2014 National Renewable Energy Laboratory
+% (c) 2011, 2013-2015 National Renewable Energy Laboratory
 %--------------------------------------------------------------------------
 % Required inputs:
 %  oldFSTName - the name of the old (v6 or 7) primary FAST input file,
 %               including full path name
 %  newDir     - the new directory that will contain converted input files 
-%               (FAST 8.8.x, ElastoDyn (primary, blade, and tower files), 
+%               (FAST 8.12.x, ElastoDyn (primary, blade, and tower files), 
 %               ServoDyn; AeroDyn and HydroDyn input files will not be 
 %               copied or moved.
 % Optional inputs:
@@ -47,9 +47,10 @@ thisFile    = which('ConvertFAST7to8');
 thisDir     = fileparts(thisFile);
 templateDir = strcat(thisDir,filesep, 'TemplateFiles');
 
-FAST_template = strcat(templateDir,filesep,'FAST_Primary_v8.08.x.dat');
-ED_template   = strcat(templateDir,filesep,'ED_Primary_v1.01.x.dat');
-SrvD_template = strcat(templateDir,filesep,'SrvD_Primary_v1.02.x.dat');
+FAST_template = strcat(templateDir,filesep,'FAST_Primary_v8.12.x.dat');
+ED_template   = strcat(templateDir,filesep,'ED_Primary_v1.03.x.dat');
+SrvD_template = strcat(templateDir,filesep,'SrvD_Primary_v1.03.x.dat');
+IfW_template  = strcat(templateDir,filesep,'IfW_v3.01.x.dat');
 templateDir   = strcat(templateDir,filesep,'v8.00.x');
 
 XLS_file    = strcat(templateDir, filesep,'OutListParameters.xlsx');
@@ -246,6 +247,32 @@ end
         disp('WARNING: there are no outputs to be generated.')
     end
                
+    %----------------------------------------------------------------------
+    % Convert AeroDyn data:
+    %----------------------------------------------------------------------
+    AeroFile = GetFastPar(FP,'AeroFile');                                   
+    AeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name    
+    [FullAeroFile,ADWasRelative] = GetFullFileName( AeroFile, oldDir ); % old path + name
+    ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
+       
+       
+    if (~ADWasRelative)
+        disp( ['WARNING: AeroDyn file (' AeroFile ') is not a relative name. New AeroDyn will be located here: '] )
+        [~, AeroRoot, ext] = fileparts( AeroFile );
+        AeroFile = [AeroRoot ext];
+        disp( [newDir filesep AeroFile] );
+        FP = SetFastPar(FP,'AeroFile',['"' AeroFile '"']);
+    end
+            
+    % convert everything to latest FAST version:
+    [FP] = newInputs_FAST_v8_05(FP);
+    [FP,InflowFile] = newInputs_FAST_v8_12(FP, newDir);
+    
+    %----------------------------------------------------------------------
+    % Create InflowWind data:
+    %----------------------------------------------------------------------        
+     [IfWP] = newInputs_IfW_v3_00(ADPar, FP);        
+                         
         %....................................
         % fix the headers for the new files:
         %....................................
@@ -262,8 +289,7 @@ end
     
         %....................................
 
-    % convert everything to latest FAST version:
-    [FP] = newInputs_FAST_v8_05(FP);
+    
     
 %%  %----------------------------------------------------------------------
     % Write new model data to the FAST, ElastoDyn, and ServoDyn input files:
@@ -273,6 +299,23 @@ end
     outputFile = newFSTname; 
     Matlab2FAST(FP,FAST_template,outputFile, 2); %contains 2 header lines
 
+    
+        % AeroDyn
+    [~, err1] = GetFastPar(ADPar,'TwrShadow');
+    if err1
+        ADtemplate   = [templateDir filesep 'AD_Primary_v14.04.x.dat'];  %template for AD file without NEWTOWER        
+    else
+        ADtemplate   = [templateDir filesep 'AD_Primary_v14.04.x_NT.dat'];  %template for AD file with NEWTOWER        
+    end
+    outputFile = [newDir filesep AeroFile];
+    Matlab2FAST(ADPar, ADtemplate, outputFile, 2); %contains 2 header lines            
+    
+    
+        % InflowWind
+    outputFile = [newDir filesep InflowFile];
+    Matlab2FAST(IfWP, IfW_template, outputFile, 3); %contains 3 header lines            
+    
+    
         % ServoDyn
     outputFile = [newDir filesep SrvDFile];
     FP.OutList         = OutList(SD_Channel);

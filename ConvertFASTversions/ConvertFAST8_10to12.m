@@ -85,18 +85,28 @@ end
     [FullSrvDFile] = GetFullFileName( FullSrvDFile, oldDir );
     SrvDPar = Fast2Matlab(FullSrvDFile,3); % get ElastoDyn data (3 header lines)
     
+skip=false;
+if (~skip)
     
 %%  %----------------------------------------------------------------------
     % Get old AD Data:
     %----------------------------------------------------------------------
-    CompAero = GetFastPar(FP,'CompAero'); 
 % In FAST v8.10, we read the AeroDyn input file for ElastoDyn, so we have to
 % convert it to the new format regardless of CompAero          
     AeroFile = GetFastPar(FP,'AeroFile');                                   
-    FullAeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name    
-    [newADName]    = GetFullFileName( FullAeroFile, newDir ); % new path + name
-    [FullAeroFile] = GetFullFileName( FullAeroFile, oldDir ); % old path + name
+    AeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name    
+    [FullAeroFile,ADWasRelative] = GetFullFileName( AeroFile, oldDir ); % old path + name
     ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
+    
+    if (~ADWasRelative)
+        disp( ['WARNING: AeroDyn file (' AeroFile ') is not a relative name. New AeroDyn will be located here: '] )
+        [~, AeroRoot, ext] = fileparts( AeroFile );
+        AeroFile = [AeroRoot ext];
+        disp( [newDir filesep AeroFile] );
+        FP = SetFastPar(FP,'AeroFile',['"' AeroFile '"']);
+    end
+    [newADName] = GetFullFileName( AeroFile, newDir ); % new path + name
+    
     
 %%  %----------------------------------------------------------------------
     % Write new model data to the AeroDyn input file:
@@ -124,49 +134,18 @@ end
             template   = [templateDir filesep 'AD_Primary_v14.04.x_NT.dat'];  %template for AD file with NEWTOWER        
         end
     end
-    Matlab2FAST(ADPar, template, newADName, 2); %contains 2 header lines            
+    %bjj: this AD name should be fixed if it was not a relative path name
+     Matlab2FAST(ADPar, template, newADName, 2); %contains 2 header lines            
 
     
 %%  %----------------------------------------------------------------------
     % Write new model data to the InflowWind input file:
     %----------------------------------------------------------------------        
-    [InflowFile, err1] = GetFastPar(FP,'InflowFile');  
-    if (err1)
-        CompInflow = CompAero;
-        
-        if CompInflow
-            % get name of new file:
-            InflowFile = strrep(AeroFile,'AeroDyn','InflowWind');
-            if strcmp( AeroFile, InflowFile )
-                InflowFile = strrep(AeroFile,'.','_InflowWind.');
-                if strcmp( AeroFile, InflowFile )
-                    InflowFile = [ AeroFile '_InflowWind' ];
-                end
-            end   
-        else
-            InflowFile = '"unused"';            
-        end
-        
-        % add some new fields to the primary FAST data type
-        n=length(FP.Label);
-        
-        n = n + 1;
-        FP.Label{n} = 'CompInflow';
-        FP.Val{n}   = CompAero;
-
-        n = n + 1;
-        FP.Label{n} = 'InflowFile';
-        FP.Val{n}   = InflowFile;        
-        
-        
-    else
-        [CompInflow] = GetFastPar(FP,'CompInflow');        
-    end
-    
-        %.............        
-
+    [FP,InflowFile] = newInputs_FAST_v8_12(FP, newDir); %sets CompInflow
+  
+    [CompInflow] = GetFastPar(FP,'CompInflow');    
     if CompInflow == 1 % use InflowWind in this model        
-
+        
         % get values to put into new file:
         InflowFileNoQuotes = strrep(InflowFile,'"',''); %let's remove the quotes so we can actually use this file name                                    
         [newIfWname] = GetFullFileName( InflowFileNoQuotes, newDir ); % Get name of new InflowWind input file   
@@ -183,6 +162,31 @@ end
         
     end
     
+end % ~skip    
+    
+%%  %----------------------------------------------------------------------
+    % Write new model data to the HydroDyn input file:
+    %----------------------------------------------------------------------
+   
+    CompHydro = GetFastPar(FP,'CompHydro');    
+    
+    if CompHydro == 1 % use HydroDyn in this model
+            % Name of (old) HydroDyn input file:  
+        HydroFile = GetFastPar(FP,'HydroFile');    
+        HydroFile = strrep(HydroFile,'"',''); %let's remove the quotes so we can actually use this file name
+        [oldHDName] = GetFullFileName( HydroFile, oldDir );
+        
+            % Get directory where new HydroDyn input file needs to be located:  
+        [newHDName] = GetFullFileName( HydroFile, newDir );        
+        [newHDDir] = fileparts(newHDName);
+        
+            % template file
+        template   = [templateDir filesep 'HDv2.03.x.dat'];  %template for HD file        
+            
+            % now convert the file:
+%         ConvertHDto2_03_00(oldHDName, newHDDir, template);
+    end
+        
 %%  %----------------------------------------------------------------------
     % Write new model data to the ElastoDyn input files:
     %----------------------------------------------------------------------

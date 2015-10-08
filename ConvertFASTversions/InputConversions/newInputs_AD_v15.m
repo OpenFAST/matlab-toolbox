@@ -181,6 +181,8 @@ elseif ~err1 && TwrShad > 0
 
    % need TwrElev from ED
    %add this to the tower table!!! FIX ME                    
+   fprintf( 'TwrDiam = %f\n', TwrDiam);
+   fprintf( 'TwrCd   = %f\n', TwrCd);
    
     TwrAero = 'False';        
 
