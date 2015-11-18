@@ -109,6 +109,15 @@ while true
                 continue; %let's continue reading the template file            
             end
             
+        elseif strcmpi(label,'F_X') %we've reached the TMD spring forces table
+            if ~isfield(FastPar,'TMDspProp')
+                disp( 'WARNING: TMD spring forces table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.TMDspProp, FastPar.TMDspPropHdr, newline);
+                continue; %let's continue reading the template file            
+            end
+            
         elseif strcmpi(value,'"GenSpd_TLU"') %we've reached the DLL torque-speed lookup table (and we think it's a string value so it's in quotes)
             if ~isfield(FastPar,'DLLProp')
                 disp( 'WARNING: Bladed Interface torque-speed look-up table not found in the FAST data structure.' );

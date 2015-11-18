@@ -26,6 +26,8 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.Cases            A matrix of properties for individual cases in a driver file
 %.AFCoeffHdr       A cell array of headers corresponding to the AFCoeff table
 %.AFCoeff          A matrix of airfoil coefficients
+%.TMDspProp        A matrix of TMD spring forces
+%.TMDspPropHdr     A cell array of headers corresponding to the TMDspProp table
 %.PrnElm           An array determining whether or not to print a given element
 
 
@@ -103,6 +105,10 @@ while true %loop until discovering Outlist or end of file, than break
         elseif strcmpi(value,'"BlFract"') %we've reached the distributed blade properties table (and we think it's a string value so it's in quotes)
             NBlInpSt = GetFastPar(DataOut,'NBlInpSt');        
             [DataOut.BldProp, DataOut.BldPropHdr] = ParseFASTNumTable(line, fid, NBlInpSt);
+            continue; %let's continue reading the file
+        elseif strcmpi(label,'F_X') %we've reached the TMD spring forces table
+            NKInpSt = GetFastPar(DataOut,'NKInpSt');        
+            [DataOut.TMDspProp, DataOut.TMDspPropHdr] = ParseFASTNumTable(line, fid, NKInpSt);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"GenSpd_TLU"') %we've reached the DLL torque-speed lookup table (and we think it's a string value so it's in quotes)
             DLL_NumTrq = GetFastPar(DataOut,'DLL_NumTrq');        
