@@ -64,7 +64,7 @@ end
 fid = fopen(FileName);
 if fid <= 0
     disp(['ReadFASTtext::Error ' int2str(fid) ' reading from file, "' FileName '"'] )
-    Channels     = [];
+    Channels = [];
     ChanName = {};
     ChanUnit = {};
 else    
