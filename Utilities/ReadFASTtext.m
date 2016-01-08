@@ -106,6 +106,10 @@ else
              disp( ['ReadFASTtext::Column names and units are different sizes in file, "' FileName '."']  );
         end 
         nCols = max( nCols1, nCols2 );
+        
+        if ~exist('ChanUnit','var')
+            ChanUnit = cell(1,nCols);
+        end
 
         fmtStr = repmat('%f',1,nCols);
         if isempty( delim )
