@@ -318,7 +318,7 @@ numFiles = size(outData,1);
             legend show %(FASTfilesDesc{:});
         end
 % xlim([0,0.008])
-xlim([0,0.5])
+% xlim([0,0.5])
         set(f,'Name',RefColumnTitles{i+1} ...
              ,'paperorientation','landscape' ...
              ,'paperposition',[0.25 0.25 10.5 8]);  
