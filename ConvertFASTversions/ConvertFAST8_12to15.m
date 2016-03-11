@@ -1,5 +1,5 @@
-function ConvertFAST8_12to14(oldFSTName, newDir)
-%function ConvertFAST8_12to14(oldFSTName, newDir)
+function ConvertFAST8_12to15(oldFSTName, newDir)
+%function ConvertFAST8_12to15(oldFSTName, newDir)
 % by Bonnie Jonkman
 %
 %Conversion of FAST v 8.12.x files to FAST v8.14.x
@@ -31,7 +31,7 @@ function ConvertFAST8_12to14(oldFSTName, newDir)
 
 %% let's get the directory that contains the template files
 
-thisFile    = which('ConvertFAST8_12to14');
+thisFile    = which('ConvertFAST8_12to15');
 thisDir     = fileparts(thisFile);
 templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
 
@@ -42,7 +42,7 @@ baseFileName  = strcat(baseName,ext);                 %base FAST file name
 newFSTname    = [newDir filesep baseFileName];
 
 if strcmpi(oldDir,newDir)
-    disp('ConvertFAST8_12to14 Warning:New FAST input file is overwriting old file.')
+    disp('ConvertFAST8_12to15 Warning:New FAST input file is overwriting old file.')
 end
 
 
@@ -94,7 +94,7 @@ end
     % Write new model data to the ServoDyn input files:
     %----------------------------------------------------------------------
     if CompServo == 1
-        template = [templateDir filesep 'SrvD_Primary_v1.04.x.dat'];  %template for primary SrvD file
+        template = [templateDir filesep 'SrvD_Primary_v1.05.x.dat'];  %template for primary SrvD file
         Matlab2FAST(SrvDPar,template,newSrvDName, 2); %contains 2 header lines
 
         if strcmpi(CompNTMD,'true') || strcmpi(CompNTMD,'t')
@@ -107,7 +107,7 @@ end
 %%  %----------------------------------------------------------------------
     % Write new model data to the FAST input files:
     %----------------------------------------------------------------------
-    template   = [templateDir filesep 'FAST_Primary_v8.14.x.dat'];  %template for primary file
+    template   = [templateDir filesep 'FAST_Primary_v8.15.x.dat'];  %template for primary file
     Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
 
 return

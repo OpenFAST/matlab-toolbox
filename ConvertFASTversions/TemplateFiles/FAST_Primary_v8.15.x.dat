@@ -1,4 +1,4 @@
-------- FAST v8.14.* INPUT FILE ------------------------------------------------
+------- FAST v8.15.* INPUT FILE ------------------------------------------------
 Description line that will be printed in the output file and written to the screen.
 ---------------------- SIMULATION CONTROL --------------------------------------
 False         Echo            - Echo input data to <RootName>.ech (flag)
@@ -31,13 +31,16 @@ FATAL         AbortLevel      - Error level when simulation should abort (string
 "unused"      MooringFile     - Name of file containing mooring system input parameters (quoted string)
 "unused"      IceFile         - Name of file containing ice input parameters (quoted string)
 ---------------------- OUTPUT --------------------------------------------------
-  True        SumPrint        - Print summary data to "<RootName>.sum" (flag)
-   1.0        SttsTime        - Amount of time between screen status messages (s)
-      99999   ChkptTime       - Amount of time between creating checkpoint files for potential restart (s)
-          0   WrVTK           - Write VTK visualization data? (switch) {0=none; 1=basic (position only); 2=surfaces; 3=all meshes (debug)}
-      0.042   DT_VTK          - Amount of time between consecutive visualization output files (s) {frame rate; will use closest integer multiple of DT}
+True          SumPrint        - Print summary data to "<RootName>.sum" (flag)
+     1.0      SttsTime        - Amount of time between screen status messages (s)
+ 99999        ChkptTime       - Amount of time between creating checkpoint files for potential restart (s)
      0.0125   DT_Out          - Time step for tabular output (s) (or "default")
     30.0      TStart          - Time to begin tabular output (s)
           1   OutFileFmt      - Format for tabular (time-marching) output file (switch) {1: text file [<RootName>.out], 2: binary file [<RootName>.outb], 3: both}
 True          TabDelim        - Use tab delimiters in text tabular output file? (flag) {uses spaces if false}
 "ES10.3E2"    OutFmt          - Format used for text tabular output, excluding the time channel.  Resulting field should be 10 characters. (quoted string)
+---------------------- VISUALIZATION ------------------------------------------
+          0   WrVTK           - VTK Visualization data output: (switch) {0=none; 1=initialization data only; 2=animation}
+          2   VTK_type        - Type of VTK visualization data: (switch) {1=surfaces; 2=basic meshes (lines/points); 3=all meshes (debug)} [unused if WrVTK=0]
+False         VTK_fields      - Write mesh fields to VTK data files? (flag) {true/false} [unused if WrVTK=0]
+         15   VTK_fps         - Frame rate for VTK output (frames per second){will use closest integer multiple of DT} [used only if WrVTK=2]

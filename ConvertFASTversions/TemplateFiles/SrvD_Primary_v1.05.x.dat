@@ -1,4 +1,4 @@
-------- SERVODYN v1.04.* INPUT FILE --------------------------------------------
+------- SERVODYN v1.05.* INPUT FILE --------------------------------------------
 Controls inputs for this file.
 ---------------------- SIMULATION CONTROL --------------------------------------
 False         Echo         - Echo input data to <RootName>.ech (flag)
@@ -65,6 +65,7 @@ False         CompTTMD     - Compute tower tuned mass damper {true/false} (flag)
 ---------------------- BLADED INTERFACE ---------------------------------------- [used only with Bladed Interface]
 "DISCON.dll"  DLL_FileName - Name/location of the dynamic library {.dll [Windows] or .so [Linux]} in the Bladed-DLL format (-) [used only with Bladed Interface]
 "DISCON.IN"   DLL_InFile   - Name of input file sent to the DLL (-) [used only with Bladed Interface]
+"DISCON"      DLL_ProcName - Name of procedure in DLL to be called (-) [case sensitive; used only with DLL Interface]
 default       DLL_DT       - Communication interval for dynamic library (s) (or "default") [used only with Bladed Interface]
 false         DLL_Ramp     - Whether a linear ramp should be used between DLL_DT time steps [introduces time shift when true] (flag) [used only with Bladed Interface]
 9999.9        BPCutoff     - Cuttoff frequency for low-pass filter on blade pitch from DLL (Hz) [used only with Bladed Interface]

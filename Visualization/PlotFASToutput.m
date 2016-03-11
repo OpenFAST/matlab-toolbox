@@ -3,7 +3,7 @@ function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels
 %function [timeSeriesData] = PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels)
 %function [timeSeriesData] = PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels,ShowLegend,CustomHdr,PlotPSDs,OnePlot)
 %
-% (c) 2014-2015 National Renewable Energy Laboratory
+% (c) 2014-2016 National Renewable Energy Laboratory
 %  Author: B. Jonkman, NREL/NWTC
 %
 % This routine produces time-series plots of FAST output
@@ -230,7 +230,7 @@ if OnePlot
        legend show
     end
 end
-                
+            
 
 %% -----------------------------------------------------------
 % Plot the psd from each file, with each channel in 
@@ -246,25 +246,6 @@ end
 return
 end
       
-function [] = savePlots( f, outFigName, ReferenceFile )
-
-    [pathstr] = fileparts(ReferenceFile );
-    if isempty(pathstr)
-        pathstr = '.';
-    end 
-    
-    OutFilePath = [pathstr filesep 'Plots' ];
-    OutFileRoot = [OutFilePath filesep outFigName];
-        % make sure the directory exists; if not, create it
-    if ~exist(OutFilePath, 'dir')
-        mkdir( OutFilePath );
-    end 
-                
-    print(f,'-dpng','-r150',[OutFileRoot '.png']);
-    close(f)
-
-    return
-end
 %%
 function [f] = plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
                 RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz, figNo, outFileRoot )
@@ -325,8 +306,9 @@ numFiles = size(outData,1);
          
          
         if figNo < 0
-            outFigName = [outFileRoot '_' num2str(i)];
-%             savePlots( f, outFigName, '.\' ) 
+%             outFigName = [outFileRoot '_' num2str(i)];            
+%            outFigName = ['AD_Results\AllPlots\' outFileRoot '_' num2str(i)];            
+%             saveFigureAsPNG( f, outFigName  ) 
         end
         
     end
