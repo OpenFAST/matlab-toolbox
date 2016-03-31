@@ -2,7 +2,7 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL
 %function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL)
 % by Bonnie Jonkman, National Renewable Energy Laboratory
 %
-%Conversion of FAST v 7.x files to FAST v8.12.x
+%Conversion of FAST v 7.x files to FAST v8.15.x
 %  based on "Demonstration of fast file manipuation" by Paul Fleming
 % (c) 2011, 2013-2015 National Renewable Energy Laboratory
 %--------------------------------------------------------------------------
@@ -10,7 +10,7 @@ function ConvertFAST7to8(oldFSTName, newDir, YawManRat, PitManRat, usedBladedDLL
 %  oldFSTName - the name of the old (v6 or 7) primary FAST input file,
 %               including full path name
 %  newDir     - the new directory that will contain converted input files 
-%               (FAST 8.12.x, ElastoDyn (primary, blade, and tower files), 
+%               (FAST 8.15.x, ElastoDyn (primary, blade, and tower files), 
 %               ServoDyn; AeroDyn and HydroDyn input files will not be 
 %               copied or moved.
 % Optional inputs:
@@ -47,9 +47,9 @@ thisFile    = which('ConvertFAST7to8');
 thisDir     = fileparts(thisFile);
 templateDir = strcat(thisDir,filesep, 'TemplateFiles');
 
-FAST_template = strcat(templateDir,filesep,'FAST_Primary_v8.12.x.dat');
+FAST_template = strcat(templateDir,filesep,'FAST_Primary_v8.15.x.dat');
 ED_template   = strcat(templateDir,filesep,'ED_Primary_v1.03.x.dat');
-SrvD_template = strcat(templateDir,filesep,'SrvD_Primary_v1.03.x.dat');
+SrvD_template = strcat(templateDir,filesep,'SrvD_Primary_v1.05.x.dat');
 IfW_template  = strcat(templateDir,filesep,'IfW_v3.01.x.dat');
 templateDir   = strcat(templateDir,filesep,'v8.00.x');
 
