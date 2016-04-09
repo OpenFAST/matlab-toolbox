@@ -48,7 +48,8 @@ else
     AIDrag = 'False';
     TIDrag = 'False';    
 end
-IndToler = AToler/50;
+%IndToler = AToler/50;
+IndToler = '"Default"';
 MaxIter  = 100;
     
 if strcmpi(TLModel,'"none"') 

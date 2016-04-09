@@ -57,7 +57,11 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
                 value = testVal{1}{1};                %this is a logical input
                 fieldType = 'Logical';            
             else
-                value = ['"' testVal{1}{1} '"']; %add quotes back around the string
+                if strcmp(testVal{1}{1}(1),'@')
+                    value = testVal{1}{1};
+                else
+                    value = ['"' testVal{1}{1} '"']; %add quotes back around the string
+                end
                 fieldType = 'Character';            
             end
             nextindex = position + 1;
