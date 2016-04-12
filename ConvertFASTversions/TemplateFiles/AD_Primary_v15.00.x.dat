@@ -19,7 +19,7 @@ Description line that will be printed in the output file and written to the scre
    True             TanInd             - Include tangential induction in BEMT calculations? (flag) [used only when WakeMod=1]
   False             AIDrag             - Include the drag term in the axial-induction calculation? (flag) [used only when WakeMod=1]
   False             TIDrag             - Include the drag term in the tangential-induction calculation? (flag) [used only when WakeMod=1 and TanInd=TRUE]
- default            IndToler           - Convergence tolerance for BEM induction factors {or "default"} (radians) [used only when WakeMod=1]
+ default            IndToler           - Convergence tolerance for BEMT nonlinear solve residual equation {or "default"} (-) [used only when WakeMod=1]
        100          MaxIter            - Maximum number of iteration steps (-) [used only when WakeMod=1]
 ======  Beddoes-Leishman Unsteady Airfoil Aerodynamics Options  ===================================== [used only when AFAeroMod=2]
        1            UAMod              - Unsteady Aero Model Switch (switch) {1=Baseline model (Original), 2=Gonzalez’s variant (changes in Cn,Cc,Cm), 3=Minemma/Pierce variant (changes in Cc and Cm)} [used only when AFAeroMod=2]
@@ -29,13 +29,13 @@ Description line that will be printed in the output file and written to the scre
   2                 InCol_Cl           - The column in the airfoil tables that contains the lift coefficient (-)
   3                 InCol_Cd           - The column in the airfoil tables that contains the drag coefficient (-)
   4                 InCol_Cm           - The column in the airfoil tables that contains the pitching-moment coefficient; use zero if there is no Cm column (-)
-  0                 InCol_Cpmin        - The column in the airfoil tables that contains the drag coefficient; use zero if there is no Cpmin column (-)
+  0                 InCol_Cpmin        - The column in the airfoil tables that contains the Cpmin coefficient; use zero if there is no Cpmin column (-)
   1                 NumAFfiles         - Number of airfoil files used (-)
   "Example.AD.af"   AFNames            - Airfoil file names (NumAFfiles lines) (quoted strings)
 ======  Rotor/Blade Properties  =====================================================================
    True             UseBlCm            - Include aerodynamic pitching moment in calculations?  (flag)
 "AeroDyn_Blade.dat" ADBlFile(1)        - Name of file containing distributed aerodynamic properties for Blade #1 (-)
-"AeroDyn_Blade.dat" ADBlFile(2)        - Name of file containing distributed aerodynamic properties for Blade #2 (-)
+"AeroDyn_Blade.dat" ADBlFile(2)        - Name of file containing distributed aerodynamic properties for Blade #2 (-) [unused if NumBl < 2]
 "AeroDyn_Blade.dat" ADBlFile(3)        - Name of file containing distributed aerodynamic properties for Blade #3 (-) [unused if NumBl < 3]
 ======  Tower Influence and Aerodynamics ============================================================= [used only when TwrPotent/=0, TwrShadow=True, or TwrAero=True]
      5               NumTwrNds         - Number of tower nodes used in the analysis  (-) [used only when TwrPotent/=0, TwrShadow=True, or TwrAero=True]
