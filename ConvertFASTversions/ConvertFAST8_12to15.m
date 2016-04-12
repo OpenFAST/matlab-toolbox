@@ -63,6 +63,34 @@ end
     FP = Fast2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
 
 %%  %----------------------------------------------------------------------
+    % Get old AD Data:
+    %----------------------------------------------------------------------
+    CompAero = GetFastPar(FP,'CompAero');
+    if CompAero == 2
+        FullADFile = GetFastPar(FP,'AeroFile');
+        [newADName]  = GetFullFileName( FullADFile, newDir ); % new path + name
+        [FullADFile] = GetFullFileName( FullADFile, oldDir );
+        ADPar = Fast2Matlab(FullADFile,2); % get AeroDyn data (2 header lines)
+
+%%  %----------------------------------------------------------------------
+    % Get old AFI Data:
+    %----------------------------------------------------------------------
+        [oldPath]=fileparts(FullADFile);
+        [newPath]=fileparts(FullADFile);
+        for n=1:length(ADPar.FoilNm)
+
+            AirfoilName = GetFullFileName( ADPar.FoilNm{n}, oldPath );
+            AFI = Fast2Matlab(AirfoilName, 4);
+            
+            template = [templateDir filesep 'AirfoilInfo_v1.01.x.dat'];  %template for AFI file
+            AirfoilName = GetFullFileName( ADPar.FoilNm{n}, newPath );
+            Matlab2FAST(AFI, template, AirfoilName, 4); %contains ~4 header lines
+
+        end        
+    end    
+    
+    
+%%  %----------------------------------------------------------------------
     % Get old SrvD Data:
     %----------------------------------------------------------------------
     CompServo = GetFastPar(FP,'CompServo');
@@ -70,7 +98,7 @@ end
         FullSrvDFile = GetFastPar(FP,'ServoFile');
         [newSrvDName]  = GetFullFileName( FullSrvDFile, newDir ); % new path + name
         [FullSrvDFile] = GetFullFileName( FullSrvDFile, oldDir );
-        SrvDPar = Fast2Matlab(FullSrvDFile,2); % get ServoDyn data (3 header lines)
+        SrvDPar = Fast2Matlab(FullSrvDFile,2); % get ServoDyn data (2 header lines)
 
 %%  %----------------------------------------------------------------------
     % Get old TMD Data:
@@ -82,7 +110,7 @@ end
             [newNTMDName] = GetFullFileName( FullNTMDFile, new_SrvD_dir ); % new path + name
             old_SrvD_dir = fileparts( FullSrvDFile );
             [FullNTMDFile] = GetFullFileName( FullNTMDFile, old_SrvD_dir );
-            NTMDPar = Fast2Matlab(FullNTMDFile,2); % get ElastoDyn data (3 header lines)
+            NTMDPar = Fast2Matlab(FullNTMDFile,2); % get ElastoDyn data (2 header lines)
         end
 
     end
