@@ -13,7 +13,7 @@
 ! ------------------------------------------------------------------------------
 0.75        Re                ! Reynolds number in millions
 0.0         Ctrl              ! Control setting (must be 0 for current AirfoilInfo)
-True        InclUAdata        ! Is unsteady aerodynamics data included in this table? If TRUE, then include 30 UA coefficients below this line
+True        InclUAdata        ! Is unsteady aerodynamics data included in this table? If TRUE, then include 32 UA coefficients below this line
 !........................................
        0    alpha0            ! 0-lift angle of attack, depends on airfoil.
        0    alpha1            ! Angle of attack at f=0.7, (approximately the stall angle) for AOA>alpha0. (deg)

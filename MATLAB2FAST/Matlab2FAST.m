@@ -318,6 +318,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printU
         end                
     end
     
+    ColIndx=ColIndx(1:nc);
     
     % now we'll write the table:    
     if iscell(Table)
