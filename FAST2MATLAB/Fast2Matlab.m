@@ -215,12 +215,20 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt  )
         
     % now initialize Table and read its values from the file:
     Table = zeros(InpSt, nc);   %this is the size table we'll read
-    i = 0;                      % this the line of the table we're reading    
+    i = 0;                      % this the line of the table we're reading           
     while i < InpSt
         
         line = fgetl(fid);
         if isnumeric(line)      % we reached the end prematurely
             break
+        elseif i == 0            
+            [tmp,cnt]=sscanf(line,'%f',nc);
+            if cnt<nc
+                disp(['Warning: There are more headers in the table than columns. Ignoring the last ' num2str(nc-cnt) ' column(s).'])
+                Headers = Headers(1:cnt);
+                Table = Table(:,1:cnt);
+                nc = cnt;
+            end
         end        
 
         i = i + 1;
@@ -254,8 +262,13 @@ function [Table, Headers] = ParseFASTFmtTable( line, fid, InpSt, unitsLine )
         end        
 
         i = i + 1;
-        TmpValue  = textscan(line,'%s',nc); 
-        for j=1:nc
+        [TmpValue, cnt1] = textscan(line,'%s',nc); 
+        if i==1 && cnt1 ~= nc
+            disp(['Warning: There are more headers in the table than columns. Ignoring the last ' num2str(nc-cnt) ' column(s).'])
+            Headers = Headers(1:cnt);
+        end             
+        
+        for j=1:cnt1
             [testVal, cnt] = sscanf(TmpValue{1}{j},'%f',1);
             if cnt == 0
                 Table{i,j}=TmpValue{1}{j}; % non-numeric value
