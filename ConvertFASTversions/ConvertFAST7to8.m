@@ -93,7 +93,6 @@ end
     %----------------------------------------------------------------------
     % Tower file: (we'll modify this later)
     TwrFile = GetFastPar(FP,'TwrFile');    
-    TwrFile = strrep(TwrFile,'"',''); %let's remove the quotes so we can actually use this file name
     [OldTwrFile, TwrWasRelative] = GetFullFileName( TwrFile, oldDir );
     TP = Fast2Matlab(OldTwrFile,3); %get the old tower parameters with 3 header lines
     
@@ -103,7 +102,6 @@ end
     BldWasRelative = true(1,NumBl);
     for k=1:NumBl
         BldFile{k} = GetFastPar(FP,['BldFile(' num2str(k) ')']);
-        BldFile{k} = strrep(BldFile{k},'"',''); %let's remove the quotes so we can actually use this file name
 
         [OldBldFile, BldWasRelative(k)] = GetFullFileName( BldFile{k}, oldDir );
         BP{k} = Fast2Matlab(OldBldFile,3); %get the old blade parameters with 3 header lines
@@ -251,7 +249,6 @@ end
     % Convert AeroDyn data:
     %----------------------------------------------------------------------
     AeroFile = GetFastPar(FP,'AeroFile');                                   
-    AeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name    
     [FullAeroFile,ADWasRelative] = GetFullFileName( AeroFile, oldDir ); % old path + name
     ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
        
