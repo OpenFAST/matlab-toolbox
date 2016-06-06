@@ -39,6 +39,7 @@ elseif (ReKi == 8)
     nbits = 'float64';
 else
     disp(['undefined nbits/ReKi = ' num2str(ReKi)])
+    nbits = 'float64';
 end 
     
 fieldmask_size = fread( fid, 1, 'int32');    

@@ -262,10 +262,13 @@ function [Table, Headers] = ParseFASTFmtTable( line, fid, InpSt, unitsLine )
         end        
 
         i = i + 1;
-        [TmpValue, cnt1] = textscan(line,'%s',nc); 
-        if i==1 && cnt1 ~= nc
-            disp(['Warning: There are more headers in the table than columns. Ignoring the last ' num2str(nc-cnt) ' column(s).'])
-            Headers = Headers(1:cnt);
+        [TmpValue] = textscan(line,'%s',nc); 
+
+        cnt1 = length(TmpValue{1}); %how many strings were actually read
+            
+        if i==1 && cnt1 ~= nc % note that cnt1 <= nc because we read at max nc values.
+            disp(['Warning: There are more headers in the table than columns. Ignoring the last ' num2str(nc-cnt1) ' column(s).'])
+            Headers = Headers(1:cnt1);
         end             
         
         for j=1:cnt1

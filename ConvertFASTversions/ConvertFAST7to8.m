@@ -51,6 +51,7 @@ FAST_template = strcat(templateDir,filesep,'FAST_Primary_v8.15.x.dat');
 ED_template   = strcat(templateDir,filesep,'ED_Primary_v1.03.x.dat');
 SrvD_template = strcat(templateDir,filesep,'SrvD_Primary_v1.05.x.dat');
 IfW_template  = strcat(templateDir,filesep,'IfW_v3.01.x.dat');
+ADtemplate_1  = strcat(templateDir,filesep,'AD_Primary_v14.04.x'); %we'll figure out the rest of this name later....
 templateDir   = strcat(templateDir,filesep,'v8.00.x');
 
 XLS_file    = strcat(templateDir, filesep,'OutListParameters.xlsx');
@@ -94,6 +95,7 @@ end
     % Tower file: (we'll modify this later)
     TwrFile = GetFastPar(FP,'TwrFile');    
     [OldTwrFile, TwrWasRelative] = GetFullFileName( TwrFile, oldDir );
+    TwrFile = strrep(TwrFile,'"',''); %let's remove the quotes so we can actually use this file name (do this after calling GetFullFileName in case there are spaces in this name)
     TP = Fast2Matlab(OldTwrFile,3); %get the old tower parameters with 3 header lines
     
     % Blade files: (we'll modify this later)
@@ -104,6 +106,7 @@ end
         BldFile{k} = GetFastPar(FP,['BldFile(' num2str(k) ')']);
 
         [OldBldFile, BldWasRelative(k)] = GetFullFileName( BldFile{k}, oldDir );
+        BldFile{k} = strrep(BldFile{k},'"',''); %let's remove the quotes so we can actually use this file name (after calling GetFullFileName)
         BP{k} = Fast2Matlab(OldBldFile,3); %get the old blade parameters with 3 header lines
     end
     
@@ -250,8 +253,9 @@ end
     %----------------------------------------------------------------------
     AeroFile = GetFastPar(FP,'AeroFile');                                   
     [FullAeroFile,ADWasRelative] = GetFullFileName( AeroFile, oldDir ); % old path + name
+    AeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name (after GetFullFileName)   
     ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
-       
+    ADPar.HdrLines{2} = ADPar.HdrLines{1}; %replace 2nd header line with 1st so we retain some info about this file
        
     if (~ADWasRelative)
         disp( ['WARNING: AeroDyn file (' AeroFile ') is not a relative name. New AeroDyn will be located here: '] )
@@ -264,6 +268,9 @@ end
     % convert everything to latest FAST version:
     [FP] = newInputs_FAST_v8_05(FP);
     [FP,InflowFile] = newInputs_FAST_v8_12(FP, newDir);
+    
+    % FP = SetFastPar(FP,'InflowFile',InflowFile); - this was done in newInputs_FAST_v8_12
+    InflowFile = strrep(InflowFile,'"','');
     
     %----------------------------------------------------------------------
     % Create InflowWind data:
@@ -300,11 +307,11 @@ end
         % AeroDyn
     [~, err1] = GetFastPar(ADPar,'TwrShadow');
     if err1
-        ADtemplate   = [templateDir filesep 'AD_Primary_v14.04.x.dat'];  %template for AD file without NEWTOWER        
+        ADtemplate   = [ADtemplate_1 '.dat'];  %template for AD file without NEWTOWER        
     else
-        ADtemplate   = [templateDir filesep 'AD_Primary_v14.04.x_NT.dat'];  %template for AD file with NEWTOWER        
+        ADtemplate   = [ADtemplate_1 '_NT.dat'];  %template for AD file with NEWTOWER        
     end
-    outputFile = [newDir filesep AeroFile];
+    outputFile = [newDir filesep AeroFile];    
     Matlab2FAST(ADPar, ADtemplate, outputFile, 2); %contains 2 header lines            
     
     
