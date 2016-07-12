@@ -82,10 +82,26 @@ while true
     end
     
     if ~isempty(strfind(upper(line),upper('OutList'))) 
-        ContainsOutList = true;
-        fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
-        break;
-    end  
+        % 6/23/2016: linearization inputs contain "OutList" in the
+        % comments, so we need to make sure this is either the first (value) or
+        % second (label) word of the line.
+        [value2, ~, ~, nextindex] = sscanf(line,'%s', 1); 
+        if strcmpi(value2,'OutList')
+            ContainsOutList = true;
+            fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
+            break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
+        else
+            % try the second
+            [value2] = sscanf(line(nextindex+1:end),'%s', 1); 
+            if strcmpi(value2,'OutList')
+                ContainsOutList = true;
+                fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
+                break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
+            end
+        end            
+    end      
+    
+    
     
     [value, label, isComment, ~, ~] = ParseFASTInputLine(line);
             
