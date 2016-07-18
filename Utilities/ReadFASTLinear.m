@@ -13,24 +13,25 @@ fileName = 'C:\Users\bjonkman\Documents\DATA\DesignCodes\simulators\FAST\SVNdire
                     fgetl(fid); % skip a blank line
     data.desc     = fgetl(fid); % model description
                     fgetl(fid); % skip a blank line
+                    fgetl(fid); % "simulation information" comment/header line
                   
     % parse the next few lines:
-    line = fgetl(fid);
-    C = textscan( line, '%s', 'delimiter', '=' );
-    data.t = textscan( C{1}{2}, '%f' ); % time this linearization was performed
-
-    n = zeros(5,1);
-    for i=1:5
+    d = cell(9,1);
+    for i=1:length(d)
         line = fgetl(fid);
         C = textscan( line, '%s', 'delimiter', ':' );
-        C = textscan( C{1}{2}, '%f', 'CollectOutput',1 ); % number of inputs, outputs, continuous states, discrete states, and constraint states 
-        n(i) = C{1};
+        d{i} = textscan( C{1}{2}, '%f', 'CollectOutput',1 );
     end
-    data.n_x  = n(1);
-    data.n_xd = n(2);
-    data.n_z  = n(3);
-    data.n_u  = n(4);
-    data.n_y  = n(5);
+    
+    data.t        = d{1}{1};
+    data.RotSpeed = d{2}{1};
+    data.Azimuth  = d{3}{1};
+    data.n_x      = d{4}{1};
+    data.n_xd     = d{5}{1};
+    data.n_z      = d{6}{1};
+    data.n_u      = d{7}{1};
+    data.n_u_ext  = d{8}{1};
+    data.n_y      = d{9}{1};
             
 
     line = fgetl(fid);
@@ -51,16 +52,19 @@ fileName = 'C:\Users\bjonkman\Documents\DATA\DesignCodes\simulators\FAST\SVNdire
     end
 
     if data.n_xd > 0 
-        [data.xd_op,   data.xd_desc]   = readLinTable(fid,data.n_xd);
+        [data.xd_op,   data.xd_desc]    = readLinTable(fid,data.n_xd);
     end
     if data.n_z > 0 
-        [data.z_op,   data.z_desc]     = readLinTable(fid,data.n_z);
+        [data.z_op,    data.z_desc]     = readLinTable(fid,data.n_z);
     end
     if data.n_u > 0 
-        [data.u_op,   data.u_desc]     = readLinTable(fid,data.n_u);
+        [data.u_op,    data.u_desc]     = readLinTable(fid,data.n_u);
+    end
+    if data.n_u_ext > 0 
+        [data.u_ext_op,data.u_ext_desc] = readLinTable(fid,data.n_u_ext);
     end
     if data.n_y > 0 
-        [data.y_op,   data.y_desc]     = readLinTable(fid,data.n_y);
+        [data.y_op,    data.y_desc]     = readLinTable(fid,data.n_y);
     end
     
     
@@ -68,7 +72,7 @@ fileName = 'C:\Users\bjonkman\Documents\DATA\DesignCodes\simulators\FAST\SVNdire
     for i=1:SetOfMatrices
         %% ...........................................
         % get linearized state matrices
-        fgetl(fid); % skip linearized state matrices and/or jacobian lines
+        fgetl(fid); % skip linearized state matrices or jacobian description line
         fgetl(fid); % skip a blank line
 
         while true
