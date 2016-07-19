@@ -47,24 +47,24 @@ fileName = 'C:\Users\bjonkman\Documents\DATA\DesignCodes\simulators\FAST\SVNdire
     %% ...........................................
     % get operating points and row/column order
     if data.n_x > 0 
-        [data.x_op,    data.x_desc]    = readLinTable(fid,data.n_x);
-        [data.xdot_op, data.xdot_desc] = readLinTable(fid,data.n_x);
+        [data.x_op,    data.x_desc, data.x_rotFrame] = readLinTable(fid,data.n_x);
+        [data.xdot_op, data.xdot_desc]               = readLinTable(fid,data.n_x);
     end
 
     if data.n_xd > 0 
-        [data.xd_op,   data.xd_desc]    = readLinTable(fid,data.n_xd);
+        [data.xd_op,   data.xd_desc]                 = readLinTable(fid,data.n_xd);
     end
     if data.n_z > 0 
-        [data.z_op,    data.z_desc]     = readLinTable(fid,data.n_z);
+        [data.z_op,    data.z_desc]                  = readLinTable(fid,data.n_z);
     end
     if data.n_u > 0 
-        [data.u_op,    data.u_desc]     = readLinTable(fid,data.n_u);
+        [data.u_op,    data.u_desc, data.u_rotFrame] = readLinTable(fid,data.n_u);
     end
     if data.n_u_ext > 0 
-        [data.u_ext_op,data.u_ext_desc] = readLinTable(fid,data.n_u_ext);
+        [data.u_ext_op,data.u_ext_desc]              = readLinTable(fid,data.n_u_ext);
     end
     if data.n_y > 0 
-        [data.y_op,    data.y_desc]     = readLinTable(fid,data.n_y);
+        [data.y_op,    data.y_desc, data.y_rotFrame] = readLinTable(fid,data.n_y);
     end
     
     
@@ -88,10 +88,11 @@ fileName = 'C:\Users\bjonkman\Documents\DATA\DesignCodes\simulators\FAST\SVNdire
 return
 end 
 
-function [op, desc] = readLinTable(fid,n)
+function [op, desc, RF] = readLinTable(fid,n)
 
     desc = cell(n,1);
     op   = cell(n,1);
+    RF   = false(n,1);
 
     fgetl(fid); % table title/comment
     fgetl(fid); % table header row 1
@@ -100,13 +101,14 @@ function [op, desc] = readLinTable(fid,n)
     for row=1:n
         
         line = fgetl(fid);
-        [C,pos] = textscan( line, '%*f %f',1 );
-        if strcmp(line(pos+1),',') %we've got an orientation line:
-            [C,pos] = textscan( line, '%*f %f %*s %f %*s %f',1 );
+        [C,pos] = textscan( line, '%*f %f %s',1 );
+        if strcmp(line(pos),',') %we've got an orientation line:
+            [C,pos] = textscan( line, '%*f %f %*s %f %*s %f %s',1 );
             op{row} = [C{1:3}];
         else
             op{row} = C{1};
         end
+        RF(row) = strcmp(C{end},'T'); 
         desc{row}=strtrim( line(pos+1:end) );        
     end
 

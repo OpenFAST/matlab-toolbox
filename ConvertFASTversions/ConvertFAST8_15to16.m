@@ -76,6 +76,19 @@ end
         Matlab2FAST(ADPar,template,newADName, 2); %contains 2 header lines
     end    
     
+% %%  %----------------------------------------------------------------------
+%     % Get IfW Data and write new IfW file:
+%     %----------------------------------------------------------------------
+%     CompInflow = GetFastPar(FP,'CompInflow');
+%     if CompInflow == 1
+%         FullIfWFile = GetFastPar(FP,'InflowFile');
+%         [newIfWName]  = GetFullFileName( FullIfWFile, newDir ); % new path + name
+%         [FullIfWFile] = GetFullFileName( FullIfWFile, oldDir );
+%         IfWPar = Fast2Matlab(FullIfWFile,2); % get InflowWind data (2 header lines)
+% 
+%         template   = [templateDir filesep 'IfW_v3.01.x.dat'];  %template for primary file
+%         Matlab2FAST(IfWPar,template,newIfWName, 2); %contains 2 header lines
+%     end    
     
 
 %%  %----------------------------------------------------------------------
