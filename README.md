@@ -3,7 +3,7 @@
 
 by Gungit Bir, NREL
 
-MBC is a set of MatLab scripts that performs Multi-blade coordinate transformation (MBC) on wind turbine system models.
+MBC is a set of MatLab scripts that performs multi-blade coordinate transformation (MBC) on wind turbine system models.
 The dynamics of wind turbine rotor blades are conventionally expressed in rotating frames attached to the individual blades.
 The tower-nacelle subsystem sees the combined effect of all rotor blades, not the individual blades. This is because the rotor
 responds as a whole to excitations such as aerodynamic gusts, control inputs, and tower-nacelle motion—all of which occur in a
