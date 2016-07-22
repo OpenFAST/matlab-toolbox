@@ -71,7 +71,7 @@ for iFile = 1:NAzimStep
     data(iFile) = ReadFASTLinear(FileNames{iFile});
     
     Omega(iFile)   = data(iFile).RotSpeed;
-    Azimuth(iFile) = data(iFile).Azimuth;
+    Azimuth(iFile) = data(iFile).Azimuth*180/pi;
 
     if (isfield(data(iFile), 'A'))
         AMat(:,:,iFile) = data(iFile).A;
