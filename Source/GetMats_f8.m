@@ -13,7 +13,8 @@
 
 format short g;
 
-FileNames = {'C:\Users\bjonkman\Documents\DATA\DesignCodes\simulators\FAST\SVNdirectory\branches\BJonkman\CertTest\Test14_1.1.lin'};
+FileNames = {'C:\Users\bjonkman\Documents\DATA\DesignCodes\simulators\FAST\SVNdirectory\branches\BJonkman\CertTest\Test18.1.lin'};
+FileNames = {'Test18.1.lin'};
 
 % Input data:
 
@@ -22,7 +23,7 @@ NAzimStep = length(FileNames);
 data(NAzimStep) = ReadFASTLinear(FileNames{1}); %we'll read this twice so we can allocate space first; putting it at NAzimStep saves some reallocation later
 N = data(NAzimStep).n_x;
 NActvDOF = N / 2;
-NInputs  = data(NAzimStep).n_u + data(NAzimStep).n_u_ext;
+NInputs  = data(NAzimStep).n_u;
 NumOuts  = data(NAzimStep).n_y;
 
 
@@ -44,19 +45,7 @@ if ( N > 0 )
 end
 
 if ( NInputs > 0 )
-    DescCntrlInpt = cell(1,NInputs);
-    if (isfield(data(NAzimStep), 'u_desc'))
-        if (isfield(data(NAzimStep),'u_ext_desc'))
-            DescCntrlInpt = vertcat(data(NAzimStep).u_desc,data(NAzimStep).u_ext_desc);
-        else
-            DescCntrlInpt = data(NAzimStep).u_desc;
-        end
-    else
-        if (isfield(data(NAzimStep),'u_ext_desc'))
-            DescCntrlInpt = data(NAzimStep).u_ext_desc;
-        end
-    end            
-    
+    DescCntrlInpt = data(NAzimStep).u_desc;    
     if (N>0) 
         BMat = zeros(N, NInputs, NAzimStep);
     end
@@ -128,16 +117,16 @@ end
 for i=1:NActvDOF
     col = strfind(DescStates{i},'DOF_GeAz'); % find the starting index of the string 'DOF_GeAz'
     if ( ~isempty(col) )     % true if the DescStates contains the string 'DOF_GeAz'
-        Omega(:)    = xdop(i,:);
-        OmegaDot(:) = xdop(i+NActvDOF,:);
+        Omega(:)    = xdop(i,:)';
+        OmegaDot(:) = xdop(i+NActvDOF,:)';
         break;
     end
 end
 for i=1:NActvDOF
     col = strfind(DescStates{i},'DOF_DrTr'); % find the starting index of the string 'DOF_DrTr'
     if ( ~isempty(col) )     % true if the DescStates contains the string 'DOF_GeAz'
-        Omega(:)    = Omega(:)    + xdop(i,:); %This always comes after DOF_GeAz so let's just add it here (it won't get written over later).
-        OmegaDot(:) = OmegaDot(:) + xdop(i+NActvDOF,:);
+        Omega(:)    = Omega(:)    + xdop(i,:)'; %This always comes after DOF_GeAz so let's just add it here (it won't get written over later).
+        OmegaDot(:) = OmegaDot(:) + xdop(i+NActvDOF,:)';
         break;
     end
 end

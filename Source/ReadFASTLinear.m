@@ -15,7 +15,7 @@ function [data] = ReadFASTLinear(fileName)
                     fgetl(fid); % "simulation information" comment/header line
                   
     % parse the next few lines:
-    d = cell(9,1);
+    d = cell(8,1);
     for i=1:length(d)
         line = fgetl(fid);
         C = textscan( line, '%s', 'delimiter', ':' );
@@ -29,8 +29,7 @@ function [data] = ReadFASTLinear(fileName)
     data.n_xd     = d{5}{1};
     data.n_z      = d{6}{1};
     data.n_u      = d{7}{1};
-    data.n_u_ext  = d{8}{1};
-    data.n_y      = d{9}{1};
+    data.n_y      = d{8}{1};
             
 
     line = fgetl(fid);
@@ -58,9 +57,6 @@ function [data] = ReadFASTLinear(fileName)
     end
     if data.n_u > 0 
         [data.u_op,    data.u_desc, data.u_rotFrame] = readLinTable(fid,data.n_u);
-    end
-    if data.n_u_ext > 0 
-        [data.u_ext_op,data.u_ext_desc]              = readLinTable(fid,data.n_u_ext);
     end
     if data.n_y > 0 
         [data.y_op,    data.y_desc, data.y_rotFrame] = readLinTable(fid,data.n_y);
