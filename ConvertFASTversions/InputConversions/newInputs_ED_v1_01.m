@@ -12,16 +12,16 @@ function [EDP] = newInputs_ED_v1_01(EDPar)
     %----------------------------------------------------------------------   
     n = length(EDP.Label);
 
-    [PtfmRef, err1] = GetFastPar(EDP,'PtfmRef');    
+    [PtfmRef, err1] = GetFASTPar(EDP,'PtfmRef');    
     if ~err1
         n = n + 1;
         EDP.Label{n} = 'PtfmRefzt';
         EDP.Val{n}   = -PtfmRef;
     end
 
-    [TwrRBHt, err2] = GetFastPar(EDP,'TwrRBHt');    
+    [TwrRBHt, err2] = GetFASTPar(EDP,'TwrRBHt');    
     if ~err2
-        [TwrDraft,err3] = GetFastPar(EDP,'TwrDraft');
+        [TwrDraft,err3] = GetFASTPar(EDP,'TwrDraft');
         if ~err3 
             n = n + 1;
             EDP.Label{n} = 'TowerBsHt';

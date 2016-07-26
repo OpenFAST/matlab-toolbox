@@ -13,10 +13,10 @@ function [FP,InflowFile,AeroFile] = newInputs_FAST_v8_12(FASTPar, newDir)
     %----------------------------------------------------------------------       
     % CompInflow and InflowFile are new inputs:
     %----------------------------------------------------------------------       
-    [InflowFile, err1] = GetFastPar(FP,'InflowFile');  
-    AeroFile = GetFastPar(FP,'AeroFile');  
+    [InflowFile, err1] = GetFASTPar(FP,'InflowFile');  
+    AeroFile = GetFASTPar(FP,'AeroFile');  
     if (err1)
-        CompInflow = GetFastPar(FP,'CompAero');  
+        CompInflow = GetFASTPar(FP,'CompAero');  
         
         if CompInflow
                                         

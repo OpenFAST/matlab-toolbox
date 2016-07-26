@@ -15,7 +15,7 @@ function [EDP] = newInputs_ED_v1_00(EDPar, oldDir)
     %----------------------------------------------------------------------       
     % 1) modify GBRatio based on the removed GBRevers variable
     %----------------------------------------------------------------------       
-    [GBRevers, err1] = GetFastPar(EDP,'GBRevers');
+    [GBRevers, err1] = GetFASTPar(EDP,'GBRevers');
     if ~err1
     
         if strcmpi(GBRevers,'t')
@@ -27,11 +27,11 @@ function [EDP] = newInputs_ED_v1_00(EDPar, oldDir)
         end
 
         if GBRevers 
-            [GBRatio, err2] = GetFastPar(EDP,'GBRatio');
+            [GBRatio, err2] = GetFASTPar(EDP,'GBRatio');
             if ~err2
                 GBRatio = -1*GBRatio;
                 disp('GBRatio sign being reversed.')
-                SetFastPar(EDP,'GBRatio', GBRatio);
+                SetFASTPar(EDP,'GBRatio', GBRatio);
             else
                 disp('GBRatio was not found; it should be set negative.')
             end            
@@ -42,11 +42,11 @@ function [EDP] = newInputs_ED_v1_00(EDPar, oldDir)
     % 2) if we had a platform file, read it and add its inputs to the ED
     %    file; if we didn't, initialize those values.
     %----------------------------------------------------------------------           
-    [PtfmModel, err1] = GetFastPar(EDP,'PtfmModel');
+    [PtfmModel, err1] = GetFASTPar(EDP,'PtfmModel');
     if ~err1
         setPtfmVals = true;
         if ( PtfmModel ~= 0 ) 
-            [PlatformFile] = GetFastPar(EDP,'PtfmFile');
+            [PlatformFile] = GetFASTPar(EDP,'PtfmFile');
             inputfile = GetFullFileName(PlatformFile,oldDir);
 
             if ( ~isempty(inputfile) )                        
@@ -88,7 +88,7 @@ function [EDP] = newInputs_ED_v1_00(EDPar, oldDir)
     %----------------------------------------------------------------------  
     % 3) We don't allow furling in this version.
     %----------------------------------------------------------------------       
-    EDP = SetFastPar(EDP,'Furling','False');      % Furling isn't available in this version 
+    EDP = SetFASTPar(EDP,'Furling','False');      % Furling isn't available in this version 
     
     %----------------------------------------------------------------------  
     % 4) Add new inputs:
@@ -97,7 +97,7 @@ function [EDP] = newInputs_ED_v1_00(EDPar, oldDir)
     %    PtfmCMyt = 0
     %----------------------------------------------------------------------       
     % note that this must be done after adding PtfmCM (step 2).
-    PtfmCM = GetFastPar(EDP,'PtfmCM');
+    PtfmCM = GetFASTPar(EDP,'PtfmCM');
     
     n = n + 1;
     EDP.Label{n} = 'PtfmCMzt';

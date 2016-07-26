@@ -47,9 +47,9 @@ if YawColumn <= 0
     disp( ['Error: could not find yaw position column in output file, ' outputfile] );
     YawManRat = 0;
 else
-    NacYawF  = GetFastPar(FP,'NacYawF' );
-    TYawManE = GetFastPar(FP,'TYawManE');
-    TYawManS = GetFastPar(FP,'TYawManS');
+    NacYawF  = GetFASTPar(FP,'NacYawF' );
+    TYawManE = GetFASTPar(FP,'TYawManE');
+    TYawManS = GetFASTPar(FP,'TYawManS');
     
         % find the YawPos at time TYawManS
     timeIndx = find( ChannelData(:,1) >= TYawManS, 1, 'first' );
@@ -63,7 +63,7 @@ end
 %% ........................................................................
 % Calculate pitch maneuver rate:
 %..........................................................................
-NumBl  = GetFastPar(FP,'NumBl' );
+NumBl  = GetFASTPar(FP,'NumBl' );
 PitManRat = zeros(NumBl,1);
 
 % pitch position output names:
@@ -85,9 +85,9 @@ for k=1:NumBl
     if PitchColumn <= 0
         disp( ['Error: could not find blade pitch column for blade ' blStr ' in output file, ' outputfile] )
     else
-        BlPitchF = GetFastPar(FP,['BlPitchF(' blStr ')'] );
-        TPitManE = GetFastPar(FP,['TPitManE(' blStr ')'] );
-        TPitManS = GetFastPar(FP,['TPitManS(' blStr ')'] );
+        BlPitchF = GetFASTPar(FP,['BlPitchF(' blStr ')'] );
+        TPitManE = GetFASTPar(FP,['TPitManE(' blStr ')'] );
+        TPitManS = GetFASTPar(FP,['TPitManS(' blStr ')'] );
 
             % find the BlPitch at time TPitManS
         timeIndx = find( ChannelData(:,1) >= TPitManS, 1, 'first' );

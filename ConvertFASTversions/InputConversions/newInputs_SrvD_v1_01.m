@@ -26,7 +26,7 @@ function [SrvDP] = newInputs_SrvD_v1_01(SrvDPar,usedBladed)
     %    YCMode { if 2 => 5 }  
     %----------------------------------------------------------------------  
     if usedBladed
-        [~, err1] = GetFastPar(SrvDP,'DLL_FileName');
+        [~, err1] = GetFASTPar(SrvDP,'DLL_FileName');
         
             % if there *wasn't* an error, DLL_FileName already existed, 
             % and we don't want to change these values again.    
@@ -66,33 +66,33 @@ function [SrvDP] = newInputs_SrvD_v1_01(SrvDPar,usedBladed)
             %..............................................................
             % PCMode { if 1 => 5 }
             %..............................................................
-            [PCMode, err] = GetFastPar(SrvDP,'PCMode');
+            [PCMode, err] = GetFASTPar(SrvDP,'PCMode');
             if ~err && PCMode == 1
-                SrvDP = SetFastPar(SrvDP,'PCMode',ControlMode_DLL);
+                SrvDP = SetFASTPar(SrvDP,'PCMode',ControlMode_DLL);
             end
             
             %..............................................................
             % VSContrl { if 2 => 5 }
             %..............................................................
-            [VSContrl, err] = GetFastPar(SrvDP,'VSContrl');
+            [VSContrl, err] = GetFASTPar(SrvDP,'VSContrl');
             if ~err && VSContrl == 2
-                SrvDP = SetFastPar(SrvDP,'VSContrl',ControlMode_DLL);
+                SrvDP = SetFASTPar(SrvDP,'VSContrl',ControlMode_DLL);
             end            
             
             %..............................................................
             % HSSBrMode { if 2 => 5 }
             %..............................................................
-            [HSSBrMode, err] = GetFastPar(SrvDP,'HSSBrMode');
+            [HSSBrMode, err] = GetFASTPar(SrvDP,'HSSBrMode');
             if ~err && HSSBrMode == 2
-                SrvDP = SetFastPar(SrvDP,'HSSBrMode',ControlMode_DLL);
+                SrvDP = SetFASTPar(SrvDP,'HSSBrMode',ControlMode_DLL);
             end             
             
             %..............................................................
             % YCMode { if 2 => 5 }
             %..............................................................
-            [YCMode, err] = GetFastPar(SrvDP,'YCMode');
+            [YCMode, err] = GetFASTPar(SrvDP,'YCMode');
             if ~err && YCMode == 2
-                SrvDP = SetFastPar(SrvDP,'YCMode',ControlMode_DLL);
+                SrvDP = SetFASTPar(SrvDP,'YCMode',ControlMode_DLL);
             end             
             
             

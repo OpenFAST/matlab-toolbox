@@ -74,11 +74,11 @@ end
     % Write new model data to the ServoDyn input file:
     %----------------------------------------------------------------------
    
-    CompServo = GetFastPar(FP,'CompServo');    
+    CompServo = GetFASTPar(FP,'CompServo');    
     
     if CompServo == 1 % use ServoDyn in this model
             % Name of (old) ServoDyn input file:  
-        ServoFile = GetFastPar(FP,'ServoFile');    
+        ServoFile = GetFASTPar(FP,'ServoFile');    
         ServoFile = strrep(ServoFile,'"',''); %let's remove the quotes so we can actually use this file name
         [oldSrvDName] = GetFullFileName( ServoFile, oldDir );
         

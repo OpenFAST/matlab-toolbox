@@ -65,9 +65,9 @@ end
 %%  %----------------------------------------------------------------------
     % Get old AD Data:
     %----------------------------------------------------------------------
-    CompAero = GetFastPar(FP,'CompAero');
+    CompAero = GetFASTPar(FP,'CompAero');
     if CompAero == 2
-        FullADFile = GetFastPar(FP,'AeroFile');
+        FullADFile = GetFASTPar(FP,'AeroFile');
         [newADName]  = GetFullFileName( FullADFile, newDir ); % new path + name
         [FullADFile] = GetFullFileName( FullADFile, oldDir );
         ADPar = Fast2Matlab(FullADFile,2); % get AeroDyn data (2 header lines)
@@ -93,9 +93,9 @@ end
 %%  %----------------------------------------------------------------------
     % Get old SrvD Data:
     %----------------------------------------------------------------------
-    CompServo = GetFastPar(FP,'CompServo');
+    CompServo = GetFASTPar(FP,'CompServo');
     if CompServo == 1
-        FullSrvDFile = GetFastPar(FP,'ServoFile');
+        FullSrvDFile = GetFASTPar(FP,'ServoFile');
         [newSrvDName]  = GetFullFileName( FullSrvDFile, newDir ); % new path + name
         [FullSrvDFile] = GetFullFileName( FullSrvDFile, oldDir );
         SrvDPar = Fast2Matlab(FullSrvDFile,2); % get ServoDyn data (2 header lines)
@@ -103,9 +103,9 @@ end
 %%  %----------------------------------------------------------------------
     % Get old TMD Data:
     %----------------------------------------------------------------------
-        CompNTMD = GetFastPar(SrvDPar,'CompNTMD');
+        CompNTMD = GetFASTPar(SrvDPar,'CompNTMD');
         if strcmpi(CompNTMD,'true') || strcmpi(CompNTMD,'t')
-            FullNTMDFile = GetFastPar(SrvDPar,'NTMDfile');
+            FullNTMDFile = GetFASTPar(SrvDPar,'NTMDfile');
             new_SrvD_dir = fileparts( newSrvDName );
             [newNTMDName] = GetFullFileName( FullNTMDFile, new_SrvD_dir ); % new path + name
             old_SrvD_dir = fileparts( FullSrvDFile );

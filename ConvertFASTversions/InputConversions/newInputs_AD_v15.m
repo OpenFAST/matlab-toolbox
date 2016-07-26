@@ -11,11 +11,11 @@ SpdSound = 335; %value from AD 14
 
 %% ........................................................................
 %% BEMT options:
-[IndModel] = GetFastPar(ADPar,'IndModel');        %Induction-factor model [NONE or WAKE or SWIRL] (unquoted string)
-[InfModel] = GetFastPar(ADPar,'InfModel');        %Inflow model [DYNIN or EQUIL] (unquoted string)
-[TLModel ] = GetFastPar(ADPar,'TLModel');         %Tip-loss model (EQUIL only) [PRANDtl, GTECH, or NONE] (unquoted string)
-[HLModel ] = GetFastPar(ADPar,'HLModel');         %Hub-loss model (EQUIL only) [PRANdtl or NONE] (unquoted string)
-[AToler  ] = GetFastPar(ADPar,'AToler');          %Induction-factor tolerance (convergence criteria) (-)
+[IndModel] = GetFASTPar(ADPar,'IndModel');        %Induction-factor model [NONE or WAKE or SWIRL] (unquoted string)
+[InfModel] = GetFASTPar(ADPar,'InfModel');        %Inflow model [DYNIN or EQUIL] (unquoted string)
+[TLModel ] = GetFASTPar(ADPar,'TLModel');         %Tip-loss model (EQUIL only) [PRANDtl, GTECH, or NONE] (unquoted string)
+[HLModel ] = GetFASTPar(ADPar,'HLModel');         %Hub-loss model (EQUIL only) [PRANdtl or NONE] (unquoted string)
+[AToler  ] = GetFASTPar(ADPar,'AToler');          %Induction-factor tolerance (convergence criteria) (-)
 
 if (strcmpi(IndModel,'"none"'))
     WakeMod = 0;
@@ -69,7 +69,7 @@ end
 
 %% ........................................................................
 %% Unsteady Aero options:
-[StallMod] = GetFastPar(ADPar,'StallMod');        %Dynamic stall included [BEDDOES or STEADY] (unquoted string)
+[StallMod] = GetFASTPar(ADPar,'StallMod');        %Dynamic stall included [BEDDOES or STEADY] (unquoted string)
 if strcmpi(StallMod,'"beddoes"')
     AFAeroMod = 2;
 else %steady
@@ -82,7 +82,7 @@ FLookup = 'True';
 
 %% ........................................................................
 %% Airfoil Info:
-[NumFoil ] = GetFastPar(ADPar,'NumFoil');         %Number of airfoil files (-)
+[NumFoil ] = GetFASTPar(ADPar,'NumFoil');         %Number of airfoil files (-)
 
 InCol_Alfa  = 1;
 InCol_Cl    = 2;
@@ -98,8 +98,8 @@ NumAFfiles = NumFoil;
 
 %% ........................................................................
 %% rotor/blade properties:
-[UseCm   ] = GetFastPar(ADPar,'UseCm');           %Use aerodynamic pitching moment model? [USE_CM or NO_CM] (unquoted string)
-[BldNodes] = GetFastPar(ADPar,'BldNodes');        %Number of blade nodes used for analysis (-)
+[UseCm   ] = GetFASTPar(ADPar,'UseCm');           %Use aerodynamic pitching moment model? [USE_CM or NO_CM] (unquoted string)
+[BldNodes] = GetFASTPar(ADPar,'BldNodes');        %Number of blade nodes used for analysis (-)
 
 if strcmpi(UseCm,'"USE_CM"')
     UseBlCm = 'True';
@@ -149,29 +149,29 @@ ADPar.BldNodes{NumBlNds,7} = BldNodeTable{BldNodes,5};  %BlAFID
 
 %% ........................................................................
 %% tower shadow/aero:
-[TwrShad,  err1] = GetFastPar(ADPar,'TwrShad');         %Tower-shadow velocity deficit (-)
+[TwrShad,  err1] = GetFASTPar(ADPar,'TwrShad');         %Tower-shadow velocity deficit (-)
 if ~err1 && strcmpi(TwrShad, '"newtower"' )
 % if TwrShad is "NEWTOWER" we can convert tower influence
 
     % TwrShadow exists already
-    [TwrPotent] = GetFastPar(ADPar,'TwrPotent');     %Calculate tower potential flow (flag)
+    [TwrPotent] = GetFASTPar(ADPar,'TwrPotent');     %Calculate tower potential flow (flag)
     if strcmpi(TwrPotent,'false')
         TwrPotent = 0;
     else
         TwrPotent = 1; % ignore the tower file, so that section will need to be filled out        
     end
-    [ADPar] = SetFastPar(ADPar,'TwrPotent',TwrPotent);     %Calculate tower potential flow (flag)
+    [ADPar] = SetFASTPar(ADPar,'TwrPotent',TwrPotent);     %Calculate tower potential flow (flag)
     
     
-    [CalcTwrAero] = GetFastPar(ADPar,'CalcTwrAero'); %Calculate aerodynamic drag of the tower at the ElastoDyn nodes.
+    [CalcTwrAero] = GetFASTPar(ADPar,'CalcTwrAero'); %Calculate aerodynamic drag of the tower at the ElastoDyn nodes.
     TwrAero = CalcTwrAero;
     
 elseif ~err1 && TwrShad > 0
     
     % create TwrDiam and TwrCd values to get tower shadow results
     % comparable to AD14.
-   [ShadHWid] = GetFastPar(ADPar,'ShadHWid');           
-   [T_Shad_Refpt] = GetFastPar(ADPar,'T_Shad_Refpt'); 
+   [ShadHWid] = GetFASTPar(ADPar,'ShadHWid');           
+   [T_Shad_Refpt] = GetFASTPar(ADPar,'T_Shad_Refpt'); 
 
    uref = TwrShad;
    bref = ShadHWid;
@@ -230,14 +230,14 @@ end
     end 
 
     
-    [~, err1] = GetFastPar(ADPar,'TwrShadow');     %Calculate tower shadow (flag)
+    [~, err1] = GetFASTPar(ADPar,'TwrShadow');     %Calculate tower shadow (flag)
     if err1
         n = n + 1;
         ADPar.Label{n} = 'TwrShadow';
         ADPar.Val{n}   = 'False';
     end 
     
-    [~, err1] = GetFastPar(ADPar,'TwrPotent');     %Calculate tower shadow (flag)
+    [~, err1] = GetFASTPar(ADPar,'TwrPotent');     %Calculate tower shadow (flag)
     if err1
         n = n + 1;
         ADPar.Label{n} = 'TwrPotent';

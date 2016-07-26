@@ -65,9 +65,9 @@ end
 %%  %----------------------------------------------------------------------
     % Get AD Data and write new AD15 file:
     %----------------------------------------------------------------------
-    CompAero = GetFastPar(FP,'CompAero');
+    CompAero = GetFASTPar(FP,'CompAero');
     if CompAero == 2
-        FullADFile = GetFastPar(FP,'AeroFile');
+        FullADFile = GetFASTPar(FP,'AeroFile');
         [newADName]  = GetFullFileName( FullADFile, newDir ); % new path + name
         [FullADFile] = GetFullFileName( FullADFile, oldDir );
         ADPar = Fast2Matlab(FullADFile,2); % get AeroDyn data (2 header lines)
@@ -79,9 +79,9 @@ end
 % %%  %----------------------------------------------------------------------
 %     % Get IfW Data and write new IfW file:
 %     %----------------------------------------------------------------------
-%     CompInflow = GetFastPar(FP,'CompInflow');
+%     CompInflow = GetFASTPar(FP,'CompInflow');
 %     if CompInflow == 1
-%         FullIfWFile = GetFastPar(FP,'InflowFile');
+%         FullIfWFile = GetFASTPar(FP,'InflowFile');
 %         [newIfWName]  = GetFullFileName( FullIfWFile, newDir ); % new path + name
 %         [FullIfWFile] = GetFullFileName( FullIfWFile, oldDir );
 %         IfWPar = Fast2Matlab(FullIfWFile,2); % get InflowWind data (2 header lines)

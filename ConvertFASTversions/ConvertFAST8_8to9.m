@@ -74,11 +74,11 @@ end
     % Write new model data to the HydroDyn input file:
     %----------------------------------------------------------------------
    
-    CompHydro = GetFastPar(FP,'CompHydro');    
+    CompHydro = GetFASTPar(FP,'CompHydro');    
     
     if CompHydro == 1 % use HydroDyn in this model
             % Name of (old) HydroDyn input file:  
-        HydroFile = GetFastPar(FP,'HydroFile');    
+        HydroFile = GetFASTPar(FP,'HydroFile');    
         HydroFile = strrep(HydroFile,'"',''); %let's remove the quotes so we can actually use this file name
         [oldHDName] = GetFullFileName( HydroFile, oldDir );
         
@@ -98,11 +98,11 @@ end
     % Write new model data to the SubDyn input file:
     %----------------------------------------------------------------------
    
-    CompSub = GetFastPar(FP,'CompSub');    
+    CompSub = GetFASTPar(FP,'CompSub');    
     
     if CompSub == 1 % use SubDyn in this model
             % Name of (old) HydroDyn input file:  
-        SubFile = GetFastPar(FP,'SubFile');    
+        SubFile = GetFASTPar(FP,'SubFile');    
         SubFile = strrep(SubFile,'"',''); %let's remove the quotes so we can actually use this file name
         [oldSDName] = GetFullFileName( SubFile, oldDir );
         

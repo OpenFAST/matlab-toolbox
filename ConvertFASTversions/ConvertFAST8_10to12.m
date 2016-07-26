@@ -69,7 +69,7 @@ end
 %%  %----------------------------------------------------------------------
     % Get old ED Data:
     %----------------------------------------------------------------------
-    FullEDFile = GetFastPar(FP,'EDFile');
+    FullEDFile = GetFASTPar(FP,'EDFile');
     FullEDFile = strrep(FullEDFile,'"',''); %let's remove the quotes so we can actually use this file name
     [newEDName]  = GetFullFileName( FullEDFile, newDir ); % new path + name
     [FullEDFile] = GetFullFileName( FullEDFile, oldDir );
@@ -79,7 +79,7 @@ end
 %%  %----------------------------------------------------------------------
     % Get old SrvD Data:
     %----------------------------------------------------------------------
-    FullSrvDFile = GetFastPar(FP,'ServoFile');
+    FullSrvDFile = GetFASTPar(FP,'ServoFile');
     FullSrvDFile = strrep(FullSrvDFile,'"',''); %let's remove the quotes so we can actually use this file name
     [newSrvDName]  = GetFullFileName( FullSrvDFile, newDir ); % new path + name
     [FullSrvDFile] = GetFullFileName( FullSrvDFile, oldDir );
@@ -93,7 +93,7 @@ if (~skip)
     %----------------------------------------------------------------------
 % In FAST v8.10, we read the AeroDyn input file for ElastoDyn, so we have to
 % convert it to the new format regardless of CompAero          
-    AeroFile = GetFastPar(FP,'AeroFile');                                   
+    AeroFile = GetFASTPar(FP,'AeroFile');                                   
     AeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name    
     [FullAeroFile,ADWasRelative] = GetFullFileName( AeroFile, oldDir ); % old path + name
     ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
@@ -103,7 +103,7 @@ if (~skip)
         [~, AeroRoot, ext] = fileparts( AeroFile );
         AeroFile = [AeroRoot ext];
         disp( [newDir filesep AeroFile] );
-        FP = SetFastPar(FP,'AeroFile',['"' AeroFile '"']);
+        FP = SetFASTPar(FP,'AeroFile',['"' AeroFile '"']);
     end
     [newADName] = GetFullFileName( AeroFile, newDir ); % new path + name
     
@@ -126,7 +126,7 @@ if (~skip)
         
     else
     
-        [~, err1] = GetFastPar(ADPar,'TwrShadow');
+        [~, err1] = GetFASTPar(ADPar,'TwrShadow');
 
         if err1
             template   = [templateDir filesep 'AD_Primary_v14.04.x.dat'];  %template for AD file without NEWTOWER        
@@ -143,7 +143,7 @@ if (~skip)
     %----------------------------------------------------------------------        
     [FP,InflowFile] = newInputs_FAST_v8_12(FP, newDir); %sets CompInflow
   
-    [CompInflow] = GetFastPar(FP,'CompInflow');    
+    [CompInflow] = GetFASTPar(FP,'CompInflow');    
     if CompInflow == 1 % use InflowWind in this model        
         
         % get values to put into new file:
@@ -168,11 +168,11 @@ end % ~skip
     % Write new model data to the HydroDyn input file:
     %----------------------------------------------------------------------
    
-    CompHydro = GetFastPar(FP,'CompHydro');    
+    CompHydro = GetFASTPar(FP,'CompHydro');    
     
     if CompHydro == 1 % use HydroDyn in this model
             % Name of (old) HydroDyn input file:  
-        HydroFile = GetFastPar(FP,'HydroFile');    
+        HydroFile = GetFASTPar(FP,'HydroFile');    
         HydroFile = strrep(HydroFile,'"',''); %let's remove the quotes so we can actually use this file name
         [oldHDName] = GetFullFileName( HydroFile, oldDir );
         

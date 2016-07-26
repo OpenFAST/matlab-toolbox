@@ -69,7 +69,7 @@ end
     
     
         % Primary SrvD file
-    SrvDFile = GetFastPar(FP,'SrvDFile');
+    SrvDFile = GetFASTPar(FP,'SrvDFile');
     SrvDFile = strrep(SrvDFile,'"',''); %let's remove the quotes so we can actually use this file name   
     [OldSrvDFile, FileWasRelative] = GetFullFileName( SrvDFile, oldDir );       
     SrvDP = Fast2Matlab(OldSrvDFile,2); %SrvDP are ServoDyn parameters
@@ -81,7 +81,7 @@ end
         [~, SrvDRoot, ext] = fileparts( SrvDFile );
         SrvDFile = [SrvDRoot ext];
         disp( [newDir filesep SrvDFile] )
-        SetFastPar(FP,'SrvDFile', [ '"' SrvDFile '"' ]);
+        SetFASTPar(FP,'SrvDFile', [ '"' SrvDFile '"' ]);
     end
     
     if usedBladedDLL
@@ -89,7 +89,7 @@ end
     end
     
         % Primary ED file
-    EDFile = GetFastPar(FP,'EDFile');
+    EDFile = GetFASTPar(FP,'EDFile');
     EDFile = strrep(EDFile,'"',''); %let's remove the quotes so we can actually use this file name   
     [OldEDFile, FileWasRelative] = GetFullFileName( EDFile, oldDir );       
     EDP = Fast2Matlab(OldEDFile,2); %EDP are ElastoDyn parameters
@@ -101,7 +101,7 @@ end
         [~, EDRoot, ext] = fileparts( EDFile );
         EDFile = [EDRoot ext];
         disp( [newDir filesep EDFile] )
-        SetFastPar(FP,'EDFile', [ '"' EDFile '"' ]);
+        SetFASTPar(FP,'EDFile', [ '"' EDFile '"' ]);
     end    
     
     EDP = newInputs_ED_v1_01(EDP);

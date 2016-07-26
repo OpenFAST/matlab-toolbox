@@ -93,17 +93,17 @@ end
     % Get blade and tower data, too...
     %----------------------------------------------------------------------
     % Tower file: (we'll modify this later)
-    TwrFile = GetFastPar(FP,'TwrFile');    
+    TwrFile = GetFASTPar(FP,'TwrFile');    
     [OldTwrFile, TwrWasRelative] = GetFullFileName( TwrFile, oldDir );
     TwrFile = strrep(TwrFile,'"',''); %let's remove the quotes so we can actually use this file name (do this after calling GetFullFileName in case there are spaces in this name)
     TP = Fast2Matlab(OldTwrFile,3); %get the old tower parameters with 3 header lines
     
     % Blade files: (we'll modify this later)
-    NumBl = GetFastPar(FP,'NumBl');
+    NumBl = GetFASTPar(FP,'NumBl');
     BldFile        = cell(1,NumBl);
     BldWasRelative = true(1,NumBl);
     for k=1:NumBl
-        BldFile{k} = GetFastPar(FP,['BldFile(' num2str(k) ')']);
+        BldFile{k} = GetFASTPar(FP,['BldFile(' num2str(k) ')']);
 
         [OldBldFile, BldWasRelative(k)] = GetFullFileName( BldFile{k}, oldDir );
         BldFile{k} = strrep(BldFile{k},'"',''); %let's remove the quotes so we can actually use this file name (after calling GetFullFileName)
@@ -125,20 +125,20 @@ end
     %....................................  
     
     
-%     FP = SetFastPar(FP,'ADAMSPrep',1);          % Adams isn't available in this version
-%     FP = SetFastPar(FP,'AnalMode', 1);          % Linearization isn't available in this version
-%     FP = SetFastPar(FP,'CompNoise','False');    % Noise isn't available in this version
+%     FP = SetFASTPar(FP,'ADAMSPrep',1);          % Adams isn't available in this version
+%     FP = SetFASTPar(FP,'AnalMode', 1);          % Linearization isn't available in this version
+%     FP = SetFASTPar(FP,'CompNoise','False');    % Noise isn't available in this version
 
-% FP = SetFastPar(FP,'Echo','True');      % For preliminary testing purposes...
+% FP = SetFASTPar(FP,'Echo','True');      % For preliminary testing purposes...
     
-    DT_Out = GetFastPar(FP,'DT') * GetFastPar(FP,'DecFact');
+    DT_Out = GetFASTPar(FP,'DT') * GetFASTPar(FP,'DecFact');
     
     if ~TwrWasRelative
         disp( ['WARNING: FAST tower file (' TwrFile ') is not a relative name. New tower file will be located here: '] )
         [~, TwrRoot, ext] = fileparts( TwrFile );
         TwrFile = [TwrRoot ext];
         disp( [newDir filesep TwrFile] )
-        SetFastPar(FP,'TwrFile', [ '"' TwrFile '"' ]);
+        SetFASTPar(FP,'TwrFile', [ '"' TwrFile '"' ]);
     end
     
     
@@ -150,12 +150,12 @@ end
             BldFile{k} = [BldFile{k} ext];
             disp( [newDir filesep BldFile{k}] );
 
-            SetFastPar(FP,['BldFile(' num2str(k) ')'], [ '"' BldFile{k} '"' ]);
+            SetFASTPar(FP,['BldFile(' num2str(k) ')'], [ '"' BldFile{k} '"' ]);
         end    
     end
     
         % add a new CompUserPtfmLd line
-    PtfmModel = GetFastPar(FP,'PtfmModel');
+    PtfmModel = GetFASTPar(FP,'PtfmModel');
     if PtfmModel > 0
         Platform = 'True';
     else
@@ -164,7 +164,7 @@ end
     
         % TwrLdMod is now CompUserTwrLd (TwrLdMod may or may not have existed)    
     CompUserTwrLd = 'False';
-    TwrLdMod = GetFastPar(FP,'TwrLdMod');
+    TwrLdMod = GetFASTPar(FP,'TwrLdMod');
     if isnumeric(TwrLdMod)
         if TwrLdMod == 2
             CompUserTwrLd = 'True';
@@ -251,7 +251,7 @@ end
     %----------------------------------------------------------------------
     % Convert AeroDyn data:
     %----------------------------------------------------------------------
-    AeroFile = GetFastPar(FP,'AeroFile');                                   
+    AeroFile = GetFASTPar(FP,'AeroFile');                                   
     [FullAeroFile,ADWasRelative] = GetFullFileName( AeroFile, oldDir ); % old path + name
     AeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name (after GetFullFileName)   
     ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
@@ -262,14 +262,14 @@ end
         [~, AeroRoot, ext] = fileparts( AeroFile );
         AeroFile = [AeroRoot ext];
         disp( [newDir filesep AeroFile] );
-        FP = SetFastPar(FP,'AeroFile',['"' AeroFile '"']);
+        FP = SetFASTPar(FP,'AeroFile',['"' AeroFile '"']);
     end
             
     % convert everything to latest FAST version:
     [FP] = newInputs_FAST_v8_05(FP);
     [FP,InflowFile] = newInputs_FAST_v8_12(FP, newDir);
     
-    % FP = SetFastPar(FP,'InflowFile',InflowFile); - this was done in newInputs_FAST_v8_12
+    % FP = SetFASTPar(FP,'InflowFile',InflowFile); - this was done in newInputs_FAST_v8_12
     InflowFile = strrep(InflowFile,'"','');
     
     %----------------------------------------------------------------------
@@ -305,7 +305,7 @@ end
 
     
         % AeroDyn
-    [~, err1] = GetFastPar(ADPar,'TwrShadow');
+    [~, err1] = GetFASTPar(ADPar,'TwrShadow');
     if err1
         ADtemplate   = [ADtemplate_1 '.dat'];  %template for AD file without NEWTOWER        
     else

@@ -110,43 +110,43 @@ while true %loop until discovering Outlist or end of file, than break
     if ~isComment
         
         if strcmpi(value,'"HtFract"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)
-            NTwInpSt = GetFastPar(DataOut,'NTwInpSt');        
+            NTwInpSt = GetFASTPar(DataOut,'NTwInpSt');        
             [DataOut.TowProp, DataOut.TowPropHdr] = ParseFASTNumTable(line, fid, NTwInpSt);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"TwrElev"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)
-            NumTwrNds = GetFastPar(DataOut,'NumTwrNds');        
+            NumTwrNds = GetFASTPar(DataOut,'NumTwrNds');        
             [DataOut.TowProp, DataOut.TowPropHdr] = ParseFASTNumTable(line, fid, NumTwrNds);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"BlFract"') %we've reached the distributed blade properties table (and we think it's a string value so it's in quotes)
-            NBlInpSt = GetFastPar(DataOut,'NBlInpSt');        
+            NBlInpSt = GetFASTPar(DataOut,'NBlInpSt');        
             [DataOut.BldProp, DataOut.BldPropHdr] = ParseFASTNumTable(line, fid, NBlInpSt);
             continue; %let's continue reading the file
         elseif strcmpi(label,'F_X') %we've reached the TMD spring forces table
-            NKInpSt = GetFastPar(DataOut,'NKInpSt');        
+            NKInpSt = GetFASTPar(DataOut,'NKInpSt');        
             [DataOut.TMDspProp, DataOut.TMDspPropHdr] = ParseFASTNumTable(line, fid, NKInpSt);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"GenSpd_TLU"') %we've reached the DLL torque-speed lookup table (and we think it's a string value so it's in quotes)
-            DLL_NumTrq = GetFastPar(DataOut,'DLL_NumTrq');        
+            DLL_NumTrq = GetFASTPar(DataOut,'DLL_NumTrq');        
             [DataOut.DLLProp, DataOut.DLLPropHdr] = ParseFASTNumTable(line, fid, DLL_NumTrq);
             continue; %let's continue reading the file
         elseif strcmpi(label,'FoilNm') %note NO quotes because it's a label
-            NumFoil = GetFastPar(DataOut,'NumFoil');
+            NumFoil = GetFASTPar(DataOut,'NumFoil');
             [DataOut.FoilNm] = ParseFASTFileList( line, fid, NumFoil );
             continue; %let's continue reading the file  
         elseif strcmpi(label,'AFNames') %note NO quotes because it's a label
-            NumFoil = GetFastPar(DataOut,'NumAFfiles');
+            NumFoil = GetFASTPar(DataOut,'NumAFfiles');
             [DataOut.FoilNm] = ParseFASTFileList( line, fid, NumFoil );
             continue; %let's continue reading the file  
         elseif strcmpi(value,'"RNodes"')
-            BldNodes = GetFastPar(DataOut,'BldNodes');  
+            BldNodes = GetFASTPar(DataOut,'BldNodes');  
             [DataOut.BldNodes, DataOut.BldNodesHdr] = ParseFASTFmtTable( line, fid, BldNodes, false );
             continue;
         elseif strcmpi(value,'"BlSpn"')
-            NumBlNds = GetFastPar(DataOut,'NumBlNds');  
+            NumBlNds = GetFASTPar(DataOut,'NumBlNds');  
             [DataOut.BldNodes, DataOut.BldNodesHdr] = ParseFASTNumTable( line, fid, NumBlNds );
             continue;            
         elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
-            NumCases = GetFastPar(DataOut,'NumCases');        
+            NumCases = GetFASTPar(DataOut,'NumCases');        
             [DataOut.Cases, DataOut.CasesHdr] = ParseFASTNumTable(line, fid, NumCases);
             continue; %let's continue reading the file
         elseif strcmpi(label,'NumAlf')

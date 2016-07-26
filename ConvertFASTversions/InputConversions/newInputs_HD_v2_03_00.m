@@ -13,25 +13,25 @@ function [HDP] = newInputs_HD_v2_02_00(HDPar)
  % v2.02.00 Specification
     
     % WaveDirMod, WaveDirSpread, WaveNDir, WaveDirRange
-    [WaveDirMod, err1] = GetFastPar(HDP,'WaveDirMod');    
+    [WaveDirMod, err1] = GetFASTPar(HDP,'WaveDirMod');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WaveDirMod';
         HDP.Val{n}   = 0;
     end
-    [WaveDirSpread, err1] = GetFastPar(HDP,'WaveDirSpread');    
+    [WaveDirSpread, err1] = GetFASTPar(HDP,'WaveDirSpread');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WaveDirSpread';
         HDP.Val{n}   = 1;
     end
-    [WaveNDir, err1] = GetFastPar(HDP,'WaveNDir');    
+    [WaveNDir, err1] = GetFASTPar(HDP,'WaveNDir');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WaveNDir';
         HDP.Val{n}   = 1;
     end
-    [WaveDirRange, err1] = GetFastPar(HDP,'WaveDirRange');    
+    [WaveDirRange, err1] = GetFASTPar(HDP,'WaveDirRange');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WaveDirRange';
@@ -39,37 +39,37 @@ function [HDP] = newInputs_HD_v2_02_00(HDPar)
     end
     
     % WvDiffQTF, WvSumQTF, WvLowCOffD, WvHiCOffD, WvLowCOffS, WvHiCOffS 
-    [WvDiffQTF, err1] = GetFastPar(HDP,'WvDiffQTF');    
+    [WvDiffQTF, err1] = GetFASTPar(HDP,'WvDiffQTF');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WvDiffQTF';
         HDP.Val{n}   = 'False';
     end
-    [WvSumQTF, err1] = GetFastPar(HDP,'WvSumQTF');    
+    [WvSumQTF, err1] = GetFASTPar(HDP,'WvSumQTF');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WvSumQTF';
         HDP.Val{n}   = 'False';
     end
-    [WvLowCOffD, err1] = GetFastPar(HDP,'WvLowCOffD');    
+    [WvLowCOffD, err1] = GetFASTPar(HDP,'WvLowCOffD');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WvLowCOffD';
         HDP.Val{n}   = 0;
     end
-    [WvHiCOffD, err1] = GetFastPar(HDP,'WvHiCOffD');    
+    [WvHiCOffD, err1] = GetFASTPar(HDP,'WvHiCOffD');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WvHiCOffD';
         HDP.Val{n}   = 3.5;
     end
-    [WvLowCOffS, err1] = GetFastPar(HDP,'WvLowCOffS');    
+    [WvLowCOffS, err1] = GetFASTPar(HDP,'WvLowCOffS');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WvLowCOffS';
         HDP.Val{n}   = 0.1;
     end
-    [WvHiCOffS, err1] = GetFastPar(HDP,'WvHiCOffS');    
+    [WvHiCOffS, err1] = GetFASTPar(HDP,'WvHiCOffS');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'WvHiCOffS';
@@ -78,25 +78,25 @@ function [HDP] = newInputs_HD_v2_02_00(HDPar)
     
     
     % MnDrift, NewmanApp, DiffQTF, SumQTF    
-    [MnDrift, err1] = GetFastPar(HDP,'MnDrift');    
+    [MnDrift, err1] = GetFASTPar(HDP,'MnDrift');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'MnDrift';
         HDP.Val{n}   = 0;
     end
-    [NewmanApp, err1] = GetFastPar(HDP,'NewmanApp');    
+    [NewmanApp, err1] = GetFASTPar(HDP,'NewmanApp');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'NewmanApp';
         HDP.Val{n}   = 0;
     end
-    [DiffQTF, err1] = GetFastPar(HDP,'DiffQTF');    
+    [DiffQTF, err1] = GetFASTPar(HDP,'DiffQTF');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'DiffQTF';
         HDP.Val{n}   = 0;
     end
-    [SumQTF, err1] = GetFastPar(HDP,'SumQTF');    
+    [SumQTF, err1] = GetFASTPar(HDP,'SumQTF');    
     if err1
         n = n + 1;
         HDP.Label{n} = 'SumQTF';
@@ -104,15 +104,15 @@ function [HDP] = newInputs_HD_v2_02_00(HDPar)
     end
     
     % v2.03.00 specification GHWvFile  is replaced with WvKinFile
-    [GHWvFile, err1, Indx] = GetFastPar(HDP,'GHWvFile');    
+    [GHWvFile, err1, Indx] = GetFASTPar(HDP,'GHWvFile');    
     if ~err1
         HDP.Label{Indx} = 'WvKinFile';
         HDP.Val{Indx}   = '';
     end
     
-    [NAxCoef, err1] = GetFastPar(HDP,'NAxCoef');    
+    [NAxCoef, err1] = GetFASTPar(HDP,'NAxCoef');    
     if err1
-      [NAxCoef, err1] = GetFastPar(HDP,'NHvCoef');    
+      [NAxCoef, err1] = GetFASTPar(HDP,'NHvCoef');    
       if ~err1
         n = n + 1;
         HDP.Label{n} = 'NAxCoef';
@@ -126,7 +126,7 @@ function [HDP] = newInputs_HD_v2_02_00(HDPar)
     end
     
     % v2.03.00 specification GHWvFile  is replaced with WvKinFile
-    [HasWAMIT, err1, Indx] = GetFastPar(HDP,'HasWAMIT');    
+    [HasWAMIT, err1, Indx] = GetFASTPar(HDP,'HasWAMIT');    
     if ~err1
         HDP.Label{Indx} = 'PotMod';
         if ( strcmpi(HasWAMIT, 'FALSE') || strcmpi(HasWAMIT, 'F') )
@@ -136,7 +136,7 @@ function [HDP] = newInputs_HD_v2_02_00(HDPar)
         end
     end
     
-    [WAMITFile, err1, Indx] = GetFastPar(HDP,'WAMITFile');    
+    [WAMITFile, err1, Indx] = GetFASTPar(HDP,'WAMITFile');    
     if ~err1
         HDP.Label{Indx} = 'PotFile';
     end

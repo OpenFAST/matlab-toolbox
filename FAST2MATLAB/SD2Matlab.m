@@ -96,43 +96,43 @@ while true %loop until discovering Outlist or end of file, than break
         
         
         if strcmpi(value,'"JointID"') %we've reached the member joints table (and we think it's a string value so it's in quotes)
-            NJoints = GetFastPar(DataOut,'NJoints');        
+            NJoints = GetFASTPar(DataOut,'NJoints');        
             [DataOut.Joints, DataOut.JointsHdr] = ParseFASTTable(line, fid, NJoints);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"RJointID"') %we've reached the base reaction joints table (and we think it's a string value so it's in quotes)
-            NReact = GetFastPar(DataOut,'NReact');        
+            NReact = GetFASTPar(DataOut,'NReact');        
             [DataOut.ReactionJoints, DataOut.ReactionJointsHdr] = ParseFASTTable(line, fid, NReact);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"IJointID"') %we've reached the interface joints table (and we think it's a string value so it's in quotes)
-            NInterf = GetFastPar(DataOut,'NInterf');        
+            NInterf = GetFASTPar(DataOut,'NInterf');        
             [DataOut.InterfaceJoints, DataOut.InterfaceJointsHdr] = ParseFASTTable(line, fid, NInterf);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"MemberID"') 
             if strcmpi(DataOut.Label(end), 'NMembers') %we've reached the member table 
-               NMembers = GetFastPar(DataOut,'NMembers');        
+               NMembers = GetFASTPar(DataOut,'NMembers');        
                [DataOut.Members, DataOut.MembersHdr] = ParseFASTTable(line, fid, NMembers);
                continue; %let's continue reading the file
             elseif strcmpi(DataOut.Label(end), 'NMOutputs') %we've reached the member output list table 
-               NMOutputs = GetFastPar(DataOut,'NMOutputs');        
+               NMOutputs = GetFASTPar(DataOut,'NMOutputs');        
                [DataOut.MemberOuts, DataOut.MemberOutsHdr] = ParseMemberOutputs(line, fid, NMOutputs);
                continue; %let's continue reading the file
             end    
         elseif strcmpi(value,'"PropSetID"') %we've reached the member cross-section properties table (and we think it's a string value so it's in quotes)
             if strcmpi(DataOut.Label(end), 'NPropSets') %we've reached the member table 
-               NPropSets = GetFastPar(DataOut,'NPropSets');        
+               NPropSets = GetFASTPar(DataOut,'NPropSets');        
                [DataOut.MemberSectionProp, DataOut.MemberSectionPropHdr] = ParseFASTTable(line, fid, NPropSets);
                continue; %let's continue reading the file
             elseif strcmpi(DataOut.Label(end), 'NXPropSets') %we've reached the member table 
-               NXPropSets = GetFastPar(DataOut,'NXPropSets');        
+               NXPropSets = GetFASTPar(DataOut,'NXPropSets');        
                [DataOut.MemberSection2Prop, DataOut.MemberSection2PropHdr] = ParseFASTTable(line, fid, NXPropSets);
                continue; %let's continue reading the file          
             end
         elseif strcmpi(value,'"COSMID"') %we've reached the cosine matrices table (and we think it's a string value so it's in quotes)
-            NCOSMs = GetFastPar(DataOut,'NCOSMs');        
+            NCOSMs = GetFASTPar(DataOut,'NCOSMs');        
             [DataOut.CosMat, DataOut.CosMatHdr] = ParseFASTTable(line, fid, NCOSMs);
             continue; %let's continue reading the file  
         elseif strcmpi(value,'"CMJointID"') %we've reached the joint additional concentrated masses table (and we think it's a string value so it's in quotes)
-            NCmass = GetFastPar(DataOut,'NCmass');        
+            NCmass = GetFASTPar(DataOut,'NCmass');        
             [DataOut.JntConcMassProp, DataOut.JntConcMassPropHdr] = ParseFASTTable(line, fid, NCmass);
             continue; %let's continue reading the file  
         else                

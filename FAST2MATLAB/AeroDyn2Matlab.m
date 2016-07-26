@@ -65,7 +65,7 @@ end %end while
 
 
 %% Read in FoilNm list
-% numFoil = GetFastPar(DataOut,'NumFoil');
+% numFoil = GetFASTPar(DataOut,'NumFoil');
 for i = 1:numFoil
     line = fgetl(fid);
     DataOut.FoilNm{i,1} = ParseFASTInputLine( line );

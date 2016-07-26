@@ -108,48 +108,48 @@ while true %loop until discovering Outlist or end of file, than break
         
         
         if  strcmpi(value,'"HvCoefID"') %we've reached the heave coefficients table (and we think it's a string value so it's in quotes)  deprecated at version v2.00.03
-            NHvCoef = GetFastPar(DataOut,'NHvCoef');        
+            NHvCoef = GetFASTPar(DataOut,'NHvCoef');        
             [DataOut.HvCoefs, DataOut.HvCoefsHdr] = ParseFASTTable(line, fid, NHvCoef);
             continue; %let's continue reading the file
         elseif  strcmpi(value,'"AxCoefID"') %we've reached the axial coefficients table (and we think it's a string value so it's in quotes)  v2.00.03 of input specification
-            NAxCoef = GetFastPar(DataOut,'NAxCoef');        
+            NAxCoef = GetFASTPar(DataOut,'NAxCoef');        
             [DataOut.AxCoefs, DataOut.AxCoefsHdr] = ParseFASTTable(line, fid, NAxCoef);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"JointID"') %we've reached the member joints table (and we think it's a string value so it's in quotes)
-            NJoints = GetFastPar(DataOut,'NJoints');        
+            NJoints = GetFASTPar(DataOut,'NJoints');        
             [DataOut.Joints, DataOut.JointsHdr] = ParseFASTTable(line, fid, NJoints);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"PropSetID"') %we've reached the member cross-section properties table (and we think it's a string value so it's in quotes)
-            NPropSets = GetFastPar(DataOut,'NPropSets');        
+            NPropSets = GetFASTPar(DataOut,'NPropSets');        
             [DataOut.MemberSectionProp, DataOut.MemberSectionPropHdr] = ParseFASTTable(line, fid, NPropSets);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"SimplCd"') %we've reached the simple hydrodynamic coefficients table (and we think it's a string value so it's in quotes)        
             [DataOut.SmplProp, DataOut.SmplPropHdr] = ParseFASTTable(line, fid, 1);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"Dpth"') %we've reached the member depth-based hydrodynamic coefficients table (and we think it's a string value so it's in quotes)
-            NCoefDpth = GetFastPar(DataOut,'NCoefDpth');        
+            NCoefDpth = GetFASTPar(DataOut,'NCoefDpth');        
             [DataOut.DpthProp, DataOut.DpthPropHdr] = ParseFASTTable(line, fid, NCoefDpth);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"MemberID"') 
             if strcmpi(DataOut.Label(end), 'NCoefMembers') %we've reached the member-based hydrodynamic coefficients table 
-               NCoefMembers = GetFastPar(DataOut,'NCoefMembers');        
+               NCoefMembers = GetFASTPar(DataOut,'NCoefMembers');        
                [DataOut.MemberProp, DataOut.MemberPropHdr] = ParseFASTTable(line, fid, NCoefMembers);
                continue; %let's continue reading the file
             elseif strcmpi(DataOut.Label(end), 'NMembers') %we've reached the member table 
-               NMembers = GetFastPar(DataOut,'NMembers');        
+               NMembers = GetFASTPar(DataOut,'NMembers');        
                [DataOut.Members, DataOut.MembersHdr] = ParseMembersTable(line, fid, NMembers);
                continue; %let's continue reading the file
             elseif strcmpi(DataOut.Label(end), 'NMOutputs') %we've reached the member output list table 
-               NMOutputs = GetFastPar(DataOut,'NMOutputs');        
+               NMOutputs = GetFASTPar(DataOut,'NMOutputs');        
                [DataOut.MemberOuts, DataOut.MemberOutsHdr] = ParseMemberOutputs(line, fid, NMOutputs);
                continue; %let's continue reading the file
             end
         elseif strcmpi(value,'"FillNumM"') %we've reached the filled members table (and we think it's a string value so it's in quotes)
-            NFillGroups = GetFastPar(DataOut,'NFillGroups');        
+            NFillGroups = GetFASTPar(DataOut,'NFillGroups');        
             [DataOut.FillGroups, DataOut.FillGroupsHdr] = ParseFillGroups(line, fid, NFillGroups);
             continue; %let's continue reading the file
         elseif strcmpi(DataOut.Label(end), 'NJOutputs') && ~readJOut  %we've reached the joint outputs table (and we think it's a string value so it's in quotes)
-            NJOutputs = GetFastPar(DataOut,'NJOutputs'); 
+            NJOutputs = GetFASTPar(DataOut,'NJOutputs'); 
             if strcmpi(label,'HDSum')
                DataOut.Label{count,1} = label;
                DataOut.Val{count,1}   = value;
@@ -161,7 +161,7 @@ while true %loop until discovering Outlist or end of file, than break
             readJOut = true;
             continue; %let's continue reading the file
         elseif strcmpi(value,'"MGDpth"') %we've reached the marine growth table (and we think it's a string value so it's in quotes)
-            NMGDepths = GetFastPar(DataOut,'NMGDepths');        
+            NMGDepths = GetFASTPar(DataOut,'NMGDepths');        
             [DataOut.MGProp, DataOut.MGPropHdr] = ParseFASTTable(line, fid, NMGDepths);
             continue; %let's continue reading the file
         else                

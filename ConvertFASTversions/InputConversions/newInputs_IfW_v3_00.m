@@ -19,10 +19,10 @@ function [IfWP, err1] = newInputs_IfW_v3_00(ADPar,EDPar)
     %----------------------------------------------------------------------      
     n = 0;    
         
-    [WindFile, err1] = GetFastPar(ADPar,'WindFile');
-    [RefHt, err2] = GetFastPar(ADPar,'HH');
+    [WindFile, err1] = GetFASTPar(ADPar,'WindFile');
+    [RefHt, err2] = GetFASTPar(ADPar,'HH');
     if (err2)
-        [RefHt, err2] = GetFastPar(ADPar,'RefHt');
+        [RefHt, err2] = GetFASTPar(ADPar,'RefHt');
     end    
 
         % if there *was* an error, WindFile does not existed, 
@@ -114,8 +114,8 @@ function [IfWP, err1] = newInputs_IfW_v3_00(ADPar,EDPar)
     IfWP.Val{n}   = 'False';    
 
     %%%%
-    [TipRad,  err3] = GetFastPar(EDPar,'TipRad');
-    [PreCone, err4] = GetFastPar(EDPar,'PreCone(1)');
+    [TipRad,  err3] = GetFASTPar(EDPar,'TipRad');
+    [PreCone, err4] = GetFASTPar(EDPar,'PreCone(1)');
     CosPreCone = cos(PreCone * pi/180); %convert input to radians and get cosine
     r = 2*TipRad*CosPreCone;
 

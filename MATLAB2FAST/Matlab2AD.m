@@ -104,7 +104,7 @@ for i = 2:length(ADPar.FoilNm)
 end
 
 %Now write the BldNodes line
-fprintf(fidOUT,[num2str(GetFastPar(ADPar,'BldNodes')) '\tBldNodes - Number of blade nodes used for analysis (-)\n']);
+fprintf(fidOUT,[num2str(GetFASTPar(ADPar,'BldNodes')) '\tBldNodes - Number of blade nodes used for analysis (-)\n']);
 
 %Write the BNodes HDR
 fprintf(fidOUT,'RNodes\tAeroTwst\tDRNodes\tChord\tNFoil\tPrnElm\n');

@@ -9,9 +9,9 @@ function [HDP] = newInputs_HD_v2_00_03(HDPar)
      
     n = length(HDP.Label);
 
-    [NAxCoef, err1] = GetFastPar(HDP,'NAxCoef');    
+    [NAxCoef, err1] = GetFASTPar(HDP,'NAxCoef');    
     if err1
-      [NAxCoef, err1] = GetFastPar(HDP,'NHvCoef');    
+      [NAxCoef, err1] = GetFASTPar(HDP,'NHvCoef');    
       if ~err1
         n = n + 1;
         HDP.Label{n} = 'NAxCoef';
