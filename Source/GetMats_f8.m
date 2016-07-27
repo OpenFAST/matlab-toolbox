@@ -2,7 +2,7 @@
 % Written by J. Jonkman, NREL
 % 19-July-2016: Updated to convert FAST v8.16 linearization files into
 % format expected by mbc3.m
-% NOTE that we assume all the files in RootNames contain the same data
+% NOTE that we assume all the files in FileNames contain the same data
 % structures (same state matrices; same number of inputs, outputs, states, 
 % etc.; same rotor speed; but should have different azimuth angles.
 
@@ -13,8 +13,9 @@
 
 format short g;
 
-FileNames = {'C:\Users\bjonkman\Documents\DATA\DesignCodes\simulators\FAST\SVNdirectory\branches\BJonkman\CertTest\Test18.1.lin'};
-FileNames = {'Test18.1.lin'};
+if isempty(FileNames)
+    FileNames = {'Test18.1.lin','Test18.2.lin'};
+end 
 
 % Input data:
 
