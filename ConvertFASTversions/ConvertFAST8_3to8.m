@@ -61,7 +61,7 @@ end
 
         %Primary FAST file
     inputfile = [oldDir filesep baseFileName];
-    FP = Fast2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
+    FP = FAST2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
 
         % convert inputs in FAST v8.05:
     FP = newInputs_FAST_v8_05(FP);

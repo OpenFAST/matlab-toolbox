@@ -64,7 +64,7 @@ end
     
         %Primary FAST file
     inputfile = [oldDir filesep baseFileName];      
-    FP = Fast2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
+    FP = FAST2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
 
     
     
@@ -72,7 +72,7 @@ end
     SrvDFile = GetFASTPar(FP,'SrvDFile');
     SrvDFile = strrep(SrvDFile,'"',''); %let's remove the quotes so we can actually use this file name   
     [OldSrvDFile, FileWasRelative] = GetFullFileName( SrvDFile, oldDir );       
-    SrvDP = Fast2Matlab(OldSrvDFile,2); %SrvDP are ServoDyn parameters
+    SrvDP = FAST2Matlab(OldSrvDFile,2); %SrvDP are ServoDyn parameters
     
     newSrvDname = [newDir filesep SrvDFile];   
     
@@ -92,7 +92,7 @@ end
     EDFile = GetFASTPar(FP,'EDFile');
     EDFile = strrep(EDFile,'"',''); %let's remove the quotes so we can actually use this file name   
     [OldEDFile, FileWasRelative] = GetFullFileName( EDFile, oldDir );       
-    EDP = Fast2Matlab(OldEDFile,2); %EDP are ElastoDyn parameters
+    EDP = FAST2Matlab(OldEDFile,2); %EDP are ElastoDyn parameters
     
     newEDname = [newDir filesep EDFile];   
     

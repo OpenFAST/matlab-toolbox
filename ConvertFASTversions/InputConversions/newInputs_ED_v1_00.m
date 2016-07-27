@@ -50,7 +50,7 @@ function [EDP] = newInputs_ED_v1_00(EDPar, oldDir)
             inputfile = GetFullFileName(PlatformFile,oldDir);
 
             if ( ~isempty(inputfile) )                        
-                EDP = Fast2Matlab(inputfile,3, EDP); %add Platform Parameters to EDP, specify 3 lines of header
+                EDP = FAST2Matlab(inputfile,3, EDP); %add Platform Parameters to EDP, specify 3 lines of header
                 setPtfmVals = false;
             end                   
         end

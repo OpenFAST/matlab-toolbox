@@ -60,7 +60,7 @@ end
 
         %Primary FAST file
     inputfile = [oldDir filesep baseFileName];
-    FP = Fast2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
+    FP = FAST2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
 
 %%  %----------------------------------------------------------------------
     % Get AD Data and write new AD15 file:
@@ -70,7 +70,7 @@ end
         FullADFile = GetFASTPar(FP,'AeroFile');
         [newADName]  = GetFullFileName( FullADFile, newDir ); % new path + name
         [FullADFile] = GetFullFileName( FullADFile, oldDir );
-        ADPar = Fast2Matlab(FullADFile,2); % get AeroDyn data (2 header lines)
+        ADPar = FAST2Matlab(FullADFile,2); % get AeroDyn data (2 header lines)
 
         template   = [templateDir filesep 'AD_Primary_v15.03.x.dat'];  %template for primary file
         Matlab2FAST(ADPar,template,newADName, 2); %contains 2 header lines
@@ -84,7 +84,7 @@ end
 %         FullIfWFile = GetFASTPar(FP,'InflowFile');
 %         [newIfWName]  = GetFullFileName( FullIfWFile, newDir ); % new path + name
 %         [FullIfWFile] = GetFullFileName( FullIfWFile, oldDir );
-%         IfWPar = Fast2Matlab(FullIfWFile,2); % get InflowWind data (2 header lines)
+%         IfWPar = FAST2Matlab(FullIfWFile,2); % get InflowWind data (2 header lines)
 % 
 %         template   = [templateDir filesep 'IfW_v3.01.x.dat'];  %template for primary file
 %         Matlab2FAST(IfWPar,template,newIfWName, 2); %contains 2 header lines

@@ -63,7 +63,7 @@ end
 
         %Primary FAST file
     inputfile = [oldDir filesep baseFileName];
-    FP = Fast2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
+    FP = FAST2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
 
 
 %%  %----------------------------------------------------------------------
@@ -73,7 +73,7 @@ end
     FullEDFile = strrep(FullEDFile,'"',''); %let's remove the quotes so we can actually use this file name
     [newEDName]  = GetFullFileName( FullEDFile, newDir ); % new path + name
     [FullEDFile] = GetFullFileName( FullEDFile, oldDir );
-    EDPar = Fast2Matlab(FullEDFile,3); % get ElastoDyn data (3 header lines)
+    EDPar = FAST2Matlab(FullEDFile,3); % get ElastoDyn data (3 header lines)
     
 
 %%  %----------------------------------------------------------------------
@@ -83,7 +83,7 @@ end
     FullSrvDFile = strrep(FullSrvDFile,'"',''); %let's remove the quotes so we can actually use this file name
     [newSrvDName]  = GetFullFileName( FullSrvDFile, newDir ); % new path + name
     [FullSrvDFile] = GetFullFileName( FullSrvDFile, oldDir );
-    SrvDPar = Fast2Matlab(FullSrvDFile,3); % get ElastoDyn data (3 header lines)
+    SrvDPar = FAST2Matlab(FullSrvDFile,3); % get ElastoDyn data (3 header lines)
     
 skip=false;
 if (~skip)
@@ -96,7 +96,7 @@ if (~skip)
     AeroFile = GetFASTPar(FP,'AeroFile');                                   
     AeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name    
     [FullAeroFile,ADWasRelative] = GetFullFileName( AeroFile, oldDir ); % old path + name
-    ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
+    ADPar = FAST2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
     
     if (~ADWasRelative)
         disp( ['WARNING: AeroDyn file (' AeroFile ') is not a relative name. New AeroDyn will be located here: '] )
@@ -153,7 +153,7 @@ if (~skip)
         
         if (err2) % try to read the data from the InflowWind file instead
             [oldIfWName] = GetFullFileName( InflowFileNoQuotes, oldDir );
-            IfWP = Fast2Matlab(oldIfWName,3); % 3 header lines   
+            IfWP = FAST2Matlab(oldIfWName,3); % 3 header lines   
         end
                     
             % write new InflowWind file

@@ -3,8 +3,8 @@ function [OutListAry, CommentAry] = GetOutListVars(OutList, OutListComments)
 % This routine parses the OutList field into individual variables (the
 % input value may contain several variables per line)
 %Inputs: 
-%   OutList     - .OutList cell array, as returned from Fast2Matlab
-%   Comment     - .OutListComment cell array, as returned from Fast2Matlab
+%   OutList     - .OutList cell array, as returned from FAST2Matlab
+%   Comment     - .OutListComment cell array, as returned from FAST2Matlab
 %Outputs:
 %   OutListAry  - .OutList cell array, with only one variable per line
 %   CommentAry  - .OutListComm cell array, with only one variable per line

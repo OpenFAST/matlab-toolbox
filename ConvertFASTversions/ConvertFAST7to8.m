@@ -87,7 +87,7 @@ end
     fprintf( '%s\n', '****************************************************');
     
     inputfile = [oldDir filesep baseFileName];      
-    FP = Fast2Matlab(inputfile,4); %FP are Fast Parameters, specify 4 lines of header
+    FP = FAST2Matlab(inputfile,4); %FP are Fast Parameters, specify 4 lines of header
    
     %----------------------------------------------------------------------
     % Get blade and tower data, too...
@@ -96,7 +96,7 @@ end
     TwrFile = GetFASTPar(FP,'TwrFile');    
     [OldTwrFile, TwrWasRelative] = GetFullFileName( TwrFile, oldDir );
     TwrFile = strrep(TwrFile,'"',''); %let's remove the quotes so we can actually use this file name (do this after calling GetFullFileName in case there are spaces in this name)
-    TP = Fast2Matlab(OldTwrFile,3); %get the old tower parameters with 3 header lines
+    TP = FAST2Matlab(OldTwrFile,3); %get the old tower parameters with 3 header lines
     
     % Blade files: (we'll modify this later)
     NumBl = GetFASTPar(FP,'NumBl');
@@ -107,7 +107,7 @@ end
 
         [OldBldFile, BldWasRelative(k)] = GetFullFileName( BldFile{k}, oldDir );
         BldFile{k} = strrep(BldFile{k},'"',''); %let's remove the quotes so we can actually use this file name (after calling GetFullFileName)
-        BP{k} = Fast2Matlab(OldBldFile,3); %get the old blade parameters with 3 header lines
+        BP{k} = FAST2Matlab(OldBldFile,3); %get the old blade parameters with 3 header lines
     end
     
     %----------------------------------------------------------------------
@@ -254,7 +254,7 @@ end
     AeroFile = GetFASTPar(FP,'AeroFile');                                   
     [FullAeroFile,ADWasRelative] = GetFullFileName( AeroFile, oldDir ); % old path + name
     AeroFile = strrep(AeroFile,'"',''); %let's remove the quotes so we can actually use this file name (after GetFullFileName)   
-    ADPar = Fast2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
+    ADPar = FAST2Matlab(FullAeroFile,2); % get AeroDyn data (2 header lines [2nd one is actually SI input])        
     ADPar.HdrLines{2} = ADPar.HdrLines{1}; %replace 2nd header line with 1st so we retain some info about this file
        
     if (~ADWasRelative)

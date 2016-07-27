@@ -17,7 +17,7 @@ function [YawManRat, PitManRat] = CalculateYawAndPitchRates(inputfile, outputfil
 %             not defined)
 %..........................................................................
 % FAST pre-v8.* input file
-FP = Fast2Matlab(inputfile,4); %FP are Fast Parameters, specify 4 lines of header
+FP = FAST2Matlab(inputfile,4); %FP are Fast Parameters, specify 4 lines of header
 
 % output file
 if isempty( strfind( lower(outputfile), '.outb') )

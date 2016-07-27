@@ -60,7 +60,7 @@ end
 
         %Primary FAST file
     inputfile = [oldDir filesep baseFileName];
-    FP = Fast2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
+    FP = FAST2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
 
 %%  %----------------------------------------------------------------------
     % Write new model data to the FAST input files:
