@@ -19,10 +19,11 @@ function [Channels, ChanName, ChanUnit, FileID, DescStr] = ReadFASTbinary(FileNa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 LenName = 10;  % number of characters per channel name
-LenUnit = 10;  % number of characters per unit name
+LenUnit = LenName;  % number of characters per unit name
 
 FileFmtID = struct( 'WithTime',   1, ...               % File identifiers used in FAST
-                    'WithoutTime',2 );
+                    'WithoutTime',2, ...
+                    'ChanLen',    3 );
 
 fid  = fopen( FileName );
 if fid > 0
@@ -50,7 +51,11 @@ if fid > 0
     DescStrASCII = fread( fid, LenDesc,     'uint8' );  % DescStr converted to ASCII
     DescStr      = char( DescStrASCII' );                     
     
-    
+    if FileID == FileFmtID.ChanLen
+        LenName = 15;
+        LenUnit = LenName;
+    end
+
     ChanName = cell(NumOutChans+1,1);                   % initialize the ChanName cell array
     for iChan = 1:NumOutChans+1 
         ChanNameASCII = fread( fid, LenName, 'uint8' ); % ChanName converted to numeric ASCII
