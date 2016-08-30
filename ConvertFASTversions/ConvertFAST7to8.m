@@ -123,7 +123,7 @@ end
     end
     [FP] = newInputs_SrvD_v1_02(FP);
     %....................................  
-    
+        
     
 %     FP = SetFASTPar(FP,'ADAMSPrep',1);          % Adams isn't available in this version
 %     FP = SetFASTPar(FP,'AnalMode', 1);          % Linearization isn't available in this version
@@ -249,6 +249,16 @@ end
     end
                
     %----------------------------------------------------------------------
+    % convert everything to latest FAST version:
+    %----------------------------------------------------------------------
+    [FP] = newInputs_FAST_v8_05(FP);
+    [FP,InflowFile] = newInputs_FAST_v8_12(FP, newDir);
+    
+    % FP = SetFASTPar(FP,'InflowFile',InflowFile); - this was done in newInputs_FAST_v8_12
+    InflowFile = strrep(InflowFile,'"','');
+    
+    
+    %----------------------------------------------------------------------
     % Convert AeroDyn data:
     %----------------------------------------------------------------------
     AeroFile = GetFASTPar(FP,'AeroFile');                                   
@@ -264,14 +274,7 @@ end
         disp( [newDir filesep AeroFile] );
         FP = SetFASTPar(FP,'AeroFile',['"' AeroFile '"']);
     end
-            
-    % convert everything to latest FAST version:
-    [FP] = newInputs_FAST_v8_05(FP);
-    [FP,InflowFile] = newInputs_FAST_v8_12(FP, newDir);
-    
-    % FP = SetFASTPar(FP,'InflowFile',InflowFile); - this was done in newInputs_FAST_v8_12
-    InflowFile = strrep(InflowFile,'"','');
-    
+                
     %----------------------------------------------------------------------
     % Create InflowWind data:
     %----------------------------------------------------------------------        

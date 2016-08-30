@@ -4,6 +4,12 @@ function [fullFileName, wasRelative] = GetFullFileName( inFile, relDir )
 % relDir is the path the file is relative to (if inFile isn't a absolute
 %        path name)
 
+if isempty(inFile)
+   fullFileName = '';
+   wasRelative = false;
+   return
+end
+
 fileName = textscan(inFile,'%q',1); % remove quotes if necessary
 fileName = fileName{1}{1};
 
