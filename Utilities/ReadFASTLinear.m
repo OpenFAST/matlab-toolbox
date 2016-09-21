@@ -71,7 +71,7 @@ function [data] = ReadFASTLinear(fileName)
         fgetl(fid); % skip a blank line
 
         while true
-            [M, name] = readMatrix(fid);
+            [M, name] = readFASTMatrix(fid);
             if ~ischar(name) 
                 break;
             end
@@ -108,25 +108,5 @@ function [op, desc, RF] = readLinTable(fid,n)
     end
 
     fgetl(fid); % skip a blank line
-return
-end
-
-function [Mat, name] = readMatrix(fid)
-
-    line = fgetl(fid);
-    if ischar(line) && ~isempty(line)
-        C = textscan( line, '%s', 'delimiter', ':' );
-        name = C{1}{1};
-
-        C = textscan( C{1}{2}, '%f %*s %f' );
-        m=C{1};
-        n=C{2};
-
-        Mat = cell2mat( textscan(fid, repmat('%f',1,n),m,'CollectOutput',1) );
-        fgetl(fid); %read end-of-line character(s)
-    else
-        name = -1;
-        Mat = [];
-    end
 return
 end
