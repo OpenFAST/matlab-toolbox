@@ -1,4 +1,4 @@
-function [Channels, ChanName, ChanUnit, FileID, DescStr] = ReadFASTbinary(FileName)
+function [Channels, ChanName, ChanUnit, FileID, DescStr] = ReadFASTbinary(FileName,machinefmt)
 %[Channels, ChannelNames, ChannelUnits] = ReadFASTbinary(FileName)
 % Author: Bonnie Jonkman, National Renewable Energy Laboratory
 % (c) 2012, 2013 National Renewable Energy Laboratory
@@ -21,6 +21,12 @@ function [Channels, ChanName, ChanUnit, FileID, DescStr] = ReadFASTbinary(FileNa
 LenName = 10;  % number of characters per channel name
 LenUnit = LenName;  % number of characters per unit name
 
+if nargin<2
+    machinefmt = 'native';
+%     machinefmt = 'l';
+end
+
+
 FileFmtID = struct( 'WithTime',   1, ...               % File identifiers used in FAST
                     'WithoutTime',2, ...
                     'ChanLen',    3 );
@@ -31,24 +37,24 @@ if fid > 0
     % get the header information
     %----------------------------
     
-    FileID       = fread( fid, 1, 'int16');             % FAST output file format, INT(2)
+    FileID       = fread( fid, 1, 'int16',machinefmt);             % FAST output file format, INT(2)
 
-    NumOutChans  = fread( fid, 1, 'int32');             % The number of output channels, INT(4)
-    NT           = fread( fid, 1, 'int32');             % The number of time steps, INT(4)
+    NumOutChans  = fread( fid, 1, 'int32',machinefmt);             % The number of output channels, INT(4)
+    NT           = fread( fid, 1, 'int32',machinefmt);             % The number of time steps, INT(4)
 
     if FileID == FileFmtID.WithTime
-        TimeScl  = fread( fid, 1, 'float64');           % The time slopes for scaling, REAL(8)
-        TimeOff  = fread( fid, 1, 'float64');           % The time offsets for scaling, REAL(8)
+        TimeScl  = fread( fid, 1, 'float64',machinefmt);           % The time slopes for scaling, REAL(8)
+        TimeOff  = fread( fid, 1, 'float64',machinefmt);           % The time offsets for scaling, REAL(8)
     else
-        TimeOut1 = fread( fid, 1, 'float64');           % The first time in the time series, REAL(8)
-        TimeIncr = fread( fid, 1, 'float64');           % The time increment, REAL(8)
+        TimeOut1 = fread( fid, 1, 'float64',machinefmt);           % The first time in the time series, REAL(8)
+        TimeIncr = fread( fid, 1, 'float64',machinefmt);           % The time increment, REAL(8)
     end
     
-    ColScl       = fread( fid, NumOutChans, 'float32'); % The channel slopes for scaling, REAL(4)
-    ColOff       = fread( fid, NumOutChans, 'float32'); % The channel offsets for scaling, REAL(4)
+    ColScl       = fread( fid, NumOutChans, 'float32',machinefmt); % The channel slopes for scaling, REAL(4)
+    ColOff       = fread( fid, NumOutChans, 'float32',machinefmt); % The channel offsets for scaling, REAL(4)
 
-    LenDesc      = fread( fid, 1,           'int32' );  % The number of characters in the description string, INT(4)
-    DescStrASCII = fread( fid, LenDesc,     'uint8' );  % DescStr converted to ASCII
+    LenDesc      = fread( fid, 1,           'int32',machinefmt );  % The number of characters in the description string, INT(4)
+    DescStrASCII = fread( fid, LenDesc,     'uint8',machinefmt );  % DescStr converted to ASCII
     DescStr      = char( DescStrASCII' );                     
     
     if FileID == FileFmtID.ChanLen
@@ -58,13 +64,13 @@ if fid > 0
 
     ChanName = cell(NumOutChans+1,1);                   % initialize the ChanName cell array
     for iChan = 1:NumOutChans+1 
-        ChanNameASCII = fread( fid, LenName, 'uint8' ); % ChanName converted to numeric ASCII
+        ChanNameASCII = fread( fid, LenName, 'uint8',machinefmt ); % ChanName converted to numeric ASCII
         ChanName{iChan}= strtrim( char(ChanNameASCII') );
     end
     
     ChanUnit = cell(NumOutChans+1,1);                   % initialize the ChanUnit cell array
     for iChan = 1:NumOutChans+1
-        ChanUnitASCII = fread( fid, LenUnit, 'uint8' ); % ChanUnit converted to numeric ASCII
+        ChanUnitASCII = fread( fid, LenUnit, 'uint8',machinefmt ); % ChanUnit converted to numeric ASCII
         ChanUnit{iChan}= strtrim( char(ChanUnitASCII') );
     end            
 
@@ -79,7 +85,7 @@ if fid > 0
     Channels    = zeros(NT,NumOutChans+1);  % output channels (including time in column 1)
     
     if FileID == FileFmtID.WithTime
-        [PackedTime, cnt] = fread( fid, NT, 'int32' ); % read the time data
+        [PackedTime, cnt] = fread( fid, NT, 'int32',machinefmt ); % read the time data
         if ( cnt < NT ) 
             fclose(fid);
             error(['Could not read entire ' FileName ' file: read ' num2str( cnt ) ' of ' num2str( NT ) ' time values.']);
