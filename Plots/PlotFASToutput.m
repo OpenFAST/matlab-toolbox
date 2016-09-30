@@ -24,7 +24,7 @@ function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels
 %                 indicating which channels from the ReferenceFile
 %                 should be plotted. If omitted, or is the string 'all', 
 %                 all channels except time (the first one) are plotted.
-%                 
+% ShowLegend    - scalar logical that determines if a legend is printed.                 
 % CustomHdr     - cell array describing text file format. Default will use
 %                 values appropriate for FAST text output files. 
 %     CustomHdr{1} = delim: delimiter for channel columns; if
