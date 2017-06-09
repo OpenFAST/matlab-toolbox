@@ -55,10 +55,32 @@ end
     fprintf( '%s\n', [' new name: ' newFSTname ] );
     fprintf( '%s\n', '****************************************************');
 
-
+    
         %Primary FAST file
     inputfile = [oldDir filesep baseFileName];
     FP = FAST2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
+    
+    %%  %----------------------------------------------------------------------
+    % Get AD Data and write new AD15 file:
+    %----------------------------------------------------------------------
+    CompAero = GetFASTPar(FP,'CompAero');
+    if CompAero == 2
+        FullADFile = GetFASTPar(FP,'AeroFile');
+        [newADName]  = GetFullFileName( FullADFile, newDir ); % new path + name
+        [FullADFile] = GetFullFileName( FullADFile, oldDir );
+        ADPar = FAST2Matlab(FullADFile,2); % get AeroDyn data (2 header lines)
+
+        [newADPath,ADRootname] = fileparts(newADName);
+        if 7~=exist(newADPath,'dir')
+           mkdir(newADPath)
+        end
+        [ADPar] = newInputs_AD_v15_04(ADPar, ADRootname);
+        
+        template   = [templateDir filesep 'AD_Primary_v15.04.x.dat'];  %template for primary file
+        Matlab2FAST(ADPar,template,newADName, 2); %contains 2 header lines
+    end    
+
+    
 
 
 %%  %----------------------------------------------------------------------
