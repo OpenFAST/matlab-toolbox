@@ -21,5 +21,13 @@ if ~isfield(ADPar,'CavitCheck')
    ADPar.Val{n}   = 0.1;
 end
 
+if ~isfield(ADPar,'DBEMT_Mod')
+   n = n + 1;
+   ADPar.Label{n} = 'DBEMT_Mod';
+   ADPar.Val{n}   = 2;
+   n = n + 1;
+   ADPar.Label{n} = 'tau1_const';
+   ADPar.Val{n}   = 0.33;
+end
 
 return;
