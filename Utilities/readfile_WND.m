@@ -41,9 +41,9 @@ fid_wnd   = fopen( [ FileName '.wnd' ] );
 if ( fid_wnd <= 0 )
    error( 'Wind file could not be opened.' );
 end
- 
+
 nffc  = fread( fid_wnd, 1, 'int16' );                     % number of components
-      
+
 if nffc ~= -99  % AN OLD-STYLE AERODYN WIND FILE
     dz      = fread( fid_wnd, 1, 'int16' );               % delta z in mm
     dy      = fread( fid_wnd, 1, 'int16' );               % delta y in mm
@@ -85,13 +85,14 @@ else %== -99, THE NEWER-STYLE AERODYN WIND FILE
         TI_V  = 1;
         TI_W  = 1;
         
-        if fc == 8 %MANN model
+        if fc == 8 ... %MANN model 
+          || fc == 7 % General Kaimal      
             HeadRec = fread(fid_wnd,1,'int32');
-            tmp     = fread(fid_wnd,1,'int32');  %nffc?
+            nffc    = fread(fid_wnd,1,'int32');  %nffc?
         end
         
     end %fc == 4
-        
+     %%   
     dz       = fread( fid_wnd, 1, 'float32' );            % delta z in m 
     dy       = fread( fid_wnd, 1, 'float32' );            % delta y in m
     dx       = fread( fid_wnd, 1, 'float32' );            % delta x in m           
@@ -99,21 +100,27 @@ else %== -99, THE NEWER-STYLE AERODYN WIND FILE
     MFFWS    = fread( fid_wnd, 1, 'float32');             % mean full-field wind speed
 
                fread( fid_wnd, 3, 'float32' );            % zLu, yLu, xLu: unused variables (for BLADED)
-               fread( fid_wnd, 2, 'int32' );              % unused variables (for BLADED)
+               fread( fid_wnd, 2, 'int32' );              % unused variables (for BLADED) [unused integer, random seed]
     nz       = fread( fid_wnd, 1, 'int32' );              % number of points in vertical direction
     ny       = fread( fid_wnd, 1, 'int32' );              % number of points in horizontal direction
-               fread( fid_wnd, 3*(nffc-1), 'int32' );     % other length scales: unused variables (for BLADED)                
-
-%     SummVars{numVars-3} = MFFWS;
-%     SummVars{numVars-2} = TI_U;
-%     SummVars{numVars-1} = TI_V;
-%     SummVars{numVars}   = TI_W;
-    SummVars(3:6) = [MFFWS, TI_U, TI_V, TI_W];
-    if fc == 8        
+    if (nffc==3)
+               fread( fid_wnd, 2*nffc, 'int32' );     % other length scales: unused variables (for BLADED)                
+    end 
+    
+    if fc == 7
+        CohDec = fread(fid_wnd,1,'float32');
+        CohLc  = fread(fid_wnd,1,'float32');
+    elseif fc == 8        % MANN model
         gamma  = fread(fid_wnd,1,'float32');               % MANN model shear parameter
         Scale  = fread(fid_wnd,1,'float32');               % MANN model scale length
-        
+                 fread(fid_wnd,4,'float32');
+                 fread(fid_wnd,3,'int32');
+                 fread(fid_wnd,2,'float32');
+                 fread(fid_wnd,3,'int32');
+                 fread(fid_wnd,2,'float32');
     end
+        
+    SummVars(3:6) = [MFFWS, TI_U, TI_V, TI_W];
     
 end % old or new bladed styles
 
@@ -133,7 +140,6 @@ if ( fid_sum <= 0 )
     fclose(fid_wnd);
     
     error(['Could not open the summary file: ' FileName '.sum']);
-    return;
 end
 
 while ( any( indx == 0 ) )  %MFFWS and the TIs should not be zero
@@ -218,7 +224,7 @@ disp('Reading and scaling the grid data...');
 nv       = nffc*ny*nz;               % the size of one time step
 Scale    = 0.00001*SummVars(3)*SummVars(4:6);
 Offset   = [SummVars(3) 0 0];
-
+%%
 velocity = zeros(nt,nffc,ny,nz);
 
 %bjj: disp( [nv nffc ny nz nt] );
