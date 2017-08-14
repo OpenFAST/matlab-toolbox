@@ -17,6 +17,7 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
                     str = regexp(Desc{i},BldNoCol{1},'split'); %this should return the strings before and after the match
                     FirstStr = [str{1} BldNoCol{1}(1:end-1) '.' ];
                     checkThisStr = [FirstStr str{2}];
+                    checkThisStr = strrep(strrep(strrep(checkThisStr,')','\)'), '(', '\('),'^','\^'); %we need to get rid of the special characters
                     k = str2double(BldNoCol{1}(end));
                     Tmp(k) = i;
                     break;
