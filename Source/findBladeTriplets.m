@@ -5,7 +5,7 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
 
     NTriplets = 0;              % first initialize to zero
     Triplets = [];
-    for i = 1:size(rotFrame)    % loop through inputs/outputs
+    for i = 1:length(rotFrame)    % loop through inputs/outputs
         if rotFrame(i)          % this is in the rotating frame
             Tmp = zeros(1,3);
             foundIt = false;
