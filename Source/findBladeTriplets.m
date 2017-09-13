@@ -9,7 +9,7 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
         if rotFrame(i)          % this is in the rotating frame
             Tmp = zeros(1,3);
             foundIt = false;
-            for chk = 1:size(chkStr)
+            for chk = 1:length(chkStr)
                 BldNoCol = regexp(Desc{i},chkStr{chk},'match');
                 if ~isempty(BldNoCol)
                     foundIt = true;
@@ -26,7 +26,7 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
 
                 % find the other match values
             if foundIt 
-                for j = (i+1):size(rotFrame)	% loop through all remaining control inputs
+                for j = (i+1):length(rotFrame)	% loop through all remaining control inputs
                     if rotFrame(j)          % this is in the rotating frame
                         BldNoCol = regexp(Desc{j},checkThisStr,'match'); % match all but the blade number
                         if ~isempty(BldNoCol)                      
