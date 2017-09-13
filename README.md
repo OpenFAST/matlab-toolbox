@@ -14,6 +14,3 @@ is that it can handle variable-speed operation and turbines with dissimilar blad
 may generate system models either in the first-order (state-space) form or the second-order (physical-domain) form. MBC3 can
 handle both types of system models. Key advantages of MBC are: capturing cumulative dynamics of the rotor blades and its interaction
 with the tower-nacelle subsystem, well-conditioning of system matrices by eliminating non-essential periodicity, and filtering operation.
-
-###  Prerequisite:
-[MATLAB_Toolbox] (https://github.com/NWTC/MATLAB_Toolbox)
