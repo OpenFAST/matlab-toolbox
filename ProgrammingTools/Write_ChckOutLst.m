@@ -30,7 +30,7 @@ switch ModuleName
         ModName = 'AD';
     case 'BeamDyn'
         ModName = 'BD';
-    case default
+    otherwise
         error( 'Invalid module name.');        
 end
       
