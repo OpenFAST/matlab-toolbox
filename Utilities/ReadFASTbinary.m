@@ -18,8 +18,7 @@ function [Channels, ChanName, ChanUnit, FileID, DescStr] = ReadFASTbinary(FileNa
 %                  output, indicating possible non-constant time step
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-LenName = 10;  % number of characters per channel name
-LenUnit = LenName;  % number of characters per unit name
+LenName = 10;  % default number of characters per channel name
 
 if nargin<2
     machinefmt = 'native';
@@ -29,7 +28,8 @@ end
 
 FileFmtID = struct( 'WithTime',   1, ...               % File identifiers used in FAST
                     'WithoutTime',2, ...
-                    'ChanLen',    3 );
+                    'ChanLen',    3, ...
+                    'ChanLen_In', 4);
 
 fid  = fopen( FileName );
 if fid > 0
@@ -39,6 +39,12 @@ if fid > 0
     
     FileID       = fread( fid, 1, 'int16',machinefmt);             % FAST output file format, INT(2)
 
+    if FileID == FileFmtID.ChanLen_In
+        LenName  = fread( fid, 1, 'int16',machinefmt);             % Number of characters in channel names and units
+    elseif FileID == FileFmtID.ChanLen
+        LenName = 15;
+    end
+        
     NumOutChans  = fread( fid, 1, 'int32',machinefmt);             % The number of output channels, INT(4)
     NT           = fread( fid, 1, 'int32',machinefmt);             % The number of time steps, INT(4)
 
@@ -57,11 +63,10 @@ if fid > 0
     DescStrASCII = fread( fid, LenDesc,     'uint8',machinefmt );  % DescStr converted to ASCII
     DescStr      = char( DescStrASCII' );                     
     
-    if FileID == FileFmtID.ChanLen
+    if ~isempty(strfind(DescStr,'Bladed'))
         LenName = 15;
-        LenUnit = LenName;
     end
-
+    
     ChanName = cell(NumOutChans+1,1);                   % initialize the ChanName cell array
     for iChan = 1:NumOutChans+1 
         ChanNameASCII = fread( fid, LenName, 'uint8',machinefmt ); % ChanName converted to numeric ASCII
@@ -70,7 +75,7 @@ if fid > 0
     
     ChanUnit = cell(NumOutChans+1,1);                   % initialize the ChanUnit cell array
     for iChan = 1:NumOutChans+1
-        ChanUnitASCII = fread( fid, LenUnit, 'uint8',machinefmt ); % ChanUnit converted to numeric ASCII
+        ChanUnitASCII = fread( fid, LenName, 'uint8',machinefmt ); % ChanUnit converted to numeric ASCII
         ChanUnit{iChan}= strtrim( char(ChanUnitASCII') );
     end            
 
@@ -125,4 +130,4 @@ else
 end
 
 return;
-
+end
