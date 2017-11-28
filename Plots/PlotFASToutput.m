@@ -182,7 +182,14 @@ for iChannel = Channels
         else        
             ChannelName = columnTitles{ReferenceFile}{iChannel};       
             [ChannelIndx, err, ChannelName, scaleFact] = getColIndx( ChannelName, columnTitles{iFile}, FASTfiles{iFile} );
+            
+            if ~err && ChannelIndx > 0
+                [columnUnits{iFile}{ChannelIndx}, scalefact2] = ConvertUnits( columnUnits{iFile}{ChannelIndx} );            
+                scaleFact = scalefact2*scaleFact;
+            end
         end
+        
+        
 %         if iFile == 1
 %             [ChannelName,scaleFact] = getOldFASTv8ChannelName(ChannelName);
 %         elseif iFile == 2
@@ -268,8 +275,8 @@ numFiles = size(outData,1);
                 plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
                      ,'LineStyle',lStyle ...
                      ,'Marker',Markers{iFile} ...
-                     ,'MarkerSize',4 ...
-                     ,'DisplayName',[FASTfilesDesc{iFile} ' (' outData{iFile,3}{i} ')' ] ...
+                     ,'MarkerSize',3 ...
+                     ,'DisplayName',[strrep(FASTfilesDesc{iFile},'\','\\') ' (' strrep(outData{iFile,3}{i},'_','\_') ')' ] ...
                      ,'Color',LineColors{iFile} ...
                      ,'LineWidth',LineWidthConst);
                 hold on;      
@@ -373,6 +380,9 @@ end
 %% possibly use this to make sure the channel names are the same....
 %% ------------------------------------------------------------------------
 function [Indx,err,ColToFind,scaleFact] = getColIndx( ColToFind, colNames, fileName )
+    % ColToFind is originally the name of the reference channel
+    % on exit, it is the channel name in the current file
+    
     err = false;
     scaleFact = 1;
     Indx = find( strcmpi(ColToFind, colNames), 1, 'first' );
@@ -437,6 +447,24 @@ function [Indx,scaleFact,ColToFind] = getNewColIndx( ColToFind, colNames )
     end
     
 return
+end
+
+function [unitOut, scalefact] = ConvertUnits( unitIn )
+
+    if strcmpi( unitIn, '(rad)' ) 
+        unitOut = '(deg)';
+        scalefact  = 180/pi;
+    elseif strcmpi( unitIn, '(rad/s)' )
+        unitOut = '(rpm)';
+        scalefact  = 30/pi;
+    elseif strcmpi( unitIn, '(rad/ss)' )
+        unitOut = '(rpm/s)';
+        scalefact  = 30/pi;
+    else
+        unitOut = unitIn;
+        scalefact  = 1;        
+    end    
+
 end
 
 function [colNames,scalefact] = BeamDynColNames( ColToFind, colNames )
