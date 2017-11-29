@@ -212,8 +212,26 @@ while ( true )
         ZGoffset = str2double( strtok(line(findx:lindx))); %z grid offset
         break;
     end            
+end
+
+LHR = false; % left-hand rule (to flip sign for v wind component)
+while ( true )
+    line  = fgetl(fid_sum);
+
+    if ~ischar(line)
+        break;
+    end
+
+    line  = upper(line);
+    findx = strfind(line,'BLADED LEFT-HAND RULE');
+
+    if ~isempty(findx)
+        LHR = true;
+        break;
+    end            
 end  
-fclose(fid_sum);      
+
+fclose(fid_sum);
 %%
 %-----------------------------------------
 %READ THE GRID DATA FROM THE BINARY FILE
@@ -224,6 +242,10 @@ disp('Reading and scaling the grid data...');
 nv       = nffc*ny*nz;               % the size of one time step
 Scale    = 0.00001*SummVars(3)*SummVars(4:6);
 Offset   = [SummVars(3) 0 0];
+if LHR % Bladed defined the v-component opposite of the right-hand rule...
+    Scale(2) = -Scale(2);
+end
+
 %%
 velocity = zeros(nt,nffc,ny,nz);
 
