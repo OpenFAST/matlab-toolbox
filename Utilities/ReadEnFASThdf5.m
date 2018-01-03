@@ -110,8 +110,15 @@ enFASTdataStruct.SimResults.Time         =           h5read   (FileName,'/SimRes
 enFASTdataStruct.SimResults.TDC          = zeros(enFASTdataStruct.SimResults.NumTSteps,enFASTdataStruct.SimResults.NumChans+1);
 enFASTdataStruct.SimResults.TDC(:,1)     = enFASTdataStruct.SimResults.Time;
 enFASTdataStruct.SimResults.TDC(:,2:end) = transpose(h5read   (FileName,'/SimResults/TDC'));
-enFASTdataStruct.SimResults.ChanNames    = transpose(h5read   (FileName,'/SimResults/ChanNames'));
-enFASTdataStruct.SimResults.ChanUnits    = transpose(h5read   (FileName,'/SimResults/ChanUnits'));
+% Prepend the Time channel.
+tempName=h5read(FileName,'/SimResults/ChanNames');
+tempUnit=h5read(FileName,'/SimResults/ChanUnits');
+enFASTdataStruct.SimResults.ChanNames{1,1} = 'Time';
+enFASTdataStruct.SimResults.ChanUnits{1,1} = '(s)';
+for i=1:size(tempName,1)
+   enFASTdataStruct.SimResults.ChanNames{i+1,1}=strtrim(tempName{i,1});
+   enFASTdataStruct.SimResults.ChanUnits{i+1,1}=strtrim(tempUnit{i,1});
+end
 
 
 %% Read the Statistics
