@@ -41,6 +41,16 @@ function [enFASTdataStruct]=ReadEnFASThdf5(FileName)
 %        ChanStDev                  - Standard deviation of channel
 %
 %
+%  Compatibility with ReadFASTbinary.m:
+%  The equavalent of the ReadFASTbinary.m outputs are:
+%
+%     Channels     = enFASTdataStruct.SimResults.TDC;
+%     ChannelNames = enFASTdataStruct.SimResults.ChanNames;
+%     ChannelUnits = enFASTdataStruct.SimResults.ChanUnits;
+%     FieID        = 0;    % Not produced.
+%     DescStr      = enFASTdataStruct.DescStr;
+%
+%
 
 %% Check the file
 if exist(FileName, 'file') == 0
@@ -115,24 +125,7 @@ enFASTdataStruct.Statistics.ChanMean     = transpose(h5read   (FileName,'/Statis
 enFASTdataStruct.Statistics.ChanMaxTStep = transpose(h5read   (FileName,'/Statistics/ChanMaxTStep'));
 enFASTdataStruct.Statistics.ChanStDev    = transpose(h5read   (FileName,'/Statistics/ChanStDev'));
 
-%% Note on using like the ReadFASTbinary.m routine
-%
-% The ReadFASTbinary.m requires an input filename, like this routine, and
-% produces
-%     Channels
-%     ChannelNames
-%     ChannelUnits
-%     FileID
-%     DescStr
-%
-% The equavalent of these can be found from the results of this routine as:
-%
-%     Channels     = enFASTdataStruct.SimResults.TDC;
-%     ChannelNames = enFASTdataStruct.SimResults.ChanNames;
-%     ChannelUnits = enFASTdataStruct.SimResults.ChanUnits;
-%     FieID    = 0; %Not used
-%     DescStr  = enFASTdataStruct.DescStr;
-%
+
 
 return;
 end
