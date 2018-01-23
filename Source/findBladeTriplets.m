@@ -8,6 +8,7 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
     for i = 1:length(rotFrame)  % loop through inputs/outputs
         if rotFrame(i)          % this is in the rotating frame
             Tmp = zeros(1,3);
+            foundTriplet = false;
             foundIt = false;
             for chk = 1:length(chkStr)
                 BldNoCol = regexp(Desc{i},chkStr{chk},'match');
@@ -40,13 +41,26 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
                             k = str2double(Num{1}(end));
                             Tmp(k) = j;                             % save the indices for the remaining blades
                             if ( all(Tmp) )                         % true if all the elements of Tmp are nonzero; thus, we found a triplet of rotating indices
+                                foundTriplet = true;                
+                                
                                 NTriplets = NTriplets + 1;          % this  is  the number  of  control input triplets in the rotating frame
                                 Triplets(NTriplets,:) = Tmp;        % these are the indices for control input triplets in the rotating frame
+                                
+                                % we'll set rotFrame to false so that we don't have to check the found channels again; also allows us to throw error if we have a rotating channel that doesn't have a unique match
+                                rotFrame(Tmp) = false;                                                                    
+                                
                                 break;
                             end
                         end
                     end 
-                end  % j - all remaining active control inputs            
+                end  % j - all remaining active control inputs
+                
+                if (~foundTriplet)
+                    error( ['Rotating channel "' Desc{i} '" does not form a unique blade triplet. Blade(s) not found: ' num2str(find(Tmp==0)) ] )
+                end
+                
+            else
+                error( ['Could not find blade number in rotating channel "' Desc{i} '".'] )                
             end
 
         end % in the rotating frame
