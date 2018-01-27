@@ -13,39 +13,34 @@ function [Aout] = row_col_xtion(Ainp, new_seq, rc_id, rev_seq)
 % Aout = transformed mxn matrix
 
 [m,n] = size(Ainp);
-sn = size(new_seq);
-if(rc_id == 1 & m ~= sn)
+sn = length(new_seq);
+if(rc_id == 1 && m ~= sn)
  display('ERROR** number of rows of the input matrix does not match size of the vector new_seq ');
 end
-if(rc_id == 2 & n ~= sn)
+if(rc_id == 2 && n ~= sn)
  display('ERROR** number of columns of the input matrix does not match size of the vector new_seq ');
 end
 
-Aout = [];
-
+Aout = zeros(m,n); % preallocate space for Aout
 if(rev_seq == 0)
- if(rc_id == 1)
-  for i = 1:m
-   Aout(i,:) = Ainp(new_seq(i),:);
-  end
- end
- if(rc_id == 2)
-  for i = 1:n
-   Aout(:,i) = Ainp(:,new_seq(i));
-  end
- end
-end
-
-if(rev_seq == 1)
- if(rc_id == 1)
-  for i = 1:m
-   Aout(new_seq(i),:) = Ainp(i,:);
-  end
- end
- if(rc_id == 2)
-  for i = 1:n
-   Aout(:,new_seq(i)) = Ainp(:,i);
-  end
- end
+    if(rc_id == 1)
+        for i = 1:m
+            Aout(i,:) = Ainp(new_seq(i),:);
+        end
+    elseif(rc_id == 2)
+        for i = 1:n
+            Aout(:,i) = Ainp(:,new_seq(i));
+        end
+    end
+elseif(rev_seq == 1)
+    if(rc_id == 1)
+        for i = 1:m
+            Aout(new_seq(i),:) = Ainp(i,:);
+        end
+    elseif(rc_id == 2)
+        for i = 1:n
+            Aout(:,new_seq(i)) = Ainp(:,i);
+        end
+    end
 end
 %---------------------------------------------------------
