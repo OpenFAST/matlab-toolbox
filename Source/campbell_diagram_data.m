@@ -68,29 +68,30 @@ end
 %%
 
 
-CampbellData.ModesTable = cell(ndof+5,3*nModes);
+CampbellData.ModesTable = cell(ndof+5,4*nModes);
 
-for i=1:nModes       
-    CampbellData.ModesTable(1, (i-1)*3+1 ) = {'Mode number:'};
-    CampbellData.ModesTable(1, (i-1)*3+2 ) = num2cell(i);
-    CampbellData.ModesTable(1, (i-1)*3+3 ) = {''};
+for i=1:nModes
+    colStart = (i-1)*4;
+    CampbellData.ModesTable(1, colStart+1 ) = {'Mode number:'};
+    CampbellData.ModesTable(1, colStart+2 ) = num2cell(i);
+    CampbellData.ModesTable(1, colStart+3 ) = {''};
 
-    CampbellData.ModesTable(2, (i-1)*3+1 ) = {'Natural (undamped) frequency (Hz):'};
-    CampbellData.ModesTable(2, (i-1)*3+2 ) = num2cell( CampbellData.Modes{i}.NaturalFreq_Hz );
+    CampbellData.ModesTable(2, colStart+1 ) = {'Natural (undamped) frequency (Hz):'};
+    CampbellData.ModesTable(2, colStart+2 ) = num2cell( CampbellData.Modes{i}.NaturalFreq_Hz );
 
-    CampbellData.ModesTable(3, (i-1)*3+1 ) = {'Damped frequency (Hz):'};
-    CampbellData.ModesTable(3, (i-1)*3+2 ) = num2cell( CampbellData.Modes{i}.DampedFreq_Hz );
+    CampbellData.ModesTable(3, colStart+1 ) = {'Damped frequency (Hz):'};
+    CampbellData.ModesTable(3, colStart+2 ) = num2cell( CampbellData.Modes{i}.DampedFreq_Hz );
 
-    CampbellData.ModesTable(4, (i-1)*3+1 ) = {'Damping ratio (-):'};
-    CampbellData.ModesTable(4, (i-1)*3+2 ) = num2cell( CampbellData.Modes{i}.DampingRatio );
+    CampbellData.ModesTable(4, colStart+1 ) = {'Damping ratio (-):'};
+    CampbellData.ModesTable(4, colStart+2 ) = num2cell( CampbellData.Modes{i}.DampingRatio );
     
-    CampbellData.ModesTable(5, (i-1)*3+1 ) = {['Mode ' num2str(i) ' state description']};
-    CampbellData.ModesTable(5, (i-1)*3+2 ) = {['State has max at mode ' num2str(i)]};
-    CampbellData.ModesTable(5, (i-1)*3+3 ) = {['Mode ' num2str(i) ' magnitude / phase']};
+    CampbellData.ModesTable(5, colStart+1 ) = {['Mode ' num2str(i) ' state description']};
+    CampbellData.ModesTable(5, colStart+2 ) = {['State has max at mode ' num2str(i)]};
+    CampbellData.ModesTable(5, colStart+3 ) = {['Mode ' num2str(i) ' magnitude / phase']};
     
-    CampbellData.ModesTable(6:end,(i-1)*3+1) = CampbellData.Modes{i}.DescStates;
-    CampbellData.ModesTable(6:end,(i-1)*3+2) = num2cell( CampbellData.Modes{i}.StateHasMaxAtThisMode );
-    CampbellData.ModesTable(6:end,(i-1)*3+3) = num2cell( CampbellData.Modes{i}.MagnitudePhase );
+    CampbellData.ModesTable(6:end,colStart+1) = CampbellData.Modes{i}.DescStates;
+    CampbellData.ModesTable(6:end,colStart+2) = num2cell( CampbellData.Modes{i}.StateHasMaxAtThisMode );
+    CampbellData.ModesTable(6:end,colStart+3) = num2cell( CampbellData.Modes{i}.MagnitudePhase );
      
 end
 
