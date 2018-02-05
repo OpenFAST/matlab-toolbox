@@ -83,22 +83,22 @@ new_seq_states = [new_seq_dof  new_seq_dof+matData.ndof]; % add the remaining on
 
 
 if isfield(matData,'RotTripletIndicesCntrlInpt')
-    [n_RotTripletInputs,nb] = size(RotTripletIndicesCntrlInpt);
+    [n_RotTripletInputs,nb] = size(matData.RotTripletIndicesCntrlInpt);
     if(nb ~= 3)
         error('**ERROR: the number of column vectors in RotTripletIndicesCntrlInpt must equal 3, the num of blades');
     end
-    new_seq_inp = get_new_seq(RotTripletIndicesCntrlInpt,matData.NumInputs);
+    new_seq_inp = get_new_seq(matData.RotTripletIndicesCntrlInpt,matData.NumInputs);
 else
     n_RotTripletInputs = 0; % number of rotating-frame control triplets
     new_seq_inp = 1:matData.NumInputs;
 end
 
 if isfield(matData,'RotTripletIndicesOutput')
-    [n_RotTripletOutputs,nb] = size(RotTripletIndicesOutput);
+    [n_RotTripletOutputs,nb] = size(matData.RotTripletIndicesOutput);
     if(nb ~= 3)
         error('**ERROR: the number of column vectors in RotTripletIndicesOutput must equal 3, the num of blades');
     end
-    new_seq_out = get_new_seq(RotTripletIndicesOutput,matData.NumOutputs);
+    new_seq_out = get_new_seq(matData.RotTripletIndicesOutput,matData.NumOutputs);
 else
     n_RotTripletOutputs = 0; % number of rotating-frame output triplets
     new_seq_out = 1:matData.NumOutputs;
@@ -197,10 +197,11 @@ for iaz = matData.NAzimStep:-1:1
     end
 
     if isfield(matData,'C')
-            % Eq. 31 (Note that to match Eq 31, this assumes matData.C(:,new_seq_states(1:ndof)) = 0)
+            % Eq. 31 (Note that to match Eq 31, this assumes matData.C(:,new_seq_states(1:matData.ndof)) = 0,
+            % which does not appear to be true in general!!!!)
         MBC.C(new_seq_out, new_seq_states, iaz) = ...
                      T1ov * matData.C(new_seq_out,new_seq_states,iaz) * ...
-                     [T1, zeros(matData.ndof); Omega(iaz)*T2, T1];
+                     [T1, zeros(matData.ndof); matData.Omega(iaz)*T2, T1];
     end
 
     if isfield(matData,'D')

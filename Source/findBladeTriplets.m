@@ -56,7 +56,7 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
                 end  % j - all remaining active control inputs
                 
                 if (~foundTriplet)
-                    error( ['Rotating channel "' Desc{i} '" does not form a unique blade triplet. Blade(s) not found: ' num2str(find(Tmp==0)) ] )
+                     disp( ['Rotating channel "' Desc{i} '" does not form a unique blade triplet. Blade(s) not found: ' num2str(find(Tmp==0)) ] )
                 end
                 
             else
