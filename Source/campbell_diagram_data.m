@@ -1,4 +1,4 @@
-function [CampbellData] = campbell_diagram_data(mbc_data, BladeLen, TowerLen)
+function [CampbellData] = campbell_diagram_data(mbc_data, BladeLen, TowerLen, xlsFileName)
 %%
 % inputs: 
 % -   mbc_data is the output data from mbc3 containing DescStates and
@@ -7,6 +7,7 @@ function [CampbellData] = campbell_diagram_data(mbc_data, BladeLen, TowerLen)
 %     the tower, respectively, and are used for scaling the magnitudes of 
 %     the rows (for consistent units)
 %
+outputXLSfile = nargin > 3;
 
 % mbc_data.eigSol = eiganalysis(mbc_data.AvgA);
 ndof = size(mbc_data.AvgA,1)/2;          % number of translational states
