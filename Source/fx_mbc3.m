@@ -178,8 +178,8 @@ for iaz = matData.NAzimStep:-1:1
             % xAMat( 1:matData.ndof, 1:matData.NumStates ) = 0 and
             % xAMat( 1:matData.ndof, (matData.ndof+1):matData.NumStates) = I
         xAMat(:,:) = matData.A(new_seq_states,new_seq_states,iaz); %--
-        AK = xAMat((matData.ndof+1):matData.NumStates,               1:matData.ndof);
-        AC = xAMat((matData.ndof+1):matData.NumStates,(matData.ndof+1):matData.NumStates);
+        AK = xAMat(matData.ndof+1:matData.NumStates,             1:matData.ndof);
+        AC = xAMat(matData.ndof+1:matData.NumStates,matData.ndof+1:matData.NumStates);
        
         MBC.A(new_seq_states,new_seq_states,iaz) = ...
                [zeros(matData.ndof),   eye(matData.ndof);
@@ -197,8 +197,7 @@ for iaz = matData.NAzimStep:-1:1
     end
 
     if isfield(matData,'C')
-            % Eq. 31 (Note that to match Eq 31, this assumes matData.C(:,new_seq_states(1:matData.ndof)) = 0,
-            % which does not appear to be true in general!!!!)
+            % Eq. 31
         MBC.C(new_seq_out, new_seq_states, iaz) = ...
                      T1ov * matData.C(new_seq_out,new_seq_states,iaz) * ...
                      [T1, zeros(matData.ndof); matData.Omega(iaz)*T2, T1];
