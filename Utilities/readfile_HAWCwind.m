@@ -21,20 +21,33 @@ if nargin<1
 end
 
 if ~iscell(fileNames)
-    % fileNames = strcat(fileNames, {'u.bin','v.bin','w.bin'});
-    fileNames = strcat(fileNames, {'.u-bin','.v-bin','.w-bin'});
+    fileNames = strcat(fileNames, {'u.bin','v.bin','w.bin'});
+%     fileNames = strcat(fileNames, {'.u-bin','.v-bin','.w-bin'});
 end
 
 %%
+    HAWCData = zeros(nz,ny,length(fileNames),nx);
+    
     for i = 1:length(fileNames)
 
         UnWind = fopen(fileNames{i});
+        tmp = fread( UnWind, nz*ny*nx, 'float32' );
+        tmp = reshape(tmp, nz,ny,nx); 
         
-        for ix = 1:nx
-            for iy = ny:-1:1
-               HAWCData(:,iy,i,ix) = fread( UnWind, nz, 'float32' );
-               velocity(ix,i,iy,:) = HAWCData(:,iy,i,ix);
-            end
+        HAWCData(:,:,i,:) = tmp(:, ny:-1:1, :);
+%         for ix = 1:nx
+%             for iy = ny:-1:1
+%                HAWCData(:,iy,i,ix) = fread(UnWind, nz, 'float32');
+%                indx = indx + nz;
+%             end
+%         end
+
+        if nargout > 1
+            for ix = 1:nx
+                for iy = ny:-1:1
+                   velocity(ix,i,iy,:) = HAWCData(:,iy,i,ix);
+                end
+            end        
         end
         
         fclose( UnWind );
