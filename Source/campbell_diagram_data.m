@@ -34,6 +34,7 @@ ModesMagnitude = ModesMagnitude * diag(1./maxCol); % scale the columns
 
 %%
 CampbellData.NaturalFreq_Hz = mbc_data.eigSol.NaturalFreqs_Hz(SortedFreqIndx);
+CampbellData.DampingRatio   = mbc_data.eigSol.DampRatios(     SortedFreqIndx);
 %%
 % Matlab apparently does not allow nested arrays of structures, so Modes will be a cell array
 CampbellData.Modes = cell(nModes,1);
@@ -96,7 +97,10 @@ for i=1:nModes
      
 end
 
-% xlswrite('CampbellData.xlsx',CampbellData.ModesTable)
+%% if requested, output this data to a Microsoft Excel spreadsheet file, in a sheet named 'Modes_Data'
+if outputXLSfile
+    xlswrite(xlsFileName,CampbellData.ModesTable, 'Modes_Data')
+end
 
 return
 end

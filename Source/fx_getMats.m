@@ -1,5 +1,5 @@
 function [matData, data] = fx_getMats(FileNames)
-% GetMats_f8.m
+% fx_getMats(FileNames)
 % Written by J. Jonkman, NREL
 % 19-July-2016: Updated by B. Jonkman (NREL) to convert FAST v8.16 
 % linearization files into format expected by mbc3.m
@@ -13,7 +13,9 @@ function [matData, data] = fx_getMats(FileNames)
 %
 % inputs: 
 %   FileNames - cell string containing names of FAST linear output files
-%
+% outputs:
+%   matData   - structure containing computations of FAST linear data.
+%   data      - raw data read from the FAST linearization files.
 %
 % ASSUMPTIONS:
 % - all files in FileNames contain the same data structures (i.e., they
@@ -54,7 +56,7 @@ if ( matData.NumStates > 0 )
     matData.DescStates = data(matData.NAzimStep).x_desc;
     matData.xdop       = zeros(matData.NumStates,                    matData.NAzimStep);
     matData.xop        = zeros(matData.NumStates,                    matData.NAzimStep);
-    matData.A       = zeros(matData.NumStates, matData.NumStates, matData.NAzimStep);   
+    matData.A          = zeros(matData.NumStates, matData.NumStates, matData.NAzimStep);   
 end
 
 if ( matData.NumInputs > 0 )
@@ -67,14 +69,14 @@ end
 if ( matData.NumOutputs > 0 )
     matData.DescOutput    = data(matData.NAzimStep).y_desc;    
     if ( matData.NumStates > 0 )
-        matData.C      = zeros(matData.NumOutputs, matData.NumStates, matData.NAzimStep);
+        matData.C         = zeros(matData.NumOutputs, matData.NumStates, matData.NAzimStep);
     end
     if ( matData.NumInputs > 0 )
-        matData.D      = zeros(matData.NumOutputs, matData.NumInputs, matData.NAzimStep);
+        matData.D         = zeros(matData.NumOutputs, matData.NumInputs, matData.NAzimStep);
     end
 end
 
-%% Reorder state matrices so that all the module's displacements are first,
+%% Reorder state matrices so that all the modules' displacements are first,
 %  followed by all the modules' velocities (because mbc assumes that the 
 %  first ndof values are velocities).
 if ( matData.NumStates > 0 )
@@ -123,16 +125,16 @@ end
 if isfield(matData,'A')
     matData.Avgxdop = mean(matData.xdop,2);
     matData.Avgxop  = mean(matData.xop, 2);
-    matData.AvgAMat = mean(matData.A,3);
+    matData.AvgA    = mean(matData.A,3);
 end
 if isfield(matData,'B')
-    matData.AvgBMat = mean(matData.B,3);
+    matData.AvgB    = mean(matData.B,3);
 end
 if isfield(matData,'C')
-    matData.AvgCMat = mean(matData.C,3);
+    matData.AvgC    = mean(matData.C,3);
 end
 if isfield(matData,'D')
-    matData.AvgDMat = mean(matData.D,3);
+    matData.AvgD    = mean(matData.D,3);
 end
 
 
