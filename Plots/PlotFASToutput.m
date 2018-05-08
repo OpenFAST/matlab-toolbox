@@ -93,6 +93,12 @@ for iFile=1:numFiles
 
     if length(FASTfiles{iFile}) > 4 && strcmpi( FASTfiles{iFile}((end-4):end),'.outb' )
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile}, ~, DescStr{iFile}] = ReadFASTbinary(FASTfiles{iFile});
+    elseif length(FASTfiles{iFile}) > 2 && strcmpi( FASTfiles{iFile}((end-2):end),'.h5' )
+        dataStruct = ReadEnFASThdf5(FASTfiles{iFile});
+        data{iFile}         = dataStruct.SimResults.TDC;
+        columnTitles{iFile} = dataStruct.SimResults.ChanNames;
+        columnUnits{iFile}  = dataStruct.SimResults.ChanUnits; 
+        DescStr{iFile}      = dataStruct.DescStr;  
     elseif ~useCustomHdr
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile},    DescStr{iFile}] = ReadFASTtext(FASTfiles{iFile});                        
     else % allow other files 
@@ -460,6 +466,12 @@ function [unitOut, scalefact] = ConvertUnits( unitIn )
     elseif strcmpi( unitIn, '(rad/ss)' )
         unitOut = '(rpm/s)';
         scalefact  = 30/pi;
+    elseif strcmpi( unitIn, '(N-m)' )
+        unitOut = '(kN-m)';
+        scalefact  = 1/1000;
+    elseif strcmpi( unitIn, '(N)' )
+        unitOut = '(kN)';
+        scalefact  = 1/1000;
     else
         unitOut = unitIn;
         scalefact  = 1;        
@@ -651,10 +663,7 @@ function [colNames,scalefact] = BeamDynColNames( ColToFind, colNames )
         scalefact = 1E3;
         
     end
-    
-end
-    end
-    
+            
 end
 
 

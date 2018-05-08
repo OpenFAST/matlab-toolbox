@@ -184,6 +184,14 @@ while true
                 continue; %let's continue reading the template file            
             end   
             
+        elseif strcmpi(label,'kp_yr') %we've reached the BD key-points table
+            if ~isfield(FastPar,'kp')
+                disp( 'WARNING: BeamDyn key-point table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.kp, FastPar.kpHdr, newline, true);
+                continue; %let's continue reading the template file            
+            end   
             
         elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
             if ~isfield(FastPar,'Cases')
@@ -201,6 +209,7 @@ while true
             line = GetLineToWrite( line, FastPar, label, TemplateFile, value );
             
         end
+        
     else % isComment || length(label) == 0 || printTable (i.e. tables must end with comments
         if isComment
             printTable = false;     % we aren't reading a table (if we were, we reached the end) 
