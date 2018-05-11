@@ -27,7 +27,9 @@ where the returned data structures are:
 - `FAST_linData`: the raw data stored in the OpenFAST linearization files
 
 After the MBC3 transformation, the `campbell_diagram_data` function can be called to help analyze modes:
-`[CampbellData] = campbell_diagram_data(mbc_data, BladeLen, TowerLen, xlsFileName)`
+```
+[CampbellData] = campbell_diagram_data(mbc_data, BladeLen, TowerLen, xlsFileName)
+```
 
 Note that the blade and tower lengths are inputs to this function. Also, if the optional `xlsFileName` is used, the CampbellData is written to an Excel 
 file, which can be useful for analyzing the results.
