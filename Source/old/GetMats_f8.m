@@ -1,15 +1,26 @@
 % GetMats_f8.m
 % Written by J. Jonkman, NREL
-% 19-July-2016: Updated to convert FAST v8.16 linearization files into
-% format expected by mbc3.m
-% NOTE that we assume all the files in FileNames contain the same data
-% structures (same state matrices; same number of inputs, outputs, states, 
-% etc.; same rotor speed; but should have different azimuth angles.
-
+% 19-July-2016: Updated by B. Jonkman (NREL) to convert FAST v8.16 
+% linearization files into format expected by mbc3.m
+% 22-Jan-2018: Updated by B. Jonkman, (Envision Energy) for BeamDyn linearization.
+% 
 % This m-file is used to read in the data written to multiple FAST linear output
 %  (.lin) files, compute the state matrix, [A], at each of the equally-spaced
 %  azimuth steps and their azimuth-average, along with their eigenvalues and
 %  eigenvectors.
+%
+% ASSUMPTIONS:
+% - all files in FileNames contain the same data structures (i.e., they
+%   have the same numbers of inputs, outputs, and states; if a state matrix
+%   exists in one, it exists in all)
+% - all files in FileNames have the same rotor speed, but have different
+%   azimuth angles
+% - BeamDyn blade nodes are discretized in the same way for each blade.
+% - the states for each module are ordered by module; in each module all of  
+%   the displacement states are followed by all the velocity states.
+% - descriptions of inputs, outputs, and (BD) states are triplets if they
+%   match in all characters except the blade number. (see
+%   findBladeTriplets.m for details)
 
 format short g;
 
@@ -28,8 +39,8 @@ NInputs  = data(NAzimStep).n_u;
 NumOuts  = data(NAzimStep).n_y;
 
 
-clear xdop xop AMat DescCntrlInpt BMat DescOutput OutName CMat DMat AvgBMat AvgCMat AvgDMat;
-clear RotTripletIndicesStates RotTripletIndicesCntrlInpt RotTripletIndicesOutput;
+clear xdop xop AMat DescCntrlInpt BMat DescOutput OutName CMat DMat AvgBMat AvgCMat AvgDMat DescStates;
+clear RotTripletIndicesStates RotTripletIndicesCntrlInpt RotTripletIndicesOutput StateOrderingIndx;
 
 %% .................................
 % allocate space for these variables
@@ -62,6 +73,46 @@ if ( NumOuts > 0 )
     end
 end
 
+%% Reorder state matrices so that all the module's displacements are first,
+%  followed by all the modules' velocities (because mbc assumes that the 
+%  first ndof values are velocities).
+if ( N > 0 )
+    StateOrderingIndx = (1:N)';
+    lastModName = '';
+    mod_nDOFs = 0; % number of DOFs in each module
+    sum_nDOFs = 0; % running total of DOFs
+    indx_start=1;  % starting index of the module's
+    for i=1:2:N % there are an even number of states, so we're going to save some time
+        modName = strtok(DescStates{i}); % name of the module whose states we are looking at
+
+        if ~strcmp(lastModName,modName)
+            % this is the start of a new set of DOFs, so we'll set the
+            % "first time derivative" descriptions to an empty string.
+            StateOrderingIndx(  indx_start           :(indx_start+mod_nDOFs-1)) = sum_nDOFs +            (1:mod_nDOFs);
+            StateOrderingIndx( (indx_start+mod_nDOFs):(i - 1))                  = sum_nDOFs + NActvDOF + (1:mod_nDOFs);
+
+            % reset for a new module
+            sum_nDOFs = sum_nDOFs + mod_nDOFs;
+            mod_nDOFs = 0;
+            indx_start = i;
+            lastModName = modName;
+        end
+        mod_nDOFs = mod_nDOFs+1;
+    end
+    StateOrderingIndx(  indx_start           :(indx_start+mod_nDOFs-1)) = sum_nDOFs +            (1:mod_nDOFs);
+    StateOrderingIndx( (indx_start+mod_nDOFs):N)                        = sum_nDOFs + NActvDOF + (1:mod_nDOFs);
+    if strcmpi(lastModName,'ED')
+        checkEDstates = true;
+    else
+        checkEDstates = false;
+    end
+
+    clear lastModName mod_nDOFs sum_nDOFs indx_start modName
+    
+    x_rotFrame(StateOrderingIndx) = data(NAzimStep).x_rotFrame;
+    DescStates(StateOrderingIndx) = data(NAzimStep).x_desc;
+end
+
 %% .................................
 % get data into variables expected by GetMats (concatenate data from
 % different azimuths into matrices)
@@ -75,23 +126,23 @@ for iFile = 1:NAzimStep
     Azimuth(iFile) = data(iFile).Azimuth*180/pi;
 
     if (isfield(data(iFile), 'A'))
-        AMat(:,:,iFile) = data(iFile).A;
+        AMat(StateOrderingIndx,StateOrderingIndx,iFile) = data(iFile).A;
     end
     if (isfield(data(iFile), 'B'))
-        BMat(:,:,iFile) = data(iFile).B;
+        BMat(StateOrderingIndx,:,iFile) = data(iFile).B;
     end
     if (isfield(data(iFile), 'C'))
-        CMat(:,:,iFile) = data(iFile).C;
+        CMat(:,StateOrderingIndx,iFile) = data(iFile).C;
     end
     if (isfield(data(iFile), 'D'))
         DMat(:,:,iFile) = data(iFile).D;
     end
 
     if (isfield(data(iFile), 'x_op'))        
-        xop(:,iFile) = cell2mat(data(iFile).x_op);
+        xop(StateOrderingIndx,iFile) = cell2mat(data(iFile).x_op);
     end
     if (isfield(data(iFile), 'xdot_op'))
-        xdop(:,iFile) = cell2mat(data(iFile).xdot_op);
+        xdop(StateOrderingIndx,iFile) = cell2mat(data(iFile).xdot_op);
     end
     
 end 
@@ -135,39 +186,21 @@ end
 % ----------- Find multi-blade coordinate (MBC) transformation indices ----
 
 %% Find the number of, and indices for, state triplets in the rotating
-%   frame:
-NRotTripletStates = 0;                  % first initialize to zero
-for i = 1:NActvDOF	% loop through all active (enabled) DOFs
-    if data(1).x_rotFrame(i)  % this is a state in the rotating frame
-
-        col = strfind(DescStates{i},'blade');                    % find the starting index of the string 'blade'
-        if ~isempty(col)             % true if the DescStates{I} contains the string 'blade'
-            k = str2double(DescStates{i}(col+6));                % save the blade number for the initial blade
-            Tmp = zeros(1,3);                                       % first initialize to zero
-            Tmp(k) = i;                                           % save the index for the initial blade
-            for j = (i+1):NActvDOF                                  % loop through all remaining active (enabled) DOFs
-                if strncmp(DescStates{j},DescStates{i},col)      % true if we have the same state from a different blade
-                    k = str2double(DescStates{j}(col+6));        % save the blade numbers for the remaining blades
-                    Tmp(k) = j;                                   % save the indices for the remaining blades
-                    
-                    if ( all(Tmp) )     % true if all the elements of Tmp are nonzero; thus, we found a triplet of rotating indices
-                        NRotTripletStates = NRotTripletStates + 1;           % this  is  the number  of  state triplets in the rotating frame
-                        RotTripletIndicesStates(NRotTripletStates,:) = Tmp;  % these are the indices for state triplets in the rotating frame
-                        break;
-                    end
-                end
-            end %for j
-        end
-        
+%   frame (note that we avoid the "first time derivative" states)
+if (NActvDOF > 0)   
+    if (checkEDstates)
+        [RotTripletIndicesStates, NRotTripletStates] = findBladeTriplets_EDstate(x_rotFrame(1:NActvDOF),DescStates(1:NActvDOF) );
+    else
+        [RotTripletIndicesStates, NRotTripletStates] = findBladeTriplets(x_rotFrame(1:NActvDOF),DescStates(1:NActvDOF) );
     end
-end % i - all active (enabled) DOFs
+    clear x_rotFrame
+end
 
 %% Find the number of, and indices for, control input triplets in the
 %   rotating frame:
 if (NInputs > 0)
     [RotTripletIndicesCntrlInpt, NRotTripletCntrlInpt] = findBladeTriplets(data(1).u_rotFrame,DescCntrlInpt );
 end
-
 
 %% Find the number of, and indices for, output measurement triplets in the
 %   rotating frame:

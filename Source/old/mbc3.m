@@ -15,14 +15,14 @@
 % 2. Given second-order matrices (M,Dmp,K), control input matrix (F), wind input disturbance
 %    matrix (Fd), displacement output matrix (Dc), and velocity output matrix (Vc), transform
 %    these to the fixed coordinate frame using multi-blade coordinate transformation (MBC).
-%    The transformned matrices are MBC_M, MBC_Dmp, MBC_K, MBC_F, MBC_Fd, MBC_Dc, and MBC_Vc.
+%    The transformed matrices are MBC_M, MBC_Dmp, MBC_K, MBC_F, MBC_Fd, MBC_Dc, and MBC_Vc.
 %
 % 3. Azimuth-average the MBC_A matrix and compute its eigenvalues and eigenvectors.  The
 %    eigenvectors, referred to the fixed coordinates, are presented in both complex and
 %    amplitude-phase forms. The eigenvalues, also referred to the fixed coordinates, are
 %    presented in complex and damping-ratio/damped-frequency forms.
 
-% ***WARNING: Do not copy or modify this code, or transfer algoritms (in original or modified form)
+% ***WARNING: Do not copy or modify this code, or transfer algorithms (in original or modified form)
 %    from this code into another code without permission from NREL (Gunjit Bir, 303-384-6953).
 %
 % ***Disclaimer: This code is still in the developmental stage and no guarantee is given
@@ -41,7 +41,7 @@
 % Dc, Vc     : displacement and velocity output matrices (associated with 2nd-order equation)
 % azm        : vector of rotor azimuth positions wrt the the user-specified reference position [see AzimB1Up, FAST User's guide] (deg)
 % omg        : rotor speed (rad/sec)
-% OmgDot   : rotor acceleraton (rad/sec^2)
+% OmgDot     : rotor acceleraton (rad/sec^2)
 
 % RotTripletIndicesStates   : State triplets in rotating frame (matrix of size rotating_dof_types*3)
 % RotTripletIndicesCntrlInpt: Control-input triplets in rotating frame (matrix of size rotating_control_input_types*3)
