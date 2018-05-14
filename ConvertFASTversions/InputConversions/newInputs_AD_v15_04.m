@@ -1,9 +1,7 @@
-function [ADPar, ADBladeRootname] = newInputs_AD_v15(ADPar, ADrootname)
-%[ADPar] = newInputs_AD_v15(ADPar, ADrootname)
+function [ADPar] = newInputs_AD_v15_04(ADPar)
+%[ADPar] = newInputs_AD_v15_04(ADPar)
 % ADPar is the data structure containing already-filled parameters for
-%       AeroDyn, which will be modified for AeroDyn v15.
-% ADrootname is the base file name (without path or extension) of the
-%       AeroDyn input file [to set name of blade files]
+%       AeroDyn, which will be modified for AeroDyn v15.04.
 
 %% Cavitation options:
 n = length(ADPar.Label);

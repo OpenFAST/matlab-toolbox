@@ -21,8 +21,6 @@ function [Channels, ChanName, ChanUnit,DescStr] = ReadFASTtext(FileName, delim, 
 %  ChanUnit      - cell array containing unit names of output channels
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-LenName = 10;  % number of characters per channel name
-LenUnit = 10;  % number of characters per unit name
 DescStr = '';
 
 switch nargin;
@@ -98,6 +96,10 @@ else
                 nCols2 = length(ChanUnit);
             elseif i == NameLine-2
                 DescStr=line;
+                if (~isempty(DescStr))
+                    disp( ['Reading from the file ' FileName ' with heading: ' ] );
+                    disp( ['   "' DescStr '".' ] ) ;           
+                end
             end %if i
 
         end %for i

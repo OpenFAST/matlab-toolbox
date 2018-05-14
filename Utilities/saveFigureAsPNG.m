@@ -28,12 +28,19 @@ function [] = saveFigureAsPNG( f, outPNGName, ReferenceFile )
     end
     
     OutFileRoot = [OutFilePath filesep outPNGName];
+    [~,~,ext] = fileparts(OutFileRoot);
+    if strcmpi(ext, '.png')
+        OutFile = OutFileRoot;
+    else
+        OutFile = [OutFileRoot '.png'];
+    end
+    
         % make sure the directory exists; if not, create it
     if ~exist(OutFilePath, 'dir')
         mkdir( OutFilePath );
     end 
                 
-    print(f,'-dpng','-r150',[OutFileRoot '.png']);
+    print(f,'-dpng','-r150',OutFile);
     close(f)
 
     return

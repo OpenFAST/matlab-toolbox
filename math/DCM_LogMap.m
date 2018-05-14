@@ -10,30 +10,27 @@ function [logMap, theta, v_pi] = DCM_LogMap(DCM)
       
         if ( theta > 3.1 ) % theta/(2*sin(theta)) blows up quickly as theta approaches pi, 
          % so I'm putting a pretty large tolerance on pi here, and using a different equation to find the solution near pi
-                     
-             %d11 = 1 - (1-cos(theta))/theta^2 * (logMap3^2 + logMap2^2)
-             %d22 = 1 - (1-cos(theta))/theta^2 * (logMap3^2 + logMap1^2)
-             %d33 = 1 - (1-cos(theta))/theta^2 * (logMap2^2 + logMap1^2)
-
-             logMap(1) = theta * sqrt(abs( 0.5 * ( 1.0 + DCM(1,1) - DCM(2,2) - DCM(3,3) ) / (1.0-cosTheta) ));
-             logMap(2) = theta * sqrt(abs( 0.5 * ( 1.0 - DCM(1,1) + DCM(2,2) - DCM(3,3) ) / (1.0-cosTheta) ));
-             logMap(3) = theta * sqrt(abs( 0.5 * ( 1.0 - DCM(1,1) - DCM(2,2) + DCM(3,3) ) / (1.0-cosTheta) ));
-
-             % we choose logMap1 positive then we get the signs for logMap2 and logMap3:
-             if ( logMap(1) ~= 0.0 )
-                %d12+d21=2*(1-cos(theta))/theta**2 * logMap(1)*logMap(2); 2*(1-cos(theta))/theta**2 * logMap(1)>0 so logMap(2) is sign(logMap(2),d12+d21)
-                %d13+d31=2*(1-cos(theta))/theta**2 * logMap(1)*logMap(3); 2*(1-cos(theta))/theta**2 * logMap(1)>0 so logMap(3) is sign(logMap(3),d13+d31)
-
-                logMap(2) = sign( logMap(2), DCM(1,2)+DCM(2,1) );
-                logMap(3) = sign( logMap(3), DCM(1,3)+DCM(3,1) );            
+            
+            
+             logMap(1) = 1.0 + DCM(1,1) - DCM(2,2) - DCM(3,3);
+             logMap(2) = 1.0 - DCM(1,1) + DCM(2,2) - DCM(3,3);
+             logMap(3) = 1.0 - DCM(1,1) - DCM(2,2) + DCM(3,3);
+                          
+             [~,indx] = max(abs(logMap));
+             
+             divisor = sqrt(abs( logMap(indx) *  2*(1 - cosTheta)  )) / theta;
+             if indx==1
+                 logMap(2) = DCM(1,2) + DCM(2,1);
+                 logMap(3) = DCM(1,3) + DCM(3,1);
+             elseif indx ==2
+                 logMap(1) = DCM(1,2) + DCM(2,1);
+                 logMap(3) = DCM(2,3) + DCM(3,2);
              else
-                % because logMap1 is zero, we can choose logMap2 positive:
-
-                %d23+d32=2*(1-cos(theta))/theta**2 * logMap(2)*logMap(3); 2*(1-cos(theta))/theta**2 * logMap(2)>0 so logMap(3) is sign(logMap(3),d23+d32)
-                logMap(3) = sign( logMap(3), DCM(2,3)+DCM(3,2) );            
-
+                 logMap(1) = DCM(1,3) + DCM(3,1);
+                 logMap(2) = DCM(2,3) + DCM(3,2);
              end
-
+             logMap = logMap / divisor;            
+            
              % at this point we may have the wrong sign for logMap (though if theta==pi, it doesn't matter because we can change it in the DCM_setLogMapforInterp() routines)
              % we'll do a little checking to see if we should change the sign:
 
@@ -44,16 +41,10 @@ function [logMap, theta, v_pi] = DCM_LogMap(DCM)
              v(1) = -DCM(3,2) + DCM(2,3); %-skewSym(3,2)
              v(2) =  DCM(3,1) - DCM(1,3); % skewSym(3,1)
              v(3) = -DCM(2,1) + DCM(1,2); %-skewSym(2,1)
+             
+             [~,indx_max] = max(abs(v));
 
-             indx_max = 1;
-             for i = 2:3
-                if ( abs(v(i)) > abs(v(indx_max)) ) 
-                    indx_max = i;
-                end
-             end
-
-
-             if ( sign(1.0,v(indx_max)) ~= sign(1.0,logMap(indx_max)) )
+             if ( sign(v(indx_max)) ~= sign(logMap(indx_max)) )
                  logMap = -logMap;
              end
          

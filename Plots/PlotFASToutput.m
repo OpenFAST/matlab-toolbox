@@ -275,7 +275,7 @@ numFiles = size(outData,1);
                 hold on;      
                 lStyle = ':';
             end
-            ylabel({RefColumnTitles{i+1}     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines            
+            ylabel({strrep(RefColumnTitles{i+1},'_','\_')     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines            
         else
             f=figNo;
             figure(f);
@@ -283,8 +283,8 @@ numFiles = size(outData,1);
                 plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
                      ,'LineStyle','-' ...
                      ,'Marker',Markers{iFile} ...
-                     ,'MarkerSize',4 ...
-                     ,'DisplayName',[FASTfilesDesc{iFile} ' (' outData{iFile,3}{i} ', ' RefColumnUnits{i+1} ')'  ] ...
+                     ,'MarkerSize',3 ...
+                     ,'DisplayName',[strrep(FASTfilesDesc{iFile},'\','\\') ' (' outData{iFile,3}{i} ', ' RefColumnUnits{i+1} ')'  ] ...
                      ,'LineWidth',LineWidthConst);
                 hold on;      
             end   
@@ -292,7 +292,7 @@ numFiles = size(outData,1);
         end
         set(gca,'FontSize',FntSz-2,'gridlinestyle','-');
         xlabel([RefColumnTitles{1  } ' ' RefColumnUnits{1  }],'FontSize',FntSz); %string = print on one line
-        title( titleText,'FontSize',FntSz )    
+        title( strrep(titleText,'\','\\'),'FontSize',FntSz )    
         grid on;
 
         if numFiles > 1 && ShowLegend
@@ -306,7 +306,7 @@ numFiles = size(outData,1);
          
          
         if figNo < 0
-%             outFigName = [outFileRoot '_' num2str(i)];            
+             outFigName = [outFileRoot '_' num2str(i)];           
 %            outFigName = ['AD_Results\AllPlots\' outFileRoot '_' num2str(i)];            
 %             saveFigureAsPNG( f, outFigName  ) 
         end
@@ -515,13 +515,116 @@ function [colNames,scalefact] = BeamDynColNames( ColToFind, colNames )
        colNames = strrep(colNames,'TipDzc2','B2TipTDzr');
        colNames = strrep(colNames,'TipDzc3','B3TipTDzr');
        scalefact = 1;
-%     elseif strcmpi(ColToFind, 'B1TipTAXg') || ...
-%            strcmpi(ColToFind, 'B2TipTAxg') || ...
-%            strcmpi(ColToFind, 'B3TipTAxg')        
-%        colNames = strrep(colNames,'TipALxb1','B1TipTAXg');
-%        colNames = strrep(colNames,'TipALxb2','B2TipTAxg');
-%        colNames = strrep(colNames,'TipALxb3','B3TipTAxg');
-%        scalefact = 1;                     
+    elseif strcmpi(ColToFind, 'B1TipTAXl') || ...
+           strcmpi(ColToFind, 'B2TipTAXl') || ...
+           strcmpi(ColToFind, 'B3TipTAXl')        
+       colNames = strrep(colNames,'TipALxb1','B1TipTAXl');
+       colNames = strrep(colNames,'TipALxb2','B2TipTAXl');
+       colNames = strrep(colNames,'TipALxb3','B3TipTAXl');
+       scalefact = 1; 
+    elseif strcmpi(ColToFind, 'B1TipTAYl') || ...
+           strcmpi(ColToFind, 'B2TipTAYl') || ...
+           strcmpi(ColToFind, 'B3TipTAYl')        
+       colNames = strrep(colNames,'TipALyb1','B1TipTAYl');
+       colNames = strrep(colNames,'TipALyb2','B2TipTAYl');
+       colNames = strrep(colNames,'TipALyb3','B3TipTAYl');
+       scalefact = 1; 
+    elseif strcmpi(ColToFind, 'B1TipTAZl') || ...
+           strcmpi(ColToFind, 'B2TipTAZl') || ...
+           strcmpi(ColToFind, 'B3TipTAZl')        
+       colNames = strrep(colNames,'TipALzb1','B1TipTAZl');
+       colNames = strrep(colNames,'TipALzb2','B2TipTAZl');
+       colNames = strrep(colNames,'TipALzb3','B3TipTAZl');
+       scalefact = 1; 
+    elseif strcmpi(ColToFind, 'B1N2Fxl') || ...
+           strcmpi(ColToFind, 'B2N2Fxl') || ...
+           strcmpi(ColToFind, 'B3N2Fxl') 
+        colNames = strrep(colNames,'Spn1FLxb1','B1N2Fxl');
+        colNames = strrep(colNames,'Spn1FLxb2','B2N2Fxl');
+        colNames = strrep(colNames,'Spn1FLxb3','B3N2Fxl');
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N2Fyl') || ...
+           strcmpi(ColToFind, 'B2N2Fyl') || ...
+           strcmpi(ColToFind, 'B3N2Fyl')  
+        colNames = strrep(colNames,'Spn1FLyb1','B1N2Fyl');  
+        colNames = strrep(colNames,'Spn1FLyb2','B2N2Fyl');  
+        colNames = strrep(colNames,'Spn1FLyb3','B3N2Fyl');  
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N2Fzl') || ...
+           strcmpi(ColToFind, 'B2N2Fzl') || ...
+           strcmpi(ColToFind, 'B3N2Fzl') 
+        colNames = strrep(colNames,'Spn1FLzb1','B1N2Fzl');
+        colNames = strrep(colNames,'Spn1FLzb2','B2N2Fzl');
+        colNames = strrep(colNames,'Spn1FLzb3','B3N2Fzl');
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N2Mxl') || ...
+           strcmpi(ColToFind, 'B2N2Mxl') || ...
+           strcmpi(ColToFind, 'B3N2Mxl') 
+        colNames = strrep(colNames,'Spn1MLxb1','B1N2Mxl');
+        colNames = strrep(colNames,'Spn1MLxb2','B2N2Mxl');
+        colNames = strrep(colNames,'Spn1MLxb3','B3N2Mxl');
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N2Myl') || ...
+           strcmpi(ColToFind, 'B2N2Myl') || ...
+           strcmpi(ColToFind, 'B3N2Myl')  
+        colNames = strrep(colNames,'Spn1MLyb1','B1N2Myl');
+        colNames = strrep(colNames,'Spn1MLyb2','B2N2Myl');
+        colNames = strrep(colNames,'Spn1MLyb3','B3N2Myl');
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N2Mzl') || ...
+           strcmpi(ColToFind, 'B2N2Mzl') || ...
+           strcmpi(ColToFind, 'B3N2Mzl') 
+        colNames = strrep(colNames,'Spn1MLzb1','B1N2Mzl');
+        colNames = strrep(colNames,'Spn1MLzb2','B2N2Mzl');
+        colNames = strrep(colNames,'Spn1MLzb3','B3N2Mzl');
+        scalefact = 1E3;
+
+    elseif strcmpi(ColToFind, 'B1N3Fxl') || ...
+           strcmpi(ColToFind, 'B2N3Fxl') || ...
+           strcmpi(ColToFind, 'B3N3Fxl') 
+        colNames = strrep(colNames,'Spn2FLxb1','B1N3Fxl');
+        colNames = strrep(colNames,'Spn2FLxb2','B2N3Fxl');
+        colNames = strrep(colNames,'Spn2FLxb3','B3N3Fxl');
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N3Fyl') || ...
+           strcmpi(ColToFind, 'B2N3Fyl') || ...
+           strcmpi(ColToFind, 'B3N3Fyl') 
+        colNames = strrep(colNames,'Spn2FLyb1','B1N3Fyl');
+        colNames = strrep(colNames,'Spn2FLyb2','B2N3Fyl');
+        colNames = strrep(colNames,'Spn2FLyb3','B3N3Fyl');
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N3Fzl') || ...
+           strcmpi(ColToFind, 'B2N3Fzl') || ...
+           strcmpi(ColToFind, 'B3N3Fzl') 
+        colNames = strrep(colNames,'Spn2FLzb1','B1N3Fzl');
+        colNames = strrep(colNames,'Spn2FLzb2','B2N3Fzl');
+        colNames = strrep(colNames,'Spn2FLzb3','B3N3Fzl');
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N3Mxl') || ...
+           strcmpi(ColToFind, 'B2N3Mxl') || ...
+           strcmpi(ColToFind, 'B3N3Mxl') 
+        colNames = strrep(colNames,'Spn2MLxb1','B1N3Mxl');
+        colNames = strrep(colNames,'Spn2MLxb2','B2N3Mxl');
+        colNames = strrep(colNames,'Spn2MLxb3','B3N3Mxl');
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N3Myl') || ...
+           strcmpi(ColToFind, 'B2N3Myl') || ...
+           strcmpi(ColToFind, 'B3N3Myl') 
+        colNames = strrep(colNames,'Spn2MLyb1','B1N3Myl');
+        colNames = strrep(colNames,'Spn2MLyb2','B2N3Myl');
+        colNames = strrep(colNames,'Spn2MLyb3','B3N3Myl');
+        scalefact = 1E3;
+    elseif strcmpi(ColToFind, 'B1N3Mzl') || ...
+           strcmpi(ColToFind, 'B2N3Mzl') || ...
+           strcmpi(ColToFind, 'B3N3Mzl') 
+        colNames = strrep(colNames,'Spn2MLzb1','B1N3Mzl');
+        colNames = strrep(colNames,'Spn2MLzb2','B2N3Mzl');
+        colNames = strrep(colNames,'Spn2MLzb3','B3N3Mzl');
+        scalefact = 1E3;
+        
+    end
+    
+end
     end
     
 end
@@ -741,6 +844,10 @@ function [ChannelName_new,scaleFact] = getAD14ChannelName(ChannelName)
             scaleFact = 1/dr;
          elseif strcmpi(B1N2_channel,'Re')
             ChannelName_new = [ 'ReNum' AD14node];
+         elseif strcmpi(B1N2_channel,'Vx')
+            ChannelName_new = [ 'Vx' AD14node];
+         elseif strcmpi(B1N2_channel,'Vy')
+            ChannelName_new = [ 'Vy' AD14node];
         end
 
     end
