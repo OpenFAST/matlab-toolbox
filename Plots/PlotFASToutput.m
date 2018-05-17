@@ -623,10 +623,7 @@ function [colNames,scalefact] = BeamDynColNames( ColToFind, colNames )
         scalefact = 1E3;
         
     end
-    
-end
-    end
-    
+            
 end
 
 

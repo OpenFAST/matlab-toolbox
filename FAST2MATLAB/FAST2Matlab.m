@@ -13,23 +13,35 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 % (depending on the type of file being read):
 %.OutList          An array of variables to output
 %.OutListComments  An array of descriptions of the .OutList values
+%
 %.TowProp          A matrix of tower properties with columns .TowPropHdr 
 %.TowPropHdr       A cell array of headers corresponding to the TowProp table
+%
 %.BldProp          A matrix of blade properties with columns .BldPropHdr
 %.BldPropHdr       A cell array of headers corresponding to the BldProp table
+%
 %.DLLProp          A matrix of properties for the Bladed DLL Interface with columns .DLLPropHdr
 %.DLLPropHdr       A cell array of headers corresponding to the DLLProp table
+%
 %.FoilNm           A Cell array of foil names
+%
 %.BldNodesHdr      A cell array of headers corresponding to the BldNodes table 
 %.BldNodes         A matrix of blade nodes with columns RNodes, AeroTwst DRNodes Chord and Nfoil
+%
 %.CasesHdr         A cell array of headers corresponding to the Cases table
 %.Cases            A matrix of properties for individual cases in a driver file
+%
 %.AFCoeffHdr       A cell array of headers corresponding to the AFCoeff table
 %.AFCoeff          A matrix of airfoil coefficients
+%
 %.TMDspProp        A matrix of TMD spring forces
 %.TMDspPropHdr     A cell array of headers corresponding to the TMDspProp table
+%
 %.PrnElm           An array determining whether or not to print a given element
-
+%
+%.kp               A table of key points defined in BeamDyn
+%.kpHdr            A cell array of headers corresponding to the kp table
+%--------------------------------------------------------------------------
 
 %These arrays are extracted from the FAST input file
 %
@@ -159,6 +171,10 @@ while true %loop until discovering Outlist or end of file, than break
             line = line(2:end);
             [DataOut.AFCoeff, DataOut.AFCoeffHdr] = ParseFASTNumTable(line, fid, NumAlf);
             continue; %let's continue reading the file            
+        elseif strcmpi(label,'kp_yr') %we've reached the BD key-points table
+            kp_total = GetFASTPar(DataOut,'kp_total');        
+            [DataOut.kp, DataOut.kpHdr] = ParseFASTNumTable(line, fid, kp_total);
+            continue; %let's continue reading the file            
         else                
             DataOut.Label{count,1} = label;
             DataOut.Val{count,1}   = value;
@@ -237,8 +253,11 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt  )
         if isnumeric(line)      % we reached the end prematurely
             break
         elseif i == 0            
-            [tmp,cnt]=sscanf(line,'%f',nc);
-            if cnt<nc
+            [~,cnt]=sscanf(line,'%f',nc);
+            if cnt==0
+                break
+                % stop reading and return because the line was not numeric
+            elseif cnt<nc
                 disp(['Warning: There are more headers in the table than columns. Ignoring the last ' num2str(nc-cnt) ' column(s).'])
                 Headers = Headers(1:cnt);
                 Table = Table(:,1:cnt);
@@ -251,6 +270,10 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt  )
 
     end
     
+    if i < InpSt
+        disp(['Warning: There are fewer rows in the table than expected. Ignoring the last ' num2str(InpSt-i) ' row(s).'])
+        Table = Table(1:i,:);
+    end
 end %end function
 %%
 function [Table, Headers] = ParseFASTFmtTable( line, fid, InpSt, unitsLine )

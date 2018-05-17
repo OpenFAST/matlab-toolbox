@@ -1,4 +1,4 @@
-function ConvertFAST8_16to17(oldFSTName, newDir)
+function ConvertFAST8_16to17(oldFSTName, newDir, templateDir)
 %function ConvertFAST8_16to17(oldFSTName, newDir)
 % by Bonnie Jonkman
 %
@@ -29,9 +29,19 @@ function ConvertFAST8_16to17(oldFSTName, newDir)
 
 %% let's get the directory that contains the template files
 
-thisFile    = which('ConvertFAST8_16to17');
-thisDir     = fileparts(thisFile);
-templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
+if nargin < 3
+    thisFile    = which('ConvertFAST8_16to17');
+    thisDir     = fileparts(thisFile);
+    templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
+
+    ADtemplate   = 'AD_Primary_v15.04.x.dat';
+    BDtemplate   = 'BD_Primary.dat';
+    FASTtemplate = 'FAST_Primary_v8.17.x.dat';
+else
+    ADtemplate   = 'AeroDyn15.dat';
+    BDtemplate   = 'BeamDyn.dat';
+    FASTtemplate = 'OpenFAST.fst';
+end
 
         % Primary input file:
 
@@ -76,17 +86,49 @@ end
         end
         [ADPar] = newInputs_AD_v15_04(ADPar);        
         
-        template   = [templateDir filesep 'AD_Primary_v15.04.x.dat'];  %template for primary file
+        template   = [templateDir filesep ADtemplate];  %template for primary file
         Matlab2FAST(ADPar,template,newADName, 2); %contains 2 header lines
     end    
 
     
+%%  %----------------------------------------------------------------------
+    % Get BD Data and write new BD file:
+    %----------------------------------------------------------------------
+    CompElast = GetFASTPar(FP,'CompElast');
+    if CompElast == 2 % BeamDyn
+
+        % first get the number of blades from ElastoDyn:
+        FullEDFile = GetFASTPar(FP,'EDFile');
+        
+        [FullEDFile] = GetFullFileName( FullEDFile, oldDir );
+        EDPar = FAST2Matlab(FullEDFile,2); % get ElastoDyn data (2 header lines)        
+        NumBl = GetFASTPar(EDPar, 'NumBl');
+%%        
+        
+        for i = 1:NumBl
+            varName = ['BDBldFile(' num2str(i) ')'];
+            FullBDFile = GetFASTPar(FP, varName );
+
+            [newBDName]  = GetFullFileName( FullBDFile, newDir ); % new path + name
+            [FullBDFile] = GetFullFileName( FullBDFile, oldDir );
+            BDPar = FAST2Matlab(FullBDFile,2); % get BeamDyn data (2 header lines)
+
+            [newBDPath] = fileparts(newBDName);
+            if 7~=exist(newBDPath,'dir')
+               mkdir(newBDPath)
+            end
+            [BDPar] = newInputs_BD(BDPar);  
+
+            template   = [templateDir filesep BDtemplate];  %template for primary file
+            Matlab2FAST(BDPar,template,newBDName, 2); %contains 2 header lines
+        end
+    end    
 
 
 %%  %----------------------------------------------------------------------
     % Write new model data to the FAST input files:
     %----------------------------------------------------------------------
-    template   = [templateDir filesep 'FAST_Primary_v8.17.x.dat'];  %template for primary file
+    template   = [templateDir filesep FASTtemplate];  %template for primary file
     Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
 
 return
