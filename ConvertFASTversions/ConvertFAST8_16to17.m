@@ -34,15 +34,15 @@ if nargin < 3
     thisDir     = fileparts(thisFile);
     templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
 
-    ADtemplate   = 'AD_Primary_v15.04.x.dat';
-    BDtemplate   = 'BD_Primary.dat';
-    FASTtemplate = 'FAST_Primary_v8.17.x.dat';
+    ADtemplate   = 'AeroDyn15_Primary.dat';
+    BDtemplate   = 'bd_primary.inp';
+    FASTtemplate = 'OpenFAST.dat';
 else
     ADtemplate   = 'AeroDyn15.dat';
     BDtemplate   = 'BeamDyn.dat';
-    FASTtemplate = 'OpenFAST.fst';
+    FASTtemplate = 'FAST.fst';
 end
-
+%%
         % Primary input file:
 
 [oldDir, baseName, ext ] = fileparts(oldFSTName);
@@ -75,16 +75,8 @@ end
     %----------------------------------------------------------------------
     CompAero = GetFASTPar(FP,'CompAero');
     if CompAero == 2
-        FullADFile = GetFASTPar(FP,'AeroFile');
-        [newADName]  = GetFullFileName( FullADFile, newDir ); % new path + name
-        [FullADFile] = GetFullFileName( FullADFile, oldDir );
-        ADPar = FAST2Matlab(FullADFile,2); % get AeroDyn data (2 header lines)
-
-        [newADPath,ADRootname] = fileparts(newADName);
-        if 7~=exist(newADPath,'dir')
-           mkdir(newADPath)
-        end
-        [ADPar] = newInputs_AD_v15_04(ADPar);        
+        [ADPar, newADName] = GetFASTPar_Subfile(FP, 'AeroFile', oldDir, newDir);
+        ADPar = newInputs_AD_v15_04(ADPar);        
         
         template   = [templateDir filesep ADtemplate];  %template for primary file
         Matlab2FAST(ADPar,template,newADName, 2); %contains 2 header lines
@@ -98,30 +90,19 @@ end
     if CompElast == 2 % BeamDyn
 
         % first get the number of blades from ElastoDyn:
-        FullEDFile = GetFASTPar(FP,'EDFile');
-        
-        [FullEDFile] = GetFullFileName( FullEDFile, oldDir );
-        EDPar = FAST2Matlab(FullEDFile,2); % get ElastoDyn data (2 header lines)        
+        EDPar = GetFASTPar_Subfile(FP, 'EDFile', oldDir);            
         NumBl = GetFASTPar(EDPar, 'NumBl');
-%%        
-        
+            
         for i = 1:NumBl
             varName = ['BDBldFile(' num2str(i) ')'];
-            FullBDFile = GetFASTPar(FP, varName );
-
-            [newBDName]  = GetFullFileName( FullBDFile, newDir ); % new path + name
-            [FullBDFile] = GetFullFileName( FullBDFile, oldDir );
-            BDPar = FAST2Matlab(FullBDFile,2); % get BeamDyn data (2 header lines)
-
-            [newBDPath] = fileparts(newBDName);
-            if 7~=exist(newBDPath,'dir')
-               mkdir(newBDPath)
-            end
-            [BDPar] = newInputs_BD(BDPar);  
+            
+            [BDPar, newBDName] = GetFASTPar_Subfile(FP, varName, oldDir, newDir);            
+            BDPar = newInputs_BD(BDPar);  
 
             template   = [templateDir filesep BDtemplate];  %template for primary file
             Matlab2FAST(BDPar,template,newBDName, 2); %contains 2 header lines
         end
+        
     end    
 
 
