@@ -37,6 +37,9 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.TMDspProp        A matrix of TMD spring forces
 %.TMDspPropHdr     A cell array of headers corresponding to the TMDspProp table
 %
+% .PointLoads      A table of point loads in the BeamDyn driver input file
+% .PointLoadsHdr   A the headers for the point loads table
+%
 %.PrnElm           An array determining whether or not to print a given element
 %
 %.kp               A table of key points defined in BeamDyn
@@ -86,6 +89,8 @@ if nargin == 3
 else
     count = 1;
 end
+NextIsMatrix = 0;
+matrixVal = [];
 
 while true %loop until discovering Outlist or end of file, than break
     
@@ -161,6 +166,16 @@ while true %loop until discovering Outlist or end of file, than break
             NumCases = GetFASTPar(DataOut,'NumCases');        
             [DataOut.Cases, DataOut.CasesHdr] = ParseFASTNumTable(line, fid, NumCases);
             continue; %let's continue reading the file
+        elseif strcmpi(label,'NumPointLoads') 
+            DataOut.Label{count,1} = label;
+            DataOut.Val{count,1}   = value;
+            count = count + 1;
+            
+            NumPointLoads = value;
+            line = fgetl(fid);  % the next line is the header, and it may have comments
+            [DataOut.PointLoads, DataOut.PointLoadsHdr] = ParseFASTNumTable(line, fid, NumPointLoads);
+            continue; %let's continue reading the file            
+            
         elseif strcmpi(label,'NumAlf')
             DataOut.Label{count,1} = label;
             DataOut.Val{count,1}   = value;
@@ -174,11 +189,30 @@ while true %loop until discovering Outlist or end of file, than break
         elseif strcmpi(label,'kp_yr') %we've reached the BD key-points table
             kp_total = GetFASTPar(DataOut,'kp_total');        
             [DataOut.kp, DataOut.kpHdr] = ParseFASTNumTable(line, fid, kp_total);
-            continue; %let's continue reading the file            
-        else                
-            DataOut.Label{count,1} = label;
-            DataOut.Val{count,1}   = value;
-            count = count + 1;
+            continue; %let's continue reading the file
+        else         
+            
+            if NextIsMatrix > 0
+                matrixVal = vertcat( matrixVal, value );
+                NextIsMatrix = NextIsMatrix - 1;
+                label = nextLabel;
+                value = matrixVal;
+            end
+            
+            if NextIsMatrix == 0
+                DataOut.Label{count,1} = label;
+                DataOut.Val{count,1}   = value;
+                count = count + 1;
+                matrixVal = [];
+            end
+            
+            if strcmpi(label,'GlbPos(3)') % the next one is a DCM from the BD driver file:
+                NextIsMatrix = 3; % three rows of a matrix (DCM)
+                nextLabel = 'DCM';
+            elseif strcmpi(label,'kp_total') % the next one is a DCM from the BD driver file:
+                NextIsMatrix = GetFASTPar(DataOut,'member_total');  
+                nextLabel = 'MemberKeyPtTable';
+            end            
         end
     end
     
@@ -228,21 +262,28 @@ function [OutList OutListComments] = ParseFASTOutList( fid )
     
 end %end function
 %%
-function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt  )
+function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, skipUnits  )
 
     % read a numeric table from the FAST file
     
     % we've read the line of the table that includes the header 
     % let's parse it now, getting the number of columns as well:
-    TmpHdr  = textscan(line,'%s');
+    if strfind(line,',') 
+        % these will be assumed to be comma delimited:
+        TmpHdr  = textscan(line,'%s', 'Delimiter',',');
+    else
+        TmpHdr  = textscan(line,'%s');
+    end
     Headers = TmpHdr{1};
     if strcmp( Headers{1}, '!' )
         Headers = Headers(2:end);
     end
     nc = length(Headers);
 
-    % read the units line:
-    fgetl(fid); 
+    if nargin < 4 || ~skipUnits
+        % read the units line:
+        fgetl(fid); 
+    end
         
     % now initialize Table and read its values from the file:
     Table = zeros(InpSt, nc);   %this is the size table we'll read

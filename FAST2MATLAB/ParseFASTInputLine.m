@@ -93,9 +93,10 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
                     elseif strcmpi(testVal(1),',') 
                         % commas are an indication that this parameter is a list
                         if strcmpi(fieldType, 'Numeric') 
-                            [testVal, cnt, ~, nextindex] = sscanf(line(2:end),'%f',1);
+                            line = line(2:end);
+                            [testVal, cnt, ~, nextindex] = sscanf(line,'%f',1);
                             if cnt == 1
-                                value = [value; testVal];
+                                value = [value testVal];
                             end
                         end
                     elseif strcmpi(testVal(1),'"')
@@ -107,11 +108,16 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
                         descr = strtrim(line(nextindex:end));
                     end
                 end
+            else
+                % this was a finite numeric value (not separated by commas), so we'll keep it
+                value = [value tmpVal];
             end
 
         end %while 
             
     end %not a comment
            
-    
+    if strcmp(label,'-')
+        label = '';
+    end
 return
