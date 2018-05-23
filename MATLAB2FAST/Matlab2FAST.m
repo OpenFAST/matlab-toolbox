@@ -180,7 +180,7 @@ while true
             if ~isfield(FastPar,'PointLoads')
                 disp( 'WARNING: BeamDyn driver point loads not found in the FAST data structure.' );
                 printTable = true;
-                printTableComments = 1;
+                printTableComments = 2;
             else                
                 line = fgets(fidIN); %get the next (header) line from the template
                 WriteFASTTable(line, fidIN, fidOUT, FastPar.PointLoads, FastPar.PointLoadsHdr, newline, true);
@@ -355,6 +355,10 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printU
         fprintf(fidOUT,'%s',fgets(fidIN));      % print the new units (we're assuming they are the same)
     end
         
+    if ~iscell(Table) && size(Table,1) < 1
+        return
+    end
+    
     colFmtR='%11.7E  ';
     colFmtI='%9i      ';
     if nargin < 8

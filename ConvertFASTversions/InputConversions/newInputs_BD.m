@@ -52,15 +52,20 @@ function [BDP,BDdriverP] = newInputs_BD(BDPar, BDdriver)
             nd = nd + 1;
             BDdriverP.Label{nd} = 'DynamicSolve';
             BDdriverP.Val{nd}   =  DynamicSolve;
-            
-            [~, err1] = GetFASTPar(BDdriverP,'NumPointLoads');
-            if err1 
-                nd = nd + 1;
-                BDdriverP.Label{nd} = 'NumPointLoads';
-                BDdriverP.Val{nd}   =  0;
-            end
-        end
+        end                   
     end
+
+    %----------------------------------------------------------------------       
+    % add PointLoads table to driver if it doesn't exist:
+    %----------------------------------------------------------------------       
+    if nd > 0
+        [~, err1] = GetFASTPar(BDdriverP,'NumPointLoads');
+        if err1 
+            nd = nd + 1;
+            BDdriverP.Label{nd} = 'NumPointLoads';
+            BDdriverP.Val{nd}   =  0;
+        end
+    end    
     
     %----------------------------------------------------------------------       
     % add RotStates if it doesn't exist:

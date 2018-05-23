@@ -37,6 +37,9 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.TMDspProp        A matrix of TMD spring forces
 %.TMDspPropHdr     A cell array of headers corresponding to the TMDspProp table
 %
+% .PointLoads      A table of point loads in the BeamDyn driver input file
+% .PointLoadsHdr   A the headers for the point loads table
+%
 %.PrnElm           An array determining whether or not to print a given element
 %
 %.kp               A table of key points defined in BeamDyn
@@ -170,7 +173,7 @@ while true %loop until discovering Outlist or end of file, than break
             
             NumPointLoads = value;
             line = fgetl(fid);  % the next line is the header, and it may have comments
-            [DataOut.PointLoads, DataOut.PointLoadsHdr] = ParseFASTNumTable(line, fid, NumPointLoads, true);
+            [DataOut.PointLoads, DataOut.PointLoadsHdr] = ParseFASTNumTable(line, fid, NumPointLoads);
             continue; %let's continue reading the file            
             
         elseif strcmpi(label,'NumAlf')
