@@ -64,6 +64,9 @@ function [BDP,BDdriverP] = newInputs_BD(BDPar, BDdriver)
             nd = nd + 1;
             BDdriverP.Label{nd} = 'NumPointLoads';
             BDdriverP.Val{nd}   =  0;
+            
+            BDdriverP.PointLoads = [];
+            BDdriverP.PointLoadsHdr = [];            
         end
     end    
     

@@ -22,11 +22,7 @@ end
 % we're going to get the appropriate newline character(s) from the template file
 
 HaveNewLineChar = false;
-% newline = '\r'; %mac
-% newline = '\n'; %linux
-% newline = '\r\n'; %windows
 ContainsOutList = false;
-
 
 %Declare file IDs from the template to the resulting file
 fidIN = fopen(TemplateFile,'r');
@@ -41,14 +37,11 @@ end
 for hi = 1:hdrLines
     line    = fgets(fidIN); 
     
-        % get the line feed characters(s) here: CHAR(13)=CR(\r) CHAR(10)=LF(\n)
+        % get the line feed characters(s) here: char(13)=CR(\r) char(10)=LF(\n)
         % so our file has consistant line endings
     if ~HaveNewLineChar
+        newline = getNewlineChar(line);
         HaveNewLineChar = true;
-        indx = min( strfind(line,char(13)), strfind(line,char(10)) );
-        if ~isempty(indx)
-            newline = line(indx:end);
-        end
     end
 
         % print appropriate header lines:
@@ -77,11 +70,8 @@ while true
         % get the line feed characters(s) here: CHAR(13)=CR(\r) CHAR(10)=LF(\n)
         % so our file has consistant line endings
     if ~HaveNewLineChar
+        newline = getNewlineChar(line);
         HaveNewLineChar = true;
-        indx = min( strfind(line,char(13)), strfind(line,char(10)) );
-        if ~isempty(indx)
-            newline = line(indx:end);
-        end
     end
     
     if ~isempty(strfind(upper(line),upper('OutList'))) 
@@ -464,6 +454,33 @@ function WriteFASTMatrix( FastPar, fidOUT, matrixName, newline, UseIntFormat )
         fprintf(fidOUT, fmt, matrix(i,:) );  %write all of the columns
         fprintf(fidOUT, newline);
     end
+    return;
 end
 
 
+function [newline] = getNewlineChar(line)
+
+    indx = strfind(line,char(10));
+    cr_indx = strfind(line,char(13));
+    if isempty( indx ) 
+        indx = cr_indx;
+    else
+        if ~isempty(cr_indx)
+            indx = min( indx, cr_indx );
+        end
+    end
+    
+    if isempty( indx )
+        if ismac
+            newline = char(13); % '\r'; %mac
+        elseif isunix
+            newline = char(10); % '\n'; %linux
+        else % ispc
+            newline = [char(13) char(10)]; % '\r\n'; %windows
+        end
+    else
+        newline = line(indx:end);
+    end
+    
+    return;
+end
