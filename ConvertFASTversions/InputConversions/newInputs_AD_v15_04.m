@@ -3,7 +3,11 @@ function [ADPar] = newInputs_AD_v15_04(ADPar)
 % ADPar is the data structure containing already-filled parameters for
 %       AeroDyn, which will be modified for AeroDyn v15.04.
 
-n   = length(ADPar.Label);    
+if isfield(ADPar,'Label')
+    n   = length(ADPar.Label);
+else
+    n = 0;
+end
 
 %% Cavitation options:
 [~, err1] = GetFASTPar(ADPar,'CavitCheck');        %Perform cavitation check? (flag)
