@@ -1,4 +1,6 @@
 function [dat, data, columnTitles, columnUnits] = loadNodalData(fileName)
+%% [dat, data, columnTitles, columnUnits] = loadNodalData(fileName)
+%
 % This function reads a FAST file (either text or binary format) and
 % stores the data in a data structure with channel names as fields; each
 % channel has two fields:

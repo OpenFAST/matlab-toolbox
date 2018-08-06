@@ -39,7 +39,7 @@ for i=1:length(n)
 
             if ~isempty( strfind(n{i}, 'Blade_Aero_') ) 
                 X = outData_struct.nodeDistances.Blade_Aero;
-                x_label = 'Blade node distance (m)';
+                x_label = ['Blade ' num2str(nb) ' node distance (m)'];
             else
                 X = 1:size(outData_struct.(n{i}).timeSer(:,:,nb),2);
                 x_label = 'node number (-)';
