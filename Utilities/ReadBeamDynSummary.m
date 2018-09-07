@@ -25,7 +25,6 @@ function [data] = ReadBeamDynSummary(fileName)
             tmp=textscan(line,'%*s %s','Delimiter',':');
             data.Quadrature=tmp{1};
          end
-
          
          findx = strfind(line,'NUMBER OF ELEMENTS:');
          if ~isempty(findx)
@@ -88,6 +87,22 @@ function [data] = ReadBeamDynSummary(fileName)
          end
          
          
+         %% Find the quadrature point initial positions and rotations
+         findx = strfind(line,'QUADRATURE POINT POSITION VECTORS');
+         if ~isempty(findx)
+            dummy=fgetl(fid);    % Header line (QP X Y Z)
+            dummy=fgetl(fid);    % Another header line
+            data.QP.Pos=readMatrixNcol(fid,4);
+           continue;
+         end
+         findx = strfind(line,'QUADRATURE POINT INITIAL WEINER-MILENKOVIC ROTATION VECTORS');
+         if ~isempty(findx)
+            dummy=fgetl(fid);    % Header line (QP X Y Z)
+            dummy=fgetl(fid);    % Another header line
+            data.QP.Rot=readMatrixNcol(fid,4);
+            continue;
+         end
+         
          %% Find the QP mass stiffness matrices
          findx = strfind(line,'QUADRATURE POINT NUMBER:');
          if ~isempty(findx)
@@ -136,6 +151,19 @@ function [data] = ReadBeamDynSummary(fileName)
    return
 end
 
+
+function [M] = readMatrixNcol(fid,ncol)
+   M =[];
+   while (true)
+      line2=fgetl(fid);
+      if ~isempty(line2)
+         tmp=cell2mat(textscan(line2, '%f', ncol))';
+         M = [M; tmp];
+      else
+         break;
+      end
+   end
+end
 
 function [M] = readMatrix(fid, lastLine, nc)
 
