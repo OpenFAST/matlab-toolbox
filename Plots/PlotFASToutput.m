@@ -172,8 +172,10 @@ end
 
 %% -----------------------------------------------------------
 % save data for output
+TimeIndex = 1;
+% TimeIndex = 2;
 for iFile=1:numFiles
-    outData{iFile,1} = data{iFile}(:,1);
+    outData{iFile,1} = data{iFile}(:,TimeIndex);
     outData{iFile,2} = zeros( length(outData{iFile,1}), length(Channels));
 end
 
@@ -235,8 +237,8 @@ else
 end
 
 plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
-                    columnTitles{ReferenceFile}([1 Channels]), ...
-                    columnUnits{ReferenceFile}([1 Channels]), titleText, ...
+                    columnTitles{ReferenceFile}([TimeIndex Channels]), ...
+                    columnUnits{ReferenceFile}([TimeIndex Channels]), titleText, ...
                     ShowThisLegend, LineWidthConst, FntSz, figNo, outFileRoot );
 if OnePlot
     if ShowLegend
@@ -251,8 +253,8 @@ end
 % ------------------------------------------------------------
 if PlotPSDs
     plotPSDData( outData, FASTfilesDesc, Markers, LineColors, ...
-                        columnTitles{ReferenceFile}([1 Channels]), ...
-                        columnUnits{ReferenceFile}([1 Channels]), titleText, ...
+                        columnTitles{ReferenceFile}([TimeIndex Channels]), ...
+                        columnUnits{ReferenceFile}([TimeIndex Channels]), titleText, ...
                         ShowLegend, LineWidthConst, FntSz );                
 end
 
