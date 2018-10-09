@@ -166,8 +166,10 @@ end
 
 %% -----------------------------------------------------------
 % save data for output
+TimeIndex = 1;
+% TimeIndex = 2;
 for iFile=1:numFiles
-    outData{iFile,1} = data{iFile}(:,1);
+    outData{iFile,1} = data{iFile}(:,TimeIndex);
     outData{iFile,2} = zeros( length(outData{iFile,1}), length(Channels));
 end
 
@@ -182,7 +184,14 @@ for iChannel = Channels
         else        
             ChannelName = columnTitles{ReferenceFile}{iChannel};       
             [ChannelIndx, err, ChannelName, scaleFact] = getColIndx( ChannelName, columnTitles{iFile}, FASTfiles{iFile} );
+            
+            if ~err && ChannelIndx > 0
+                [columnUnits{iFile}{ChannelIndx}, scalefact2] = ConvertUnits( columnUnits{iFile}{ChannelIndx} );            
+                scaleFact = scalefact2*scaleFact;
+            end
         end
+        
+        
 %         if iFile == 1
 %             [ChannelName,scaleFact] = getOldFASTv8ChannelName(ChannelName);
 %         elseif iFile == 2
@@ -222,8 +231,8 @@ else
 end
 
 plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
-                    columnTitles{ReferenceFile}([1 Channels]), ...
-                    columnUnits{ReferenceFile}([1 Channels]), titleText, ...
+                    columnTitles{ReferenceFile}([TimeIndex Channels]), ...
+                    columnUnits{ReferenceFile}([TimeIndex Channels]), titleText, ...
                     ShowThisLegend, LineWidthConst, FntSz, figNo, outFileRoot );
 if OnePlot
     if ShowLegend
@@ -238,8 +247,8 @@ end
 % ------------------------------------------------------------
 if PlotPSDs
     plotPSDData( outData, FASTfilesDesc, Markers, LineColors, ...
-                        columnTitles{ReferenceFile}([1 Channels]), ...
-                        columnUnits{ReferenceFile}([1 Channels]), titleText, ...
+                        columnTitles{ReferenceFile}([TimeIndex Channels]), ...
+                        columnUnits{ReferenceFile}([TimeIndex Channels]), titleText, ...
                         ShowLegend, LineWidthConst, FntSz );                
 end
 
@@ -268,8 +277,8 @@ numFiles = size(outData,1);
                 plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
                      ,'LineStyle',lStyle ...
                      ,'Marker',Markers{iFile} ...
-                     ,'MarkerSize',4 ...
-                     ,'DisplayName',[FASTfilesDesc{iFile} ' (' outData{iFile,3}{i} ')' ] ...
+                     ,'MarkerSize',3 ...
+                     ,'DisplayName',[strrep(FASTfilesDesc{iFile},'\','\\') ' (' strrep(outData{iFile,3}{i},'_','\_') ')' ] ...
                      ,'Color',LineColors{iFile} ...
                      ,'LineWidth',LineWidthConst);
                 hold on;      
@@ -373,6 +382,9 @@ end
 %% possibly use this to make sure the channel names are the same....
 %% ------------------------------------------------------------------------
 function [Indx,err,ColToFind,scaleFact] = getColIndx( ColToFind, colNames, fileName )
+    % ColToFind is originally the name of the reference channel
+    % on exit, it is the channel name in the current file
+    
     err = false;
     scaleFact = 1;
     Indx = find( strcmpi(ColToFind, colNames), 1, 'first' );
@@ -437,6 +449,30 @@ function [Indx,scaleFact,ColToFind] = getNewColIndx( ColToFind, colNames )
     end
     
 return
+end
+
+function [unitOut, scalefact] = ConvertUnits( unitIn )
+
+    if strcmpi( unitIn, '(rad)' ) 
+        unitOut = '(deg)';
+        scalefact  = 180/pi;
+    elseif strcmpi( unitIn, '(rad/s)' )
+        unitOut = '(rpm)';
+        scalefact  = 30/pi;
+    elseif strcmpi( unitIn, '(rad/ss)' )
+        unitOut = '(rpm/s)';
+        scalefact  = 30/pi;
+    elseif strcmpi( unitIn, '(N-m)' )
+        unitOut = '(kN-m)';
+        scalefact  = 1/1000;
+    elseif strcmpi( unitIn, '(N)' )
+        unitOut = '(kN)';
+        scalefact  = 1/1000;
+    else
+        unitOut = unitIn;
+        scalefact  = 1;        
+    end    
+
 end
 
 function [colNames,scalefact] = BeamDynColNames( ColToFind, colNames )
@@ -623,10 +659,7 @@ function [colNames,scalefact] = BeamDynColNames( ColToFind, colNames )
         scalefact = 1E3;
         
     end
-    
-end
-    end
-    
+            
 end
 
 

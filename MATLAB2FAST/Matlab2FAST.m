@@ -22,11 +22,7 @@ end
 % we're going to get the appropriate newline character(s) from the template file
 
 HaveNewLineChar = false;
-% newline = '\r'; %mac
-% newline = '\n'; %linux
-% newline = '\r\n'; %windows
 ContainsOutList = false;
-
 
 %Declare file IDs from the template to the resulting file
 fidIN = fopen(TemplateFile,'r');
@@ -41,14 +37,11 @@ end
 for hi = 1:hdrLines
     line    = fgets(fidIN); 
     
-        % get the line feed characters(s) here: CHAR(13)=CR(\r) CHAR(10)=LF(\n)
+        % get the line feed characters(s) here: char(13)=CR(\r) char(10)=LF(\n)
         % so our file has consistant line endings
     if ~HaveNewLineChar
+        newline = getNewlineChar(line);
         HaveNewLineChar = true;
-        indx = min( strfind(line,char(13)), strfind(line,char(10)) );
-        if ~isempty(indx)
-            newline = line(indx:end);
-        end
     end
 
         % print appropriate header lines:
@@ -61,6 +54,9 @@ for hi = 1:hdrLines
 end
 
 printTable = false; %assume we'll get the tables from the FastPar data structure;
+printTableComments = 0;
+NextMatrix = '';
+isInteger = false;
 
 %loop through the template up until OUTLIST or end of file
 while true
@@ -74,11 +70,8 @@ while true
         % get the line feed characters(s) here: CHAR(13)=CR(\r) CHAR(10)=LF(\n)
         % so our file has consistant line endings
     if ~HaveNewLineChar
+        newline = getNewlineChar(line);
         HaveNewLineChar = true;
-        indx = min( strfind(line,char(13)), strfind(line,char(10)) );
-        if ~isempty(indx)
-            newline = line(indx:end);
-        end
     end
     
     if ~isempty(strfind(upper(line),upper('OutList'))) 
@@ -106,6 +99,11 @@ while true
     [value, label, isComment, ~, ~] = ParseFASTInputLine(line);
             
     if ~printTable && ~isComment && ~isempty(label)        
+        
+        if ~isempty(NextMatrix)                
+            WriteFASTMatrix( FastPar, fidOUT, NextMatrix, newline, isInteger )
+            NextMatrix = '';
+        end
         
         if strcmpi(value,'"HtFract"') || strcmpi(value,'"TwrElev"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)            
             if ~isfield(FastPar,'TowProp')
@@ -153,16 +151,31 @@ while true
             end                                     
             
         elseif strcmpi(label,'NumAlf')  %we've reached the airfoil coefficients
+            line = GetLineToWrite( line, FastPar, label, TemplateFile, value );
+            fprintf(fidOUT,'%s',line);
+            
+            line = fgets(fidIN); %get the next line from the template
             if ~isfield(FastPar,'AFCoeff')
                 disp( 'WARNING: AeroDyn airfoil coefficients not found in the FAST data structure.' );
                 printTable = true;
-            else
-                line = GetLineToWrite( line, FastPar, label, TemplateFile, value );
-                fprintf(fidOUT,'%s',line);
-                line = fgets(fidIN); %get the next line from the template
+            else                
                 WriteFASTTable(line, fidIN, fidOUT, FastPar.AFCoeff, FastPar.AFCoeffHdr, newline, true);
-                continue; %let's continue reading the template file            
             end            
+            continue; %let's continue reading the template file            
+            
+        elseif strcmpi(label,'NumPointLoads')  % BeamDyn driver point-load table
+            line = GetLineToWrite( line, FastPar, label, TemplateFile, value );                
+            fprintf(fidOUT,'%s',line);
+            
+            if ~isfield(FastPar,'PointLoads')
+                disp( 'WARNING: BeamDyn driver point loads not found in the FAST data structure.' );
+                printTable = true;
+                printTableComments = 2;
+            else                
+                line = fgets(fidIN); %get the next (header) line from the template
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.PointLoads, FastPar.PointLoadsHdr, newline, true);
+            end            
+            continue; %let's continue reading the template file            
             
         elseif strcmpi(value,'"RNodes"') %we've reached the AeroDyn Blade properies table (and we think it's a string value so it's in quotes)
             if ~isfield(FastPar,'BldNodes')
@@ -184,6 +197,14 @@ while true
                 continue; %let's continue reading the template file            
             end   
             
+        elseif strcmpi(label,'kp_yr') %we've reached the BD key-points table
+            if ~isfield(FastPar,'kp')
+                disp( 'WARNING: BeamDyn key-point table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.kp, FastPar.kpHdr, newline, true);
+                continue; %let's continue reading the template file            
+            end   
             
         elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
             if ~isfield(FastPar,'Cases')
@@ -193,21 +214,36 @@ while true
                 WriteFASTTable(line, fidIN, fidOUT, FastPar.Cases, FastPar.CasesHdr, newline);
                 continue; %let's continue reading the template file            
             end   
-                                    
+            
         elseif strcmpi(label,'NOPRINT') || strcmpi(label,'PRINT')
             continue;  % this comes from AeroDyn BldNodes table                                    
         else
 
             line = GetLineToWrite( line, FastPar, label, TemplateFile, value );
-            
+
+            if strcmpi(label,'GlbPos(3)')
+                NextMatrix = 'DCM';
+                isInteger  = false;
+            elseif strcmpi(label,'kp_total')
+                NextMatrix = 'MemberKeyPtTable';
+                isInteger  = true;
+            end            
+                
         end
-    else % isComment || length(label) == 0 || printTable (i.e. tables must end with comments
+        
+    else % isComment || length(label) == 0 || printTable (i.e. tables must end with comments)
         if isComment
-            printTable = false;     % we aren't reading a table (if we were, we reached the end) 
-        else
-            if ~printTable
-                continue;           % don't print this line without a label
+            if printTableComments == 0
+                printTable = false;     % we aren't reading a table (if we were, we reached the end)
+            else
+                printTableComments = printTableComments - 1;
             end
+        else
+            if ~isempty(NextMatrix)                
+                WriteFASTMatrix( FastPar, fidOUT, NextMatrix, newline, isInteger )
+                NextMatrix = '';
+            end
+            continue;           % don't print this line without a label (or inside a table)
         end
     end       
     
@@ -245,6 +281,7 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
     if any( indx )
 
         if sum(indx) > 1 % we found more than one....
+            vals2Write = FastPar.Val{indx}
             disp( ['WARNING: multiple occurrences of ' label ' in the FAST data structure.'] );
         end
 
@@ -290,7 +327,12 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printU
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
-    TmpHdr = textscan(HdrLine,'%s');
+    
+    if strfind(HdrLine,',')
+        TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
+    else
+        TmpHdr = textscan(HdrLine,'%s');
+    end
     TemplateHeaders = TmpHdr{1};
     if (strcmp(TemplateHeaders{1},'!'))
         TemplateHeaders = TemplateHeaders(2:end);
@@ -298,8 +340,13 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printU
     nc = length(TemplateHeaders);
 
     fprintf(fidOUT,'%s',HdrLine);           % print the new headers
+
     if nargin < 7 || printUnits
         fprintf(fidOUT,'%s',fgets(fidIN));      % print the new units (we're assuming they are the same)
+    end
+        
+    if ~iscell(Table) && size(Table,1) < 1
+        return
     end
     
     colFmtR='%11.7E  ';
@@ -389,4 +436,51 @@ function WriteFASTFileList( line, fidIN, fidOUT, List, label, newline )
         end
         fprintf(fidOUT,newline);
     end
+end
+
+function WriteFASTMatrix( FastPar, fidOUT, matrixName, newline, UseIntFormat )
+
+    indx = strcmpi( FastPar.Label, matrixName );
+    indx2 = find(indx,1,'first');
+    matrix = FastPar.Val{indx2};               
+                
+    if UseIntFormat
+        fmt = '%6i ';
+    else
+        fmt = '%11.7E  ';
+    end
+    % now we'll write the table:    
+    for i=1:size(matrix,1) 
+        fprintf(fidOUT, fmt, matrix(i,:) );  %write all of the columns
+        fprintf(fidOUT, newline);
+    end
+    return;
+end
+
+
+function [newline] = getNewlineChar(line)
+
+    indx = strfind(line,char(10));
+    cr_indx = strfind(line,char(13));
+    if isempty( indx ) 
+        indx = cr_indx;
+    else
+        if ~isempty(cr_indx)
+            indx = min( indx, cr_indx );
+        end
+    end
+    
+    if isempty( indx )
+        if ismac
+            newline = char(13); % '\r'; %mac
+        elseif isunix
+            newline = char(10); % '\n'; %linux
+        else % ispc
+            newline = [char(13) char(10)]; % '\r\n'; %windows
+        end
+    else
+        newline = line(indx:end);
+    end
+    
+    return;
 end
