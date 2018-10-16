@@ -16,12 +16,14 @@ function [p, newSubfileName] = GetFASTPar_Subfile(FP, VarName, oldDir, newDir)
                mkdir(newSubfilePath)
             end
         end
-    else
-        newSubfileName = '';
     end
     
         % get the full path name, relative to the old directory location:
     SubfileName = GetFullFileName( SubfileName, oldDir );       
     p = FAST2Matlab(SubfileName,2); % get parameter data (2 header lines)
+
+    if nargin <= 3
+        newSubfileName = SubfileName;
+    end
             
 end
