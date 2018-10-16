@@ -36,11 +36,13 @@ if nargin < 3
 
     ADtemplate   = 'AeroDyn15_Primary.dat';
     BDtemplate   = 'bd_primary.inp';
+    SrvDtemplate = 'ServoDyn.dat';
     FASTtemplate = 'OpenFAST.dat';
 else
 %   templateDir = 'C:\Users\bjonkman\Documents\Data\Software\bjonkman\enFAST\docs\Example_InputFiles';
     ADtemplate   = 'AeroDyn15.dat';
     BDtemplate   = 'BeamDyn.dat';
+    SrvDtemplate = 'ServoDyn.dat';
     FASTtemplate = 'enFAST.fst';
 end
 
@@ -83,6 +85,19 @@ end
         Matlab2FAST(ADPar,template,newADName, 2); %contains 2 header lines
     end    
 
+%%  %----------------------------------------------------------------------
+    % Get SrvD Data and write new ServoDyn file:
+    %----------------------------------------------------------------------
+    CompServo = GetFASTPar(FP,'CompServo');
+    if CompServo == 1
+        [SrvDPar, newSrvDName] = GetFASTPar_Subfile(FP, 'ServoFile', oldDir, newDir);
+%         [SrvDPar] = SetFASTPar(SrvDPar,'UsePAM','false');
+
+
+        template   = [templateDir filesep SrvDtemplate];  %template for primary file
+        Matlab2FAST(SrvDPar, template, newSrvDName, 2); %contains 2 header lines
+    end    
+    
     
 %%  %----------------------------------------------------------------------
     % Get BD Data and write new BD file:
