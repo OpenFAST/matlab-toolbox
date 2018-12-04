@@ -428,10 +428,12 @@ function [Indx,scaleFact,ColToFind] = getNewColIndx( ColToFind, colNames )
  
     scaleFact = 1;
 %     [ColToFind,    scaleFact] = getAD14ChannelName(ColToFind);
+%     [ColToFind,    scaleFact] = getFASTv7ChannelName(ColToFind);
 
     [newColNames, scaleFactM] = MooringColNames( ColToFind, colNames );
     [newColNames, scaleFactB] = BeamDynColNames( ColToFind, newColNames );    
     scaleFact = scaleFact*scaleFactM*scaleFactB;
+    
 %     disp( [colNames newColNames])
 
     Indx = find( strcmpi(ColToFind, newColNames), 1, 'first' );
@@ -725,6 +727,23 @@ function [ChannelName_old,scaleFact] = getFASTv7ChannelName(ChannelName)
         ChannelName_old = 'WaveElev';                        
     elseif strcmpi(ChannelName,'TwHt1TPxi')
         ChannelName_old = 'TTDspFA';            
+    elseif strcmpi(ChannelName,'uWind')
+        ChannelName_old = 'Wind1VelX';            
+    elseif strcmpi(ChannelName,'vWind')
+        ChannelName_old = 'Wind1VelY';            
+    elseif strcmpi(ChannelName,'wWind')
+        ChannelName_old = 'Wind1VelZ';            
+    elseif strcmpi(ChannelName,'RotCp')
+        ChannelName_old = 'RtAeroCp';            
+        scaleFact = 1;
+    elseif strcmpi(ChannelName,'RotCq')
+        ChannelName_old = 'RtAeroCq';            
+        scaleFact = 1;
+    elseif strcmpi(ChannelName,'TSR')
+        ChannelName_old = 'RtTSR';            
+    elseif strcmpi(ChannelName,'RotCt')
+        ChannelName_old = 'RtAeroCt';            
+        scaleFact = 1;
     elseif strcmpi(ChannelName,'TwHt1TPyi')
         ChannelName_old = 'TTDspSS';                    
     elseif strcmpi(ChannelName,'ReactFXss')
