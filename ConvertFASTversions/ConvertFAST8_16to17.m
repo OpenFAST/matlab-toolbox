@@ -36,7 +36,7 @@ if nargin < 3
 
     ADtemplate   = 'AeroDyn15_Primary.dat';
     BDtemplate   = 'bd_primary.inp';
-    SrvDtemplate = 'ServoDyn.dat';
+    SrvDtemplate = 'SrvD_Primary_v1.05.x.dat';
     FASTtemplate = 'OpenFAST.dat';
 else
     ADtemplate   = 'AeroDyn15.dat';
