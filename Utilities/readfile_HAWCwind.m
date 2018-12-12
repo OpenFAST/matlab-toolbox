@@ -1,4 +1,4 @@
-function [HAWCData, velocity] = readfile_HAWCwind(fileNames, nz, ny, nx)
+function [HAWCData, velocity] = readfile_HAWCwind(fileNames, nz, ny, nx, decFactor_Space, decFactor_Time)
 % input:
 %  fileNames - either (1) a cell array with the names of the U, V, and W wind files or 
 %                     (2) a string containing the root name, which will
@@ -19,6 +19,14 @@ if nargin<1
     ny = 26;
     nz = 32;
 end
+
+if nargin<5
+    decFactor_Space = 0;
+end
+if nargin<6
+    decFactor_Time = 0;
+end
+
 
 if ~iscell(fileNames)
     fileNames = strcat(fileNames, {'u.bin','v.bin','w.bin'});
@@ -51,4 +59,13 @@ end
         end
         
         fclose( UnWind );
+        
+        %% write a decimated file for comparison:
+        if decFactor_Space > 1 || decFactor_Time > 1
+            UnWind = fopen(strrep(fileNames{i},'.bin',['.decS' num2str(decFactor_Space) 'T' num2str(decFactor_Time) '.bin']),'w');
+            fwrite(UnWind,tmp(1:decFactor_Space:end,1:decFactor_Space:end,1:decFactor_Time:end),'float32');
+            fclose( UnWind );
+        end
+                                
     end
+  
