@@ -23,7 +23,7 @@ function [Channels, ChanName, ChanUnit,DescStr] = ReadFASTtext(FileName, delim, 
 %%
 DescStr = '';
 
-switch nargin;
+switch nargin
     case 1
         delim = '';
         HeaderRows = 8;
@@ -113,12 +113,13 @@ else
             ChanUnit = cell(1,nCols);
         end
 
-        fmtStr = repmat('%f',1,nCols);
+        fmtStr = repmat('%f',1,nCols);        
         if isempty( delim )
            Channels = cell2mat( textscan( fid, fmtStr ) );
         else
-           Channels = cell2mat( textscan( line, fmtStr, 'delimiter', delim ) );
+           Channels = cell2mat( textscan( fid, fmtStr, 'delimiter', delim ) );
         end
+Channels = Channels(1:2:end,:);
 
         fclose(fid);
 

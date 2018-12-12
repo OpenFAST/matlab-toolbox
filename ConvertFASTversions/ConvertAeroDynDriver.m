@@ -6,10 +6,8 @@ function ConvertAeroDynDriver(oldDriverName, newDir, templateDir)
         templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
 
         ModTemplate   = 'AeroDyn15_Primary.dat';
-        DriverTemplate = 'bd_driver.inp';
     else
         ModTemplate     = 'AeroDyn15_Primary.dat';
-        DriverTemplate = 'bd_driver.inp';
     end
 
     %%
