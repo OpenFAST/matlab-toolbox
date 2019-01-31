@@ -45,8 +45,8 @@ function [data] = ReadFASTLinear(fileName)
     %% ...........................................
     % get operating points and row/column order
     if data.n_x > 0 
-        [data.x_op,    data.x_desc, data.x_rotFrame] = readLinTable(fid,data.n_x);
-        [data.xdot_op, data.xdot_desc]               = readLinTable(fid,data.n_x);
+        [data.x_op,    data.x_desc, data.x_rotFrame, data.x_DerivOrder] = readLinTable(fid,data.n_x);
+        [data.xdot_op, data.xdot_desc]                                  = readLinTable(fid,data.n_x);
     end
 
     if data.n_xd > 0 
@@ -83,11 +83,12 @@ function [data] = ReadFASTLinear(fileName)
 return
 end 
 
-function [op, desc, RF] = readLinTable(fid,n)
+function [op, desc, RF, DerivOrd] = readLinTable(fid,n)
 
     desc = cell(n,1);
     op   = cell(n,1);
     RF   = false(n,1);
+    DerivOrd = zeros(n,1);
 
     fgetl(fid); % table title/comment
     fgetl(fid); % table header row 1
@@ -95,16 +96,24 @@ function [op, desc, RF] = readLinTable(fid,n)
     
     for row=1:n
         line = fgetl(fid);
-        [C,pos] = textscan( line, '%*f %f %s',1 );
+        [C,pos] = textscan( line, '%*f %f %s %f',1 );
         if strcmp(C{2}(end),',') %we've got an orientation line (first string ends in comma instead of T/F):    
-            [C,pos] = textscan( line, '%*f %f %*s %f %*s %f %s',1 );
+            [C,pos] = textscan( line, '%*f %f %*s %f %*s %f %s %f',1 );
             op{row} = [C{1:3}];
         else
             op{row} = C{1};
         end
-        RF(row) = strcmp(C{end},'T'); 
-        desc{row}=strtrim( line(pos+1:end) );        
+  try % new format files
+        RF(row) = strcmp(C{end-1},'T');
+        DerivOrd(row) = C{end};
+  catch % older files don't have the DerivOrd column
+        RF(row) = strcmp(C{end},'T');
+        DerivOrd(row) = 0;
+  end
+        desc{row}=strtrim( line(pos+1:end) );
+  
     end
+  
 
     fgetl(fid); % skip a blank line
 return
