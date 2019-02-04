@@ -1,5 +1,6 @@
-# MBC
-*A MATLAB®-based postprocessor for Multi-Blade Coordinate transformation of wind turbine state-space models*
+# MBC and Matlab Toolbox
+A MATLAB®-based postprocessor for Multi-Blade Coordinate transformation of wind turbine state-space models
+and a collection of Matlab tools developed for use with OpenFAST 
 
 ## by Gungit Bir, NREL
 
@@ -14,6 +15,12 @@ is that it can handle variable-speed operation and turbines with dissimilar blad
 may generate system models either in the first-order (state-space) form or the second-order (physical-domain) form. MBC3 can
 handle both types of system models. Key advantages of MBC are: capturing cumulative dynamics of the rotor blades and its interaction
 with the tower-nacelle subsystem, well-conditioning of system matrices by eliminating non-essential periodicity, and filtering operation.
+
+## Download 
+From a command line:
+```
+git clone https://github.com/OpenFAST/matlab-mbc
+```
 
 ## Usage
 The MBC scripts were updated to functions and modified to deal with some changes in OpenFAST linearizaton for BeamDyn. The old scripts have been moved 
