@@ -48,14 +48,14 @@ function [data] = ReadFASTLinear(fileName)
     if data.n_x > 0 
         [data.x_op,    data.x_desc, data.x_rotFrame, data.x_DerivOrder] = readLinTable(fid,data.n_x);
         [data.xdot_op, data.xdot_desc]                                  = readLinTable(fid,data.n_x);
-        data.n_x2 = sum(data.x_DerivOrder == 2) * 2; % (second-order states
         if data.x_DerivOrder(1) == 0 % this is an older file without derivOrder columns
             data.x_DerivOrder = 2; % (these are second-order states)
             data.n_x2 = data.n_x; 
         else
-            data.n_x2 = sum(data.x_DerivOrder == 2); % (second-order states
+            data.n_x2 = sum(data.x_DerivOrder == 2); % (number of second-order states)
         end
-
+    else
+        data.n_x2 = 0;
     end
 
     if data.n_xd > 0 
