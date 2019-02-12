@@ -102,9 +102,9 @@ end
 
 %% Get data in format for plotting
 for i= 1:nx
-    NotAvail = isnan( lineIndices(:,i) );
+    NotAvail = isnan( lineIndices(:,i) ) | lineIndices(:,i)==0;
     lineIndices(NotAvail,i) = 1;
-   
+    
     CampbellPlotData.NaturalFreq_Hz(:,i) = CampbellData{i}.NaturalFreq_Hz( lineIndices(:,i) );
     CampbellPlotData.DampRatios(    :,i) = CampbellData{i}.DampRatios(     lineIndices(:,i) );
     
