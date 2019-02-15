@@ -67,7 +67,7 @@ end
 
 % remove table name (so indices between num and txt match better)
 txt = txt(2:end,:);
-
+nColsPerMode = 5; % older format use nColsPerMode = 4;
 
 
 %%
@@ -91,13 +91,14 @@ else
     ending = '';
 end
     
+
 for i=1:nx
     WorksheetName = [ num2str(CampbellPlotData.xValues(i)) ending ];
     d = xlsread(xlsx_file, WorksheetName);
     
-    CampbellData{i}.NaturalFreq_Hz = d(2, 1:4:end);
-    CampbellData{i}.DampedFreqs_Hz = d(3, 1:4:end);
-    CampbellData{i}.DampRatios     = d(4, 1:4:end);    
+    CampbellData{i}.NaturalFreq_Hz = d(2, 1:nColsPerMode:end);
+    CampbellData{i}.DampedFreqs_Hz = d(3, 1:nColsPerMode:end);
+    CampbellData{i}.DampRatios     = d(4, 1:nColsPerMode:end);    
 end
 
 %% Get data in format for plotting
