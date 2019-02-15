@@ -2,8 +2,6 @@
 A MATLAB®-based postprocessor for Multi-Blade Coordinate transformation of wind turbine state-space models
 and a collection of Matlab tools developed for use with OpenFAST 
 
-## by Gungit Bir, NREL
-
 MBC is a set of MatLab scripts that performs multi-blade coordinate transformation (MBC) on wind turbine system models.
 The dynamics of wind turbine rotor blades are conventionally expressed in rotating frames attached to the individual blades.
 The tower-nacelle subsystem sees the combined effect of all rotor blades, not the individual blades. This is because the rotor
