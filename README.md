@@ -1,8 +1,27 @@
-# MBC and Matlab Toolbox
-A MATLAB®-based postprocessor for Multi-Blade Coordinate transformation of wind turbine state-space models
-and a collection of Matlab tools developed for use with OpenFAST 
+# MATLAB Toolbox for OpenFAST, including MBC3
+A collection of MATLAB tools developed for use with OpenFAST, including
+a MATLAB®-based postprocessor for Multi-Blade Coordinate transformation of 
+wind turbine state-space models.
 
-MBC is a set of MatLab scripts that performs multi-blade coordinate transformation (MBC) on wind turbine system models.
+## Download 
+From a command line:
+```
+git clone https://github.com/OpenFAST/MATLAB-mbc
+```
+
+## Install in MATLAB
+From a MATLAB command window:
+
+```
+addpath( getpath('AbsolutePathToToolbox') )
+```
+where `AbsolutePathToToolbox` is the name of the absolute path where you cloned this toolbox. 
+Adding this command to your MATLAB `startup.m` file will make sure these tools are avalible every time you
+use MATLAB.
+
+## MBC3 by Gungit Bir, NREL
+
+MBC is a set of MATLAB scripts that performs multi-blade coordinate transformation (MBC) on wind turbine system models.
 The dynamics of wind turbine rotor blades are conventionally expressed in rotating frames attached to the individual blades.
 The tower-nacelle subsystem sees the combined effect of all rotor blades, not the individual blades. This is because the rotor
 responds as a whole to excitations such as aerodynamic gusts, control inputs, and tower-nacelle motion—all of which occur in a
@@ -14,13 +33,7 @@ may generate system models either in the first-order (state-space) form or the s
 handle both types of system models. Key advantages of MBC are: capturing cumulative dynamics of the rotor blades and its interaction
 with the tower-nacelle subsystem, well-conditioning of system matrices by eliminating non-essential periodicity, and filtering operation.
 
-## Download 
-From a command line:
-```
-git clone https://github.com/OpenFAST/matlab-mbc
-```
-
-## Usage
+### MBC3 Usage
 The MBC scripts were updated to functions and modified to deal with some changes in OpenFAST linearizaton for BeamDyn. The old scripts have been moved 
 to the `Source\old` directory. The new functions can be called with
 ```
