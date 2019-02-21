@@ -1,4 +1,4 @@
-/ProgrammingTools/*.f90
+./ProgrammingTools/*.f90
 *.asv
 *.zip
 yamlmatlab
