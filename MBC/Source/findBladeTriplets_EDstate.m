@@ -5,6 +5,7 @@ function [Triplets, NTriplets] = findBladeTriplets_EDstate(rotFrame,Desc )
 
     %   frame: 
     NTriplets = 0;                  % first initialize to zero 
+    Triplets = [];
     for i = 1:length(rotFrame)  % loop through all active (enabled) DOFs 
         if rotFrame(i)  % this is a state in the rotating frame 
 
