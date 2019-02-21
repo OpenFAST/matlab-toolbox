@@ -1,4 +1,4 @@
-# MATLAB Toolbox for OpenFAST, including MBC3
+# MATLAB Toolbox for OpenFAST, including MBC3 (modified for Envision Energy)
 A collection of MATLAB tools developed for use with OpenFAST, including
 a MATLAB®-based postprocessor for Multi-Blade Coordinate transformation of 
 wind turbine state-space models.
@@ -6,7 +6,7 @@ wind turbine state-space models.
 ## Download 
 From a command line:
 ```
-git clone https://github.com/OpenFAST/MATLAB-mbc
+git clone https://github.com/envision-energy/FAST_matlab-toolbox
 ```
 
 ## Install in MATLAB

@@ -67,7 +67,7 @@ end
 
 % remove table name (so indices between num and txt match better)
 txt = txt(2:end,:);
-nColsPerMode = 5; % older format use nColsPerMode = 4;
+nColsPerMode = 4; %newer formats use nColsPerMode = 5; % older format use nColsPerMode = 4;
 
 
 %%
