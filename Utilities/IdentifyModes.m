@@ -60,13 +60,13 @@ for i=1:nRuns
                     j = 0;
                     while ~found && j < length(maxDesc)
                         j = j + 1;
-%                         if strcmpi( maxDesc{j}, modesDesc{modeID}{2} ) || ...
-                        if ~isempty( regexp(maxDesc{j},modesDesc{modeID}{2},'match') ) || ...                        
-                           ( length(modesDesc{modeID})>2 && ...
-                            ~isempty( regexp(maxDesc{j},modesDesc{modeID}{3},'match') ) )
-                            modesIdentified{i}(m) = true;
-                            modeID_table(modeID,i) = m;
-                            found = true;
+                        for iExp = 1:length( modesDesc{modeID} )
+                            if ~isempty( regexp(maxDesc{j},modesDesc{modeID}{iExp},'match') )
+                                modesIdentified{i}(m) = true;
+                                modeID_table(modeID,i) = m;
+                                found = true;
+                                break;
+                            end
                         end                    
                     end % while                
                 end

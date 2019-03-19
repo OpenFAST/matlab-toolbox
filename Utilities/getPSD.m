@@ -1,4 +1,4 @@
-function [ f1, Sf1, f1_Bin, Sf1_Bin ] = getPSD( Data, df, N, CreatePlot, BinLen )
+function [ f1, Sf1, f1_Bin, Sf1_Bin, f1p ] = getPSD( Data, df, N, CreatePlot, BinLen )
 %function [ f, S1 ] = getPSD( Data, df )
 %This function calculates the 1-sided PSD directly using fft
 %
@@ -36,6 +36,7 @@ if mod(N,2) == 1
     return;
 end
 N2 = N/2;
+
 domega   = 2*pi*df;
 Data_fft = fft(Data,N); %truncate Data or pad Data with zeros if N /= length(Data)
 
@@ -69,6 +70,11 @@ if nargin >= 5 && nargout == 4
         f1_Bin (iBin) = mean( f1 (BinIx) );
         Sf1_Bin(iBin) = mean( Sf1(BinIx) );
     end
+elseif nargout == 5
+    f1p = atan2( imag(Data_fft(1:N2)), real(Data_fft(1:N2)) );
+    f1_Bin = [];
+    Sf1_Bin = [];
+    return
 elseif nargout ~= 2
     disp( 'Aborting: Incorrect arguments in Jason_PSD.' );  
     return;

@@ -262,14 +262,13 @@ function WriteDataForVTK(VTK, ModeVizFileName)
     fid = fopen(ModeVizFileName,'w');
     if fid < 0
         error(['Invalid file: ' ModeVizFileName])
-        return
     end
     [nStates, nModes, NLinTimes] = size(VTK.x_eig_magnitude);
    
-    fwrite(fid, 1,        'int16' ); % write a file identifier in case we ever change this format
-    fwrite(fid, nModes,   'int16' ); % number of modes (for easier file reading)
-    fwrite(fid, nStates,  'int16' ); % number of states (for easier file reading)
-    fwrite(fid, NLinTimes,'int16' ); % number of azimuths (i.e., LinTimes) (for easier file reading)
+    fwrite(fid, 1,        'int32' ); % write a file identifier in case we ever change this format
+    fwrite(fid, nModes,   'int32' ); % number of modes (for easier file reading)
+    fwrite(fid, nStates,  'int32' ); % number of states (for easier file reading)
+    fwrite(fid, NLinTimes,'int32' ); % number of azimuths (i.e., LinTimes) (for easier file reading)
 
     % these are output, but not used in the FAST visualization algorithm
     fwrite(fid, VTK.NaturalFreq_Hz, fileFmt);
