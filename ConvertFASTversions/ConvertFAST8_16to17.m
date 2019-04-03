@@ -38,12 +38,14 @@ if nargin < 3
     BDtemplate   = 'bd_primary.inp';
     SrvDtemplate = 'SrvD_Primary_v1.05.x.dat';
     FASTtemplate = 'OpenFAST.dat';
+    HDtemplate   = 'HydroDyn.dat';
 else
 %   templateDir = 'C:\Users\bjonkman\Documents\Data\Software\bjonkman\enFAST\docs\Example_InputFiles';
     ADtemplate   = 'AeroDyn15.dat';
     BDtemplate   = 'BeamDyn.dat';
     SrvDtemplate = 'ServoDyn.dat';
     FASTtemplate = 'enFAST.fst';
+    HDtemplate   = 'HydroDyn.dat';
 end
 
         % Primary input file:
