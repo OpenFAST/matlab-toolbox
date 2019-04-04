@@ -41,8 +41,12 @@ if fid > 0
 
     if FileID == FileFmtID.ChanLen_In
         LenName  = fread( fid, 1, 'int16',machinefmt);             % Number of characters in channel names and units
+        HaveLen = true;
     elseif FileID == FileFmtID.ChanLen
         LenName = 15;
+        HaveLen = true;
+    else
+        HaveLen = false;        
     end
         
     NumOutChans  = fread( fid, 1, 'int32',machinefmt);             % The number of output channels, INT(4)
@@ -62,8 +66,9 @@ if fid > 0
     LenDesc      = fread( fid, 1,           'int32',machinefmt );  % The number of characters in the description string, INT(4)
     DescStrASCII = fread( fid, LenDesc,     'uint8',machinefmt );  % DescStr converted to ASCII
     DescStr      = char( DescStrASCII' );                     
+
     
-    if ~isempty(strfind(DescStr,'Bladed'))
+    if ~HaveLen && ~isempty(strfind(DescStr,'Bladed'))
         LenName = 15;
     end
     
