@@ -53,7 +53,8 @@ for i=1:nRuns
             continue;
         end 
         
-        tryNumber = 1;
+        tryNumber = 0;
+        
         while ~found && tryNumber <= 2
             m = 0;
             while ~found && m < length(modesIdentified{i})
@@ -62,26 +63,34 @@ for i=1:nRuns
                     continue;
                 end
 
-                if tryNumber == 1
+                if tryNumber == 0
                     maxDesc = CampbellData{i}.Modes{m}.DescStates ( CampbellData{i}.Modes{m}.StateHasMaxAtThisMode );
-                else
-                    maxDesc = CampbellData{i}.Modes{m}.DescStates ( 1 );
+                
+                    if isempty(maxDesc)
+                        tryNumber = tryNumber + 1;
+                    end
+                end
+                if tryNumber > 0 
+                    if tryNumber < length(CampbellData{i}.Modes{m}.DescStates)
+                        maxDesc = CampbellData{i}.Modes{m}.DescStates ( ~CampbellData{i}.Modes{m}.StateHasMaxAtThisMode );
+%                         maxDesc = CampbellData{i}.Modes{m}.DescStates ( tryNumber );
+                    else
+                        maxDesc = [];
+                    end
                 end
                     
-                if ~isempty(maxDesc)
-                    j = 0;
-                    while ~found && j < length(maxDesc)
-                        j = j + 1;
-                        for iExp = 1:length( modesDesc{modeID} )
-                            if ~isempty( regexp(maxDesc{j},modesDesc{modeID}{iExp},'match') )
-                                modesIdentified{i}(m) = true;
-                                modeID_table(modeID,i) = m;
-                                found = true;
-                                break;
-                            end
-                        end                    
-                    end % while                
-                end
+                j = 0;
+                while ~found && j < length(maxDesc)
+                    j = j + 1;
+                    for iExp = 2:length( modesDesc{modeID} )
+                        if ~isempty( regexp(maxDesc{j},modesDesc{modeID}{iExp},'match') )
+                            modesIdentified{i}(m) = true;
+                            modeID_table(modeID,i) = m;
+                            found = true;
+                            break;
+                        end
+                    end                    
+                end % while                
 
             end
             tryNumber = tryNumber + 1;
