@@ -6,15 +6,19 @@
 %
 % Knud A. Kragh %edited by Paul Fleming
 
-function FASTParOut=SetFASTPar(FASTPar,Par,Value)
-FASTParOut = [];
+function FASTPar=SetFASTPar(FASTPar,Par,Value)
+
+found = false;
 for i=1:length(FASTPar.Label)
     if strcmp(FASTPar.Label{i},Par)
         FASTPar.Val{i} = Value;
-        FASTParOut = FASTPar;
+        found = true;
     end
 end
 
-if isempty(FASTParOut)
-    error('Parameter not found')
+if ~found
+    i = length(FASTPar.Label) + 1;
+    disp(['Parameter ' Par ' not found; adding it to data structure.'])
+    FASTPar.Label{i} = Par;
+    FASTPar.Val{i} = Value;
 end

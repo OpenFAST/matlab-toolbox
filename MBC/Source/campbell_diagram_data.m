@@ -139,6 +139,8 @@ function [StateDesc] = PrettyStateDescriptions(DescStates, ndof2, performedTrans
                                   'Blade1','Blade collective '),...
                                   'Blade2','Blade cosine '),...
                                   'Blade3','Blade sine ');    
+    else
+        StateDesc = DescStates;
     end
     
     for i=1:length( StateDesc )                                                                            
@@ -260,7 +262,7 @@ function WriteDataForVTK(VTK, ModeVizFileName)
     fileFmt = 'float64'; %8-byte real numbers
 
     fid = fopen(ModeVizFileName,'w');
-    if fid < 0
+    if fid < 1
         error(['Invalid file: ' ModeVizFileName])
     end
     [nStates, nModes, NLinTimes] = size(VTK.x_eig_magnitude);
