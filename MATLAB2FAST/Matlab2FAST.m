@@ -405,7 +405,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
 
             else
                 if i==nc
-                    display( [ TemplateHeaders{i} ' column not found in FAST table. Last column will be missing.'] );                
+                    disp( [ TemplateHeaders{i} ' column not found in FAST table. Last column will be missing.'] );                
                     nc = nc-1;
                 else
                     error( [ TemplateHeaders{i} ' column not found in FAST table. Cannot write the table.'] );
