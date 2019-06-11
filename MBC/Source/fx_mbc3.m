@@ -48,6 +48,11 @@ MBC.RotTripletIndicesStates2 = matData.RotTripletIndicesStates2;
 MBC.RotTripletIndicesStates1 = matData.RotTripletIndicesStates1;
 MBC.Azimuth = matData.Azimuth;
 
+MBC.RotSpeed_rpm = mean(matData.Omega)*(30/pi); %rad/s to rpm
+if isfield(matData,'WindSpeed')
+    MBC.WindSpeed = mean(matData.WindSpeed);
+end
+
 %%  nb = 3; % number of blades required for MBC3
 %% ---------- Multi-Blade-Coordinate transformation -------------------------------------------
 [new_seq_dof2, ~, nb] = get_new_seq(matData.RotTripletIndicesStates2,matData.ndof2); % these are the first ndof2 states (not "first time derivative" states); these values are used to calculate matrix transformations

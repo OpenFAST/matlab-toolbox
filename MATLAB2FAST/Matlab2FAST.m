@@ -74,7 +74,7 @@ while true
         HaveNewLineChar = true;
     end
     
-    if ~isempty(strfind(upper(line),upper('OutList'))) 
+    if contains(upper(line),upper('OutList'))        
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
@@ -299,7 +299,7 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
     if any( indx )
 
         if sum(indx) > 1 % we found more than one....
-            vals2Write = FastPar.Val{indx}
+            vals2Write = FastPar.Val{indx};
             disp( ['WARNING: multiple occurrences of ' label ' in the FAST data structure.'] );
         end
 

@@ -40,7 +40,11 @@ end
 %%
 CampbellData.NaturalFreq_Hz = mbc_data.eigSol.NaturalFreqs_Hz(SortedFreqIndx);
 CampbellData.DampingRatio   = mbc_data.eigSol.DampRatios(     SortedFreqIndx);
-
+CampbellData.RotSpeed_rpm   = mbc_data.RotSpeed_rpm;
+if isfield(mbc_data,'WindSpeed')
+    CampbellData.WindSpeed  = mbc_data.WindSpeed;
+end
+    
 %%
 
 % Matlab apparently does not allow nested arrays of structures, so Modes will be a cell array
@@ -85,12 +89,11 @@ end
 
 
 %%
-nColsPerMode = 5;
-
-CampbellData.ModesTable = cell(ndof+5,nColsPerMode*nModes);
+CampbellData.nColsPerMode = 5;
+CampbellData.ModesTable = cell(ndof+5,CampbellData.nColsPerMode*nModes);
 
 for i=1:nModes
-    colStart = (i-1)*nColsPerMode;
+    colStart = (i-1)*CampbellData.nColsPerMode;
     CampbellData.ModesTable(1, colStart+1 ) = {'Mode number:'};
     CampbellData.ModesTable(1, colStart+2 ) = num2cell(i);
 
@@ -184,6 +187,8 @@ function [ScalingFactor] = getScaleFactors(DescStates, TowerLen, BladeLen)
                ScalingFactor( i ) =  1/BladeLen;
                
            end
+        elseif ~isempty(strfind(DescStates{i},'MBD Gearbox_Rot'))
+            ScalingFactor(i) = 1/(2*pi);
         end
         
     end

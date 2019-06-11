@@ -24,7 +24,7 @@ function [p, newSubfileName] = GetFASTPar_Subfile(FP, VarName, oldDir, newDir)
         p = FAST2Matlab(SubfileName,2); % get parameter data (2 header lines)
     catch
         disp(['Warning: cannot open ' SubfileName ' for reading']);
-        p = [];
+        p.Label = [];
     end
 
     if nargin <= 3
