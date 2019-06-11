@@ -10,7 +10,7 @@ function [MBC, matData, FAST_linData] = fx_mbc3( FileNames )
 %
 % Objectives:
 % 1. Given state-space matrices (A,B) and output matrices (C,D), defined partly in the
-%    rotoating frame and partly in the fixed frame, transform these matrices to the fixed
+%    rotating frame and partly in the fixed frame, transform these matrices to the fixed
 %    coordinate frame using multi-blade coordinate transformation (MBC). The transformned
 %    matrices are MBC.A, MBC.B, MBC.C, and MBC.D.
 %
@@ -223,7 +223,7 @@ else
      
 end    
 
-%------------- Eigensolution and Azimuth Averages -------------------------
+%% ------------- Eigensolution and Azimuth Averages -------------------------
 if isfield(MBC,'A')
     MBC.AvgA = mean(MBC.A,3); % azimuth-average of azimuth-dependent MBC.A matrices
     MBC.eigSol = eiganalysis(MBC.AvgA,matData.ndof2, matData.ndof1);
@@ -241,7 +241,29 @@ if isfield(MBC,'D')
     MBC.AvgD = mean(MBC.D,3); % azimuth-average of azimuth-dependent MBC.D matrices
 end
 
-% ----------- Clear unneeded variables -------------------------------
+%% set rotating output for Jeff:
+MBC.Rot = MBC;
+MBC.Rot.performedTransformation = false;
+if isfield(matData,'A')
+    MBC.Rot.A = matData.A; % initalize matrix
+    MBC.Rot.AvgA = mean(MBC.Rot.A,3);
+    MBC.Rot.eigSol = eiganalysis(MBC.Rot.AvgA,matData.ndof2, matData.ndof1);
+end
+if isfield(matData,'B')
+    MBC.Rot.B = matData.B; % initalize matrix
+    MBC.Rot.AvgB = mean(MBC.Rot.B,3);
+end
+if isfield(matData,'C')
+    MBC.Rot.C = matData.C; % initalize matrix
+    MBC.Rot.AvgC = mean(MBC.Rot.C,3);
+end
+if isfield(matData,'D')
+    MBC.Rot.D = matData.D; % initalize matrix
+    MBC.Rot.AvgD = mean(MBC.Rot.D,3);
+end
+
+
+%% ---------------------------------------------------------
   disp('  ');
   disp(' Multi-Blade Coordinate transformation completed ');
 %-----------------------------------------------------------
