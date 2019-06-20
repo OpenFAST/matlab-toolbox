@@ -2,7 +2,7 @@ function [CampbellData, VTK] = campbell_diagram_data(mbc_data, BladeLen, TowerLe
 %%
 % inputs: 
 % -   mbc_data is the output data from mbc3 containing DescStates and
-%     eigSol fields
+%     eigSol fields (as well as ndof2 & performedTrasformation)
 % -   BladeLen and TowerLen are the lengths (in meters) of the blade and  
 %     the tower, respectively, and are used for scaling the magnitudes of 
 %     the rows (for consistent units)
@@ -10,7 +10,7 @@ function [CampbellData, VTK] = campbell_diagram_data(mbc_data, BladeLen, TowerLe
 outputXLSfile = nargin > 3 && ~isempty(xlsFileName);
 
 % mbc_data.eigSol = eiganalysis(mbc_data.AvgA);
-ndof = size(mbc_data.AvgA,1)/2;          % number of translational states
+ndof = mbc_data.ndof2 + mbc_data.ndof1; %size(mbc_data.AvgA,1)/2;          % number of translational states
 nModes = length(mbc_data.eigSol.Evals);
 
 %% change the state descriptions (add collective, sine, cosine, etc) and remove the last ndof of them
