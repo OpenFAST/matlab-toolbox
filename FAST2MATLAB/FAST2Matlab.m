@@ -44,6 +44,8 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %
 %.kp               A table of key points defined in BeamDyn
 %.kpHdr            A cell array of headers corresponding to the kp table
+%
+%.profile          A table of profile values defined in TurbSim
 %--------------------------------------------------------------------------
 
 %These arrays are extracted from the FAST input file
@@ -190,6 +192,15 @@ while true %loop until discovering Outlist or end of file, than break
             kp_total = GetFASTPar(DataOut,'kp_total');        
             [DataOut.kp, DataOut.kpHdr] = ParseFASTNumTable(line, fid, kp_total);
             continue; %let's continue reading the file
+        elseif strcmpi(label,'StdScale3') %we've reached the TurbSim profiles table
+            DataOut.Label{count,1} = label;
+            DataOut.Val{count,1}   = value;
+            count = count + 1;
+            
+            NumUSRz = GetFASTPar(DataOut,'NumUSRz');        
+            line = fgetl(fid);  % the next line is the header, and it may have comments
+            [DataOut.profile] = ParseFASTNumTable(line, fid, NumUSRz, 2 );
+            continue; %let's continue reading the file
         else         
             
             if NextIsMatrix > 0
@@ -262,27 +273,39 @@ function [OutList OutListComments] = ParseFASTOutList( fid )
     
 end %end function
 %%
-function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, skipUnits  )
+function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
 
     % read a numeric table from the FAST file
     
-    % we've read the line of the table that includes the header 
-    % let's parse it now, getting the number of columns as well:
-    if strfind(line,',') 
-        % these will be assumed to be comma delimited:
-        TmpHdr  = textscan(line,'%s', 'Delimiter',',');
+    if strncmp(line,'--------------------------------------------', 20)
+        % this assumes we are using TurbSim profiles file
+        Headers = fgetl(fid);
+        nc = 5;
     else
-        TmpHdr  = textscan(line,'%s');
-    end
-    Headers = TmpHdr{1};
-    if strcmp( Headers{1}, '!' )
-        Headers = Headers(2:end);
-    end
-    nc = length(Headers);
+    
+        % we've read the line of the table that includes the header 
+        % let's parse it now, getting the number of columns as well:
+        if contains(line,',')
+            % these will be assumed to be comma delimited:
+            TmpHdr  = textscan(line,'%s', 'Delimiter',',');
+        else
+            TmpHdr  = textscan(line,'%s');
+        end
 
-    if nargin < 4 || ~skipUnits
+        Headers = TmpHdr{1};
+        if strcmp( Headers{1}, '!' )
+            Headers = Headers(2:end);
+        end
+        nc = length(Headers);
+    end
+    
+    if nargin < 4 
+        NumUnitsLines = 1;
+    end
+    
+    for i=1:NumUnitsLines
         % read the units line:
-        fgetl(fid); 
+        fgetl(fid);
     end
         
     % now initialize Table and read its values from the file:

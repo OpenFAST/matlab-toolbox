@@ -63,6 +63,8 @@ matData.Azimuth   = zeros(matData.NAzimStep, 1);
 matData.Omega     = zeros(matData.NAzimStep, 1);
 matData.OmegaDot  = zeros(matData.NAzimStep, 1);
 
+matData.WindSpeed = zeros(matData.NAzimStep, 1);
+
 if ( matData.NumStates > 0 )
     matData.DescStates = data(matData.NAzimStep).x_desc;
     matData.StateDerivOrder = data(matData.NAzimStep).x_DerivOrder;
@@ -112,26 +114,34 @@ for iFile = 1:matData.NAzimStep
     matData.Omega(iFile)   = data(iFile).RotSpeed;
     matData.Azimuth(iFile) = data(iFile).Azimuth*180/pi;
 
-    if (isfield(data(iFile), 'A'))
+    if isfield(matData,'WindSpeed')
+        if isfield(data(iFile),'WindSpeed')
+            matData.WindSpeed(iFile) = data(iFile).WindSpeed;
+        else          
+            matData = rmfield(matData,'WindSpeed');
+        end
+    end
+    
+    if isfield(data(iFile), 'A')
         matData.A(matData.StateOrderingIndx,matData.StateOrderingIndx,iFile) = data(iFile).A;
     end
-    if (isfield(data(iFile), 'B'))
+    if isfield(data(iFile), 'B')
         matData.B(matData.StateOrderingIndx,:,iFile) = data(iFile).B;
     end
-    if (isfield(data(iFile), 'C'))
+    if isfield(data(iFile), 'C')
         matData.C(:,matData.StateOrderingIndx,iFile) = data(iFile).C;
     end
-    if (isfield(data(iFile), 'D'))
+    if isfield(data(iFile), 'D')
         matData.D(:,:,iFile) = data(iFile).D;
     end
 
-    if (isfield(data(iFile), 'x_op'))        
+    if isfield(data(iFile), 'x_op')
         matData.xop(matData.StateOrderingIndx,iFile) = cell2mat(data(iFile).x_op);
     end
-    if (isfield(data(iFile), 'xdot_op'))
+    if isfield(data(iFile), 'xdot_op')
         matData.xdop(matData.StateOrderingIndx,iFile) = cell2mat(data(iFile).xdot_op);
     end
-    
+        
 end 
 
 
