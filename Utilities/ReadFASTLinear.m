@@ -15,24 +15,39 @@ function [data] = ReadFASTLinear(fileName)
                     fgetl(fid); % "simulation information" comment/header line
                   
     % parse the next few lines:
-    d = cell(8,1);
-    for i=1:length(d)
+    ValuesFromFile = {'t'
+              'RotSpeed'
+              'Azimuth'
+              'WindSpeed'
+              'n_x'
+              'n_xd'
+              'n_z'
+              'n_u'
+              'n_y' };
+    MissingWindSpeed = false; % add this for backward compatibility
+    for i=1:length(ValuesFromFile)
         line = fgetl(fid);
         C = textscan( line, '%s', 'delimiter', ':' );
-        d{i} = textscan( C{1}{2}, '%f', 'CollectOutput',1 );
+        try
+            d = textscan( C{1}{2}, '%f', 'CollectOutput',1 );
+            data.(ValuesFromFile{i}) = d{1};
+        catch
+            MissingWindSpeed = true;
+        end
     end
     
-    data.t        = d{1}{1};
-    data.RotSpeed = d{2}{1};
-    data.Azimuth  = d{3}{1};
-    data.n_x      = d{4}{1};
-    data.n_xd     = d{5}{1};
-    data.n_z      = d{6}{1};
-    data.n_u      = d{7}{1};
-    data.n_y      = d{8}{1};
-            
+    if MissingWindSpeed
+        for i=length(ValuesFromFile):-1:5
+            data.(ValuesFromFile{i}) = data.(ValuesFromFile{i-1}) ;
+        end
+        data = rmfield(data,'WindSpeed');
+    else
+        line = fgetl(fid);
+    end
+    
+    data.n_x2     = 0;    
+    data.Azimuth  = mod(data.Azimuth,2*pi);
 
-    line = fgetl(fid);
     C = textscan( line, '%s', 'delimiter', '?' );
     if strfind( C{1}{2}, 'Yes' )
         SetOfMatrices = 2;
@@ -45,8 +60,16 @@ function [data] = ReadFASTLinear(fileName)
     %% ...........................................
     % get operating points and row/column order
     if data.n_x > 0 
-        [data.x_op,    data.x_desc, data.x_rotFrame] = readLinTable(fid,data.n_x);
-        [data.xdot_op, data.xdot_desc]               = readLinTable(fid,data.n_x);
+        [data.x_op,    data.x_desc, data.x_rotFrame, data.x_DerivOrder] = readLinTable(fid,data.n_x);
+        [data.xdot_op, data.xdot_desc]                                  = readLinTable(fid,data.n_x);
+        if data.x_DerivOrder(1) == 0 % this is an older file without derivOrder columns
+            data.x_DerivOrder = 2; % (these are second-order states)
+            data.n_x2 = data.n_x; 
+        else
+            data.n_x2 = sum(data.x_DerivOrder == 2); % (number of second-order states)
+        end
+    else
+        data.n_x2 = 0;
     end
 
     if data.n_xd > 0 
@@ -83,11 +106,12 @@ function [data] = ReadFASTLinear(fileName)
 return
 end 
 
-function [op, desc, RF] = readLinTable(fid,n)
+function [op, desc, RF, DerivOrd] = readLinTable(fid,n)
 
     desc = cell(n,1);
     op   = cell(n,1);
     RF   = false(n,1);
+    DerivOrd = zeros(n,1);
 
     fgetl(fid); % table title/comment
     fgetl(fid); % table header row 1
@@ -95,16 +119,24 @@ function [op, desc, RF] = readLinTable(fid,n)
     
     for row=1:n
         line = fgetl(fid);
-        [C,pos] = textscan( line, '%*f %f %s',1 );
+        [C,pos] = textscan( line, '%*f %f %s %f',1 );
         if strcmp(C{2}(end),',') %we've got an orientation line (first string ends in comma instead of T/F):    
-            [C,pos] = textscan( line, '%*f %f %*s %f %*s %f %s',1 );
+            [C,pos] = textscan( line, '%*f %f %*s %f %*s %f %s %f',1 );
             op{row} = [C{1:3}];
         else
             op{row} = C{1};
         end
-        RF(row) = strcmp(C{end},'T'); 
-        desc{row}=strtrim( line(pos+1:end) );        
+  try % new format files
+        RF(row) = strcmp(C{end-1},'T');
+        DerivOrd(row) = C{end};
+  catch % older files don't have the DerivOrd column
+        RF(row) = strcmp(C{end},'T');
+        DerivOrd(row) = 0;
+  end
+        desc{row}=strtrim( line(pos+1:end) );
+  
     end
+    
 
     fgetl(fid); % skip a blank line
 return

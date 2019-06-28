@@ -19,8 +19,13 @@ function [p, newSubfileName] = GetFASTPar_Subfile(FP, VarName, oldDir, newDir)
     end
     
         % get the full path name, relative to the old directory location:
-    SubfileName = GetFullFileName( SubfileName, oldDir );       
-    p = FAST2Matlab(SubfileName,2); % get parameter data (2 header lines)
+    SubfileName = GetFullFileName( SubfileName, oldDir );
+    try
+        p = FAST2Matlab(SubfileName,2); % get parameter data (2 header lines)
+    catch
+        disp(['Warning: cannot open ' SubfileName ' for reading']);
+        p.Label = [];
+    end
 
     if nargin <= 3
         newSubfileName = SubfileName;
