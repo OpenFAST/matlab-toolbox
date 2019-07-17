@@ -74,7 +74,7 @@ while true
         HaveNewLineChar = true;
     end
     
-    if ~isempty(strfind(upper(line),upper('OutList'))) 
+    if contains(upper(line),upper('OutList'))        
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
@@ -159,7 +159,7 @@ while true
                 disp( 'WARNING: AeroDyn airfoil coefficients not found in the FAST data structure.' );
                 printTable = true;
             else                
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.AFCoeff, FastPar.AFCoeffHdr, newline, true);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.AFCoeff, FastPar.AFCoeffHdr, newline, 1);
             end            
             continue; %let's continue reading the template file            
             
@@ -173,7 +173,7 @@ while true
                 printTableComments = 2;
             else                
                 line = fgets(fidIN); %get the next (header) line from the template
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.PointLoads, FastPar.PointLoadsHdr, newline, true);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.PointLoads, FastPar.PointLoadsHdr, newline, 1);
             end            
             continue; %let's continue reading the template file            
             
@@ -183,7 +183,7 @@ while true
                 printTable = true;
             else
                 IntegerCols = {'NFoil'};
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, false, IntegerCols);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, 0, IntegerCols);
                 continue; %let's continue reading the template file            
             end   
             
@@ -193,7 +193,7 @@ while true
                 printTable = true;
             else
                 IntegerCols = {'BlAFID'};
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, true, IntegerCols);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, 1, IntegerCols);
                 continue; %let's continue reading the template file            
             end   
             
@@ -202,10 +202,28 @@ while true
                 disp( 'WARNING: BeamDyn key-point table not found in the FAST data structure.' );
                 printTable = true;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.kp, FastPar.kpHdr, newline, true);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.kp, FastPar.kpHdr, newline, 1);
                 continue; %let's continue reading the template file            
             end   
             
+        elseif strcmpi(label,'StdScale3') %we've reached the TurbSim profile table
+            line = GetLineToWrite( line, FastPar, label, TemplateFile, value );
+            fprintf(fidOUT,'%s',line);
+
+            for i=1:3
+                line = fgets(fidIN); %get the next line from the template
+                fprintf(fidOUT,'%s',line);           % print the comment line
+            end
+            line = fgets(fidIN); %get the next line from the template
+
+            if ~isfield(FastPar,'profile')
+                disp( 'WARNING: TurbSim profile table not found in the FAST data structure.' );
+                printTable = true;
+                printTableComments = 2;
+            else
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.profile, [], newline, 0);
+                continue; %let's continue reading the template file            
+            end
         elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
             if ~isfield(FastPar,'Cases')
                 disp( 'WARNING: AeroDyn driver cases properties table not found in the FAST data structure.' );
@@ -281,7 +299,7 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
     if any( indx )
 
         if sum(indx) > 1 % we found more than one....
-            vals2Write = FastPar.Val{indx}
+            vals2Write = FastPar.Val{indx};
             disp( ['WARNING: multiple occurrences of ' label ' in the FAST data structure.'] );
         end
 
@@ -323,25 +341,36 @@ function [writeVal] = getNumericVal2Write( val2Write, fmt )
     return;
 end
 
-function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printUnits, IntegerCols )
+function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUnitLines, IntegerCols )
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
-    
-    if strfind(HdrLine,',')
-        TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
+    if strncmp(HdrLine,'--------------------------------------------', 20)
+        % this assumes we are using TurbSim profiles file
+        nc = size(Table,2); 
     else
-        TmpHdr = textscan(HdrLine,'%s');
+        
+        
+        
+        if contains(HdrLine,',')
+            TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
+        else
+            TmpHdr = textscan(HdrLine,'%s');
+        end
+        TemplateHeaders = TmpHdr{1};
+        if (strcmp(TemplateHeaders{1},'!'))
+            TemplateHeaders = TemplateHeaders(2:end);
+        end
+        nc = length(TemplateHeaders);
     end
-    TemplateHeaders = TmpHdr{1};
-    if (strcmp(TemplateHeaders{1},'!'))
-        TemplateHeaders = TemplateHeaders(2:end);
-    end
-    nc = length(TemplateHeaders);
-
+    
     fprintf(fidOUT,'%s',HdrLine);           % print the new headers
 
-    if nargin < 7 || printUnits
+    if nargin < 7 
+        NumUnitLines = 1;
+    end
+    
+    for i=1:NumUnitLines
         fprintf(fidOUT,'%s',fgets(fidIN));      % print the new units (we're assuming they are the same)
     end
         
@@ -357,28 +386,32 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, printU
     
     % let's figure out which columns in the old Table match the headers
     % in the new table:
-    ColIndx = ones(1,nc);
-    colIsInteger = false(1,nc);
+    colIsInteger = false(1,nc);        
+    if isempty(Headers)
+        ColIndx = 1:nc;
+    else
+        ColIndx = ones(1,nc);
+        
+        for i=1:nc
+            indx = strcmpi(TemplateHeaders{i}, Headers);
+            if sum(indx) > 0
+                ColIndx(i) = find(indx,1,'first');
+                if sum(indx) ~= 1
+                    disp( ['WARNING: Multiple instances of ' TemplateHeaders{i} ' column found in FAST table.'] );
+                end
 
-    for i=1:nc
-        indx = strcmpi(TemplateHeaders{i}, Headers);
-        if sum(indx) > 0
-            ColIndx(i) = find(indx,1,'first');
-            if sum(indx) ~= 1
-                disp( ['WARNING: Multiple instances of ' TemplateHeaders{i} ' column found in FAST table.'] );
-            end
-            
-            indx2 = strcmpi(TemplateHeaders{i},IntegerCols);
-            colIsInteger(i) = sum(indx2)>0;
-            
-        else
-            if i==nc
-                disp( [ TemplateHeaders{i} ' column not found in FAST table. Last column will be missing.'] );                
-                nc = nc-1;
+                indx2 = strcmpi(TemplateHeaders{i},IntegerCols);
+                colIsInteger(i) = sum(indx2)>0;
+
             else
-                error( [ TemplateHeaders{i} ' column not found in FAST table. Cannot write the table.'] );
-            end
-        end                
+                if i==nc
+                    disp( [ TemplateHeaders{i} ' column not found in FAST table. Last column will be missing.'] );                
+                    nc = nc-1;
+                else
+                    error( [ TemplateHeaders{i} ' column not found in FAST table. Cannot write the table.'] );
+                end
+            end                
+        end
     end
     
     ColIndx=ColIndx(1:nc);

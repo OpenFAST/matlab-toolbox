@@ -63,7 +63,7 @@ ndof = ndof2 + ndof1;
 % (this is because we don't get eigenvalue pairs from eig()):
 positiveImagEvals = find( imag(mbc.Evals) > 0);
 
-mbc.Evals      = mbc.Evals(positiveImagEvals);
+mbc.Evals             = mbc.Evals(positiveImagEvals);
 mbc.EigenVects_q2_dot = mbc.EigenVects(  (ndof2+1):(ndof2*2)      ,positiveImagEvals); % save for mode-shape visualization capability
 mbc.EigenVects        = mbc.EigenVects([1:ndof2    (ndof2*2+1):ns],positiveImagEvals); % save q2 and q1, throw away q2_dot
 

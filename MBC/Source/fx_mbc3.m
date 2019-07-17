@@ -10,7 +10,7 @@ function [MBC, matData, FAST_linData] = fx_mbc3( FileNames )
 %
 % Objectives:
 % 1. Given state-space matrices (A,B) and output matrices (C,D), defined partly in the
-%    rotoating frame and partly in the fixed frame, transform these matrices to the fixed
+%    rotating frame and partly in the fixed frame, transform these matrices to the fixed
 %    coordinate frame using multi-blade coordinate transformation (MBC). The transformned
 %    matrices are MBC.A, MBC.B, MBC.C, and MBC.D.
 %
@@ -47,6 +47,11 @@ MBC.StateOrderingIndx = matData.StateOrderingIndx;
 MBC.RotTripletIndicesStates2 = matData.RotTripletIndicesStates2;
 MBC.RotTripletIndicesStates1 = matData.RotTripletIndicesStates1;
 MBC.Azimuth = matData.Azimuth;
+
+MBC.RotSpeed_rpm = mean(matData.Omega)*(30/pi); %rad/s to rpm
+if isfield(matData,'WindSpeed')
+    MBC.WindSpeed = mean(matData.WindSpeed);
+end
 
 %%  nb = 3; % number of blades required for MBC3
 %% ---------- Multi-Blade-Coordinate transformation -------------------------------------------
@@ -218,7 +223,7 @@ else
      
 end    
 
-%------------- Eigensolution and Azimuth Averages -------------------------
+%% ------------- Eigensolution and Azimuth Averages -------------------------
 if isfield(MBC,'A')
     MBC.AvgA = mean(MBC.A,3); % azimuth-average of azimuth-dependent MBC.A matrices
     MBC.eigSol = eiganalysis(MBC.AvgA,matData.ndof2, matData.ndof1);
@@ -236,7 +241,6 @@ if isfield(MBC,'D')
     MBC.AvgD = mean(MBC.D,3); % azimuth-average of azimuth-dependent MBC.D matrices
 end
 
-% ----------- Clear unneeded variables -------------------------------
   disp('  ');
   disp(' Multi-Blade Coordinate transformation completed ');
 %-----------------------------------------------------------

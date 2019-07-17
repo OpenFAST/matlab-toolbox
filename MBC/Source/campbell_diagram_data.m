@@ -2,7 +2,7 @@ function [CampbellData, VTK] = campbell_diagram_data(mbc_data, BladeLen, TowerLe
 %%
 % inputs: 
 % -   mbc_data is the output data from mbc3 containing DescStates and
-%     eigSol fields
+%     eigSol fields (as well as ndof2 & performedTrasformation)
 % -   BladeLen and TowerLen are the lengths (in meters) of the blade and  
 %     the tower, respectively, and are used for scaling the magnitudes of 
 %     the rows (for consistent units)
@@ -10,7 +10,7 @@ function [CampbellData, VTK] = campbell_diagram_data(mbc_data, BladeLen, TowerLe
 outputXLSfile = nargin > 3 && ~isempty(xlsFileName);
 
 % mbc_data.eigSol = eiganalysis(mbc_data.AvgA);
-ndof = size(mbc_data.AvgA,1)/2;          % number of translational states
+ndof = mbc_data.ndof2 + mbc_data.ndof1; %size(mbc_data.AvgA,1)/2;          % number of translational states
 nModes = length(mbc_data.eigSol.Evals);
 
 %% change the state descriptions (add collective, sine, cosine, etc) and remove the last ndof of them
@@ -40,7 +40,11 @@ end
 %%
 CampbellData.NaturalFreq_Hz = mbc_data.eigSol.NaturalFreqs_Hz(SortedFreqIndx);
 CampbellData.DampingRatio   = mbc_data.eigSol.DampRatios(     SortedFreqIndx);
-
+CampbellData.RotSpeed_rpm   = mbc_data.RotSpeed_rpm;
+if isfield(mbc_data,'WindSpeed')
+    CampbellData.WindSpeed  = mbc_data.WindSpeed;
+end
+    
 %%
 
 % Matlab apparently does not allow nested arrays of structures, so Modes will be a cell array
@@ -85,12 +89,11 @@ end
 
 
 %%
-nColsPerMode = 5;
-
-CampbellData.ModesTable = cell(ndof+5,nColsPerMode*nModes);
+CampbellData.nColsPerMode = 5;
+CampbellData.ModesTable = cell(ndof+5,CampbellData.nColsPerMode*nModes);
 
 for i=1:nModes
-    colStart = (i-1)*nColsPerMode;
+    colStart = (i-1)*CampbellData.nColsPerMode;
     CampbellData.ModesTable(1, colStart+1 ) = {'Mode number:'};
     CampbellData.ModesTable(1, colStart+2 ) = num2cell(i);
 
@@ -130,6 +133,7 @@ function [StateDesc] = PrettyStateDescriptions(DescStates, ndof2, performedTrans
     if performedTransformation
         StateDesc = strrep(strrep(strrep(strrep(strrep(strrep( ...
                     strrep(strrep(strrep( ...
+                    strrep(strrep(strrep( ...
                        DescStates,'BD_1','Blade collective'),...
                                   'BD_2','Blade cosine'),...
                                   'BD_3','Blade sine'),...
@@ -138,7 +142,10 @@ function [StateDesc] = PrettyStateDescriptions(DescStates, ndof2, performedTrans
                                   'blade 3','blade sine'),...    
                                   'Blade1','Blade collective '),...
                                   'Blade2','Blade cosine '),...
-                                  'Blade3','Blade sine ');    
+                                  'Blade3','Blade sine '), ...    
+                                  'PitchBearing1','Pitch bearing collective '),...
+                                  'PitchBearing2','Pitch bearing cosine '),...
+                                  'PitchBearing3','Pitch bearing sine '); 
     else
         StateDesc = DescStates;
     end

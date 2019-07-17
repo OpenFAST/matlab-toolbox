@@ -15,25 +15,39 @@ function [data] = ReadFASTLinear(fileName)
                     fgetl(fid); % "simulation information" comment/header line
                   
     % parse the next few lines:
-    d = cell(8,1);
-    for i=1:length(d)
+    ValuesFromFile = {'t'
+              'RotSpeed'
+              'Azimuth'
+              'WindSpeed'
+              'n_x'
+              'n_xd'
+              'n_z'
+              'n_u'
+              'n_y' };
+    MissingWindSpeed = false; % add this for backward compatibility
+    for i=1:length(ValuesFromFile)
         line = fgetl(fid);
         C = textscan( line, '%s', 'delimiter', ':' );
-        d{i} = textscan( C{1}{2}, '%f', 'CollectOutput',1 );
+        try
+            d = textscan( C{1}{2}, '%f', 'CollectOutput',1 );
+            data.(ValuesFromFile{i}) = d{1};
+        catch
+            MissingWindSpeed = true;
+        end
     end
     
-    data.t        = d{1}{1};
-    data.RotSpeed = d{2}{1};
-    data.Azimuth  = d{3}{1};
-    data.n_x      = d{4}{1};
-    data.n_xd     = d{5}{1};
-    data.n_z      = d{6}{1};
-    data.n_u      = d{7}{1};
-    data.n_y      = d{8}{1};
-    data.n_x2     = 0;
+    if MissingWindSpeed
+        for i=length(ValuesFromFile):-1:5
+            data.(ValuesFromFile{i}) = data.(ValuesFromFile{i-1}) ;
+        end
+        data = rmfield(data,'WindSpeed');
+    else
+        line = fgetl(fid);
+    end
     
+    data.n_x2     = 0;    
+    data.Azimuth  = mod(data.Azimuth,2*pi);
 
-    line = fgetl(fid);
     C = textscan( line, '%s', 'delimiter', '?' );
     if strfind( C{1}{2}, 'Yes' )
         SetOfMatrices = 2;
