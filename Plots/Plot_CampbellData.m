@@ -125,6 +125,7 @@ for p=1:2
     ax.Box = 'on';
     ax.FontSize = 15;
     xlabel( xAxisLabel )
+    grid on;
 end
 
 for i=1:nLines
