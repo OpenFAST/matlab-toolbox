@@ -1,4 +1,4 @@
-function avi2gif(aviFileName, gifFileName, StartIndx)
+function avi2gif(aviFileName, gifFileName, StartIndx, fps)
 % (c) 2016 Bonnie Jonkman, National Renewable Energy Laboratory
 %
 % This function converts an avi file to a continuous-loop, animated gif.
@@ -19,12 +19,16 @@ function avi2gif(aviFileName, gifFileName, StartIndx)
 % Optional inputs:
 %   StartIndx   - the first frame to add to the gif; if omitted, default is
 %                 1 (the first frame from the avi file)
+%   fps         - frame rate for gif file in frames per second; if omitted, 
+%                 default is the frame rate from the avi file
 %--------------------------------------------------------------------------
 
         % optional input; default is 1
-    if nargin < 3
+    if nargin < 3 || isempty(StartIndx)
         StartIndx = 1;
     end
+    
+    UseAVIfps = nargin < 4 || isempty(fps);
 
         % make sure gif file name ends in .gif; add a new extension if
         % it doesn't:
@@ -38,7 +42,12 @@ function avi2gif(aviFileName, gifFileName, StartIndx)
 
     vidWidth = xyloObj.Width;
     vidHeight = xyloObj.Height;
-    dt = 1/xyloObj.FrameRate;
+    
+    if UseAVIfps
+        dt = 1/xyloObj.FrameRate;
+    else
+        dt = 1/fps;
+    end
 
     ThisFrame = struct('cdata',zeros(vidHeight,vidWidth,3,'uint8'),'colormap',[]);
 

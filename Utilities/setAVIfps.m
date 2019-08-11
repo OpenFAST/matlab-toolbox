@@ -8,6 +8,9 @@ if nargin < 2
     fps = 15;
 end
 
+if ~exist(aviName,'file')
+    return
+end
 
 v = VideoReader(aviName);
 vw = VideoWriter( strrep(aviName,'.avi', '.2.avi') );
