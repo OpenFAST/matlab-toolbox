@@ -10,6 +10,9 @@ function avi2gif(aviFileName, gifFileName, StartIndx, fps)
 % gifFileName from the avi file named aviFileName, omitting all the frames
 % before StartIndx.
 %
+% avi2gif(aviFileName, gifFileName, StartIndx, fps) creates an animated gif called
+% gifFileName from the avi file named aviFileName, omitting all the frames
+% before StartIndx, and overriding the frame rate.
 %
 % Required inputs:
 %   aviFileName - the full name (including path [if necessary] and

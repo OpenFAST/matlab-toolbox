@@ -1,3 +1,4 @@
+function [modeID_table, modesDesc] = IdentifyModes(CampbellData)
 
 modesDesc = { 
 {'Generator DOF (not shown)'     , 'ED Variable speed generator DOF, rad'}
@@ -87,6 +88,7 @@ for i=1:nRuns
     end
 end
 
+return
 %     
 % for m = l:nModes
 % end

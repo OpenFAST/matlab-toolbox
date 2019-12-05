@@ -54,6 +54,7 @@ function [num,txt,CampbellPlotData] = Plot_CampbellData(xlsx_file,SheetName,Titl
 %
 %%
 
+
 % if SheetName is not used, function will use the first worksheet
 if nargin < 3
     TitleText = 'Campbell Diagram';
@@ -62,44 +63,76 @@ if nargin < 3
         SheetName = ''; %default to the first sheet in the Excel file
     end
 end
+ReadFromXLS = true;
 
-[num,txt] = xlsread(xlsx_file,SheetName);
-
-% remove table name (so indices between num and txt match better)
-txt = txt(2:end,:);
 nColsPerMode = 5; %newer formats use nColsPerMode = 5; % older format use nColsPerMode = 4;
-
-
-%%
-xAxisLabel  = txt{1,1};
-CampbellPlotData.xValues = num(1,:)';
-nx = length(CampbellPlotData.xValues);
-
-lineIndices = num(2:end,:);
-nLines = size(lineIndices,1);
-CampbellPlotData.lineLabels  = txt(2: nLines+1, 1);
-
-%% for each column (wind or rotor speed), open the worksheet and get the frequencies and damping
+% plotRotSpeed = true;
+plotRotSpeed = false;
 PlotRevs = false;
-CampbellData = cell( nx, 1);
-if strcmpi(xAxisLabel(1:5),'Rotor')
-    ending = ' RPM';
-    PlotRevs = true;
-elseif strcmpi(xAxisLabel(1:4),'Wind')
-    ending = ' mps';
-else
-    ending = '';
-end
+FreqCutoff = 300; %Hz
+
+if ReadFromXLS
+    [num,txt] = xlsread(xlsx_file,SheetName);
+
+    % remove table name (so indices between num and txt match better)
+    txt = txt(2:end,:);
+    
+    sheetLabels = num(1,:)';
+    if plotRotSpeed
+        [op_num,op_txt] = xlsread(xlsx_file,'OP');
+        CampbellPlotData.xValues = op_num(2,:)';
+        xAxisLabel = 'Rotor Speed (rpm)';
+    else
+        xAxisLabel  = txt{1,1};
+        CampbellPlotData.xValues = sheetLabels;
+    end
+    nx = length(CampbellPlotData.xValues);
+
+    lineIndices = num(2:end,:);
+    nLines = size(lineIndices,1);
+    CampbellPlotData.lineLabels  = txt(2: nLines+1, 1);
+
+    %% for each column (wind or rotor speed), open the worksheet and get the frequencies and damping
+    CampbellData = cell( nx, 1);
+    if strcmpi(txt{1,1}(1:5),'Rotor')
+        ending = ' RPM';
+        plotRotSpeed = true;
+    elseif strcmpi(txt{1,1}(1:4),'Wind')
+        ending = ' mps';
+    else
+        ending = '';
+    end
     
 
-for i=1:nx
-    WorksheetName = [ num2str(CampbellPlotData.xValues(i)) ending ];
-    d = xlsread(xlsx_file, WorksheetName);
-    
-    CampbellData{i}.NaturalFreq_Hz = d(2, 1:nColsPerMode:end);
-    CampbellData{i}.DampedFreqs_Hz = d(3, 1:nColsPerMode:end);
-    CampbellData{i}.DampRatios     = d(4, 1:nColsPerMode:end);    
+    for i=1:nx
+        WorksheetName = [ num2str(sheetLabels(i)) ending ];
+        d = xlsread(xlsx_file, WorksheetName);
+
+        CampbellData{i}.NaturalFreq_Hz = d(2, 1:nColsPerMode:end)';
+        CampbellData{i}.DampedFreqs_Hz = d(3, 1:nColsPerMode:end)';
+        CampbellData{i}.DampRatios     = d(4, 1:nColsPerMode:end)';    
+    end
+
+else
+%%    %FILL THIS IN, SO WE DON'T HAVE TO READ THE SPREADSHEET!!!
+% use varargin...
+%     CampbellPlotData.lineLabels = modesDesc;
+%     if plotRotSpeed    
+%         CampbellPlotData.xValues =
+%         xAxisLabel = 'Rotor Speed (rpm)';
+%     else
+%         CampbellPlotData.xValues =
+%         xAxisLabel =  'Wind Speed (mps)';    
+%     end
 end
+
+if plotRotSpeed
+    PlotRevs = true;
+end
+   
+CampbellPlotData.NotMapped_x = [];
+CampbellPlotData.NotMapped_Freq = [];
+CampbellPlotData.NotMapped_Damp = [];
 
 %% Get data in format for plotting
 for i= 1:nx
@@ -110,13 +143,31 @@ for i= 1:nx
     CampbellPlotData.DampRatios(    :,i) = CampbellData{i}.DampRatios(     lineIndices(:,i) );
     
     CampbellPlotData.NaturalFreq_Hz(NotAvail,i) = NaN;
-    CampbellPlotData.DampRatios(    NotAvail,i) = NaN;    
+    CampbellPlotData.DampRatios(    NotAvail,i) = NaN;  
+
+    
+    unusedModes = setxor(1:length(CampbellData{i}.NaturalFreq_Hz), lineIndices(:,i) ); %"set exclusive or"
+    unusedModes = unusedModes(unusedModes~=0);
+    if ~isempty(unusedModes)
+        CampbellPlotData.NotMapped_x = [CampbellPlotData.NotMapped_x 
+                                        ones(length(unusedModes),1)*CampbellPlotData.xValues(i) ];
+        CampbellPlotData.NotMapped_Freq = [CampbellPlotData.NotMapped_Freq 
+                                        CampbellData{i}.NaturalFreq_Hz(unusedModes)];
+        CampbellPlotData.NotMapped_Damp = [CampbellPlotData.NotMapped_Damp 
+                                        CampbellData{i}.DampRatios(unusedModes)];
+    end
 end
 
 %% Plot the data
 LineStyles = {'g:', '-', '-+', '-o', '-^', '-s', '-x', '-d', '-.', ...
                     ':', ':+', ':o', ':^', ':s', ':x', ':d', ':.', ...
-                   '--','--+','--o','--^','--s','--x','--d','--.'  };
+                   '--','--+','--o','--^','--s','--x','--d','--.'};
+% LineStyles = {'g:', '.', '+', 'o', '^', 's', 'x', 'd', ...
+%                     '.', '+', 'o', '^', 's', 'x', 'd', ...
+%                     '.', '+', 'o', '^', 's', 'x', 'd', ...
+%                     '.', '+', 'o', '^', 's', 'x', 'd', ...
+%                     '.', '+', 'o', '^', 's', 'x', 'd', ...
+%                     '.', '+', 'o', '^', 's', 'x', 'd'  };
 figure;
 
 for p=1:2
@@ -130,18 +181,23 @@ end
 
 for i=1:nLines
     
-    if isempty( strfind( CampbellPlotData.lineLabels{i},'(not shown)' ) )        
-        subplot(1,2,1)    
-        plot( CampbellPlotData.xValues, CampbellPlotData.NaturalFreq_Hz(i,:), LineStyles{i}, 'LineWidth',2, 'DisplayName',CampbellPlotData.lineLabels{i} );
+    if isempty( strfind( CampbellPlotData.lineLabels{i},'(not shown)' ) )    
+        if (any(CampbellPlotData.NaturalFreq_Hz(i,:)<FreqCutoff))
+            i_line = mod(i-1, length(LineStyles))+1;
+            subplot(1,2,1)    
+            plot( CampbellPlotData.xValues, CampbellPlotData.NaturalFreq_Hz(i,:), LineStyles{i_line}, 'LineWidth',2, 'DisplayName',CampbellPlotData.lineLabels{i} );
 
-        subplot(1,2,2)    
-        plot( CampbellPlotData.xValues, CampbellPlotData.DampRatios(i,:), LineStyles{i}, 'LineWidth',2, 'DisplayName',CampbellPlotData.lineLabels{i} );        
+            subplot(1,2,2)    
+            plot( CampbellPlotData.xValues, CampbellPlotData.DampRatios(i,:), LineStyles{i_line}, 'LineWidth',2, 'DisplayName',CampbellPlotData.lineLabels{i} );        
+        end
     end
     
 end
 
 
+
 subplot(1,2,1)
+plot( CampbellPlotData.NotMapped_x, CampbellPlotData.NotMapped_Freq , '.', 'DisplayName','Unmapped modes' )
 ylabel( 'Natural Frequency (Hz)' )
 if PlotRevs
     PerRev = [1 3:3:15];
@@ -154,6 +210,7 @@ if PlotRevs
 end
 
 subplot(1,2,2)
+plot( CampbellPlotData.NotMapped_x, CampbellPlotData.NotMapped_Damp , '.', 'DisplayName','Unmapped modes' )
 ylabel( 'Damping Ratio (-)' )
 legend show;
 
