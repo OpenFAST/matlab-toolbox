@@ -18,8 +18,7 @@ function [Channels, ChanName, ChanUnit, FileID, DescStr] = ReadFASTbinary(FileNa
 %                  output, indicating possible non-constant time step
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-LenName = 10;  % number of characters per channel name
-LenUnit = LenName;  % number of characters per unit name
+
 
 if nargin<2
     machinefmt = 'native';
@@ -29,7 +28,8 @@ end
 
 FileFmtID = struct( 'WithTime',   1, ...               % File identifiers used in FAST
                     'WithoutTime',2, ...
-                    'ChanLen',    3 );
+                    'NoCompressWithoutTime',    3 ...
+                    'ChanLen_In', 4);
 
 fid  = fopen( FileName );
 if fid > 0
@@ -39,6 +39,12 @@ if fid > 0
     
     FileID       = fread( fid, 1, 'int16',machinefmt);             % FAST output file format, INT(2)
 
+    if FileID == FileFmtID.ChanLen_In
+        LenName  = fread( fid, 1, 'int16',machinefmt);             % Number of characters in channel names and units
+    else
+        LenName = 10;  % default number of characters per channel name
+    end
+        
     NumOutChans  = fread( fid, 1, 'int32',machinefmt);             % The number of output channels, INT(4)
     NT           = fread( fid, 1, 'int32',machinefmt);             % The number of time steps, INT(4)
 
@@ -50,18 +56,18 @@ if fid > 0
         TimeIncr = fread( fid, 1, 'float64',machinefmt);           % The time increment, REAL(8)
     end
     
-    ColScl       = fread( fid, NumOutChans, 'float32',machinefmt); % The channel slopes for scaling, REAL(4)
-    ColOff       = fread( fid, NumOutChans, 'float32',machinefmt); % The channel offsets for scaling, REAL(4)
-
+    if FileID == FileFmtID.NoCompressWithoutTime
+        ColScl = ones(NumOutChans,1);
+        ColOff = zeros(NumOutChans,1);
+    else
+        ColScl       = fread( fid, NumOutChans, 'float32',machinefmt); % The channel slopes for scaling, REAL(4)
+        ColOff       = fread( fid, NumOutChans, 'float32',machinefmt); % The channel offsets for scaling, REAL(4)
+    end
+    
     LenDesc      = fread( fid, 1,           'int32',machinefmt );  % The number of characters in the description string, INT(4)
     DescStrASCII = fread( fid, LenDesc,     'uint8',machinefmt );  % DescStr converted to ASCII
     DescStr      = char( DescStrASCII' );                     
     
-    if FileID == FileFmtID.ChanLen
-        LenName = 15;
-        LenUnit = LenName;
-    end
-
     ChanName = cell(NumOutChans+1,1);                   % initialize the ChanName cell array
     for iChan = 1:NumOutChans+1 
         ChanNameASCII = fread( fid, LenName, 'uint8',machinefmt ); % ChanName converted to numeric ASCII
@@ -70,7 +76,7 @@ if fid > 0
     
     ChanUnit = cell(NumOutChans+1,1);                   % initialize the ChanUnit cell array
     for iChan = 1:NumOutChans+1
-        ChanUnitASCII = fread( fid, LenUnit, 'uint8',machinefmt ); % ChanUnit converted to numeric ASCII
+        ChanUnitASCII = fread( fid, LenName, 'uint8',machinefmt ); % ChanUnit converted to numeric ASCII
         ChanUnit{iChan}= strtrim( char(ChanUnitASCII') );
     end            
 
@@ -92,8 +98,12 @@ if fid > 0
         end
     end
         
-        
-    [PackedData, cnt] = fread( fid, nPts, 'int16' ); % read the channel data
+    if FileID == FileFmtID.NoCompressWithoutTime        
+        [PackedData, cnt] = fread( fid, nPts, 'float64' ); % read the channel data    
+    else
+        [PackedData, cnt] = fread( fid, nPts, 'int16' ); % read the channel data
+    end
+    
     if ( cnt < nPts ) 
         fclose(fid);
         error(['Could not read entire ' FileName ' file: read ' num2str( cnt ) ' of ' num2str( nPts ) ' values.']);
@@ -125,4 +135,4 @@ else
 end
 
 return;
-
+end
