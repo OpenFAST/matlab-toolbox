@@ -99,9 +99,20 @@ end
         Matlab2FAST(SrvDPar, template, newSrvDName, 2); %contains 2 header lines
     end    
     
+%%  %----------------------------------------------------------------------
+    % Get HD Data and write new HydroDyn file:
+    %----------------------------------------------------------------------
+    CompHydro = GetFASTPar(FP,'CompHydro');
+    if CompHydro == 1
+        [HDPar, newHDName] = GetFASTPar_Subfile(FP, 'HydroFile', oldDir, newDir, true);
+
+        template   = [templateDir filesep HDtemplate];  %template for primary file
+        Matlab2HD(HDPar, template, newHDName, 2); %contains 2 header lines
+    end    
+    
     
 %%  %----------------------------------------------------------------------
-    % Get BD Data and write new BD file:
+    % Get BD Data and write new BeamDyn file:
     %----------------------------------------------------------------------
     CompElast = GetFASTPar(FP,'CompElast');
     if CompElast == 2 % BeamDyn
