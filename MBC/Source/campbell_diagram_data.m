@@ -1,4 +1,4 @@
-function [CampbellData] = campbell_diagram_data(mbc_data, BladeLen, TowerLen, xlsFileName, sumFileName)
+function [CampbellData] = campbell_diagram_data(mbc_data, BladeLen, TowerLen, xlsFileName)
 %%
 % inputs: 
 % -   mbc_data is the output data from mbc3 containing DescStates and
@@ -8,7 +8,7 @@ function [CampbellData] = campbell_diagram_data(mbc_data, BladeLen, TowerLen, xl
 %     the rows (for consistent units)
 %
 outputXLSfile = nargin > 3 && ~isempty(xlsFileName);
-usePercent = true;
+usePercent = false;
 %%
 % mbc_data.eigSol = eiganalysis(mbc_data.AvgA);
 ndof = mbc_data.ndof2 + mbc_data.ndof1; %size(mbc_data.AvgA,1)/2;          % number of translational states
@@ -23,7 +23,7 @@ DescStates = PrettyStateDescriptions(mbc_data.DescStates, mbc_data.ndof2, mbc_da
 
 if BladeLen~=0 || TowerLen~=0
     %% get the scaling factors for the mode rows
-    ScalingFactor = getScaleFactors(DescStates, TowerLen, BladeLen, sumFileName);
+    ScalingFactor = getScaleFactors(DescStates, TowerLen, BladeLen);
 
     %% scale the magnitude of the modes by ScalingFactor (for consistent units)
     %  and then scale the columns so that their maximum is 1
@@ -31,6 +31,8 @@ if BladeLen~=0 || TowerLen~=0
     ModesMagnitude = diag(ScalingFactor) * mbc_data.eigSol.MagnitudeModes; % scale the rows
     
     CampbellData.ScalingFactor = ScalingFactor;
+else 
+    ModesMagnitude = mbc_data.eigSol.MagnitudeModes;
 end
 
 if usePercent
@@ -179,10 +181,8 @@ function [ScalingFactor] = getScaleFactors(DescStates, TowerLen, BladeLen)
     % translational dofs:
     for i=1:length(ScalingFactor)
         
-        if startsWith(DescStates{i},'MBD ') % if string starts with "MBD "
-            
             % look for blade dofs:
-        elseif ~isempty(strfind(DescStates{i},'blade')) || ...
+        if ~isempty(strfind(DescStates{i},'blade')) || ...
                ~isempty(strfind(DescStates{i},'Blade'))
            
            if isempty(strfind(DescStates{i},'rotational')) % make sure this isn't a rotational dof from BeamDyn

@@ -285,7 +285,7 @@ function line = ParseValue(HDParVal, HDParLabel, value, label, line, TemplateFil
                     if strcmpi(label,'WaveSeed(1)') || strcmpi(label,'WaveSeed(2)')
                         writeVal = sprintf('%14d',val2Write(1));
                     else
-                        writeVal = sprintf('%14G',val2Write(1));
+                        writeVal = sprintf('%14.10G',val2Write(1));
                     end
                     if ~isscalar(val2Write) %Check for the special case of an array
                         writeVal = [writeVal sprintf(',%14G',val2Write(2:end)) ' '];
