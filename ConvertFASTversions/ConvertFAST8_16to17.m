@@ -35,13 +35,15 @@ if nargin < 3
     templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
 
     ADtemplate   = 'AeroDyn15_Primary.dat';
-    BDtemplate   = 'bd_primary.inp';
+    BDtemplate   = 'BeamDyn_Primary.inp';
+    EDtemplate   = 'ElastoDyn_Primary.dat';
     SrvDtemplate = 'SrvD_Primary_v1.05.x.dat';
     FASTtemplate = 'OpenFAST.dat';
     HDtemplate   = 'HydroDyn.dat';
 else
     ADtemplate   = 'AeroDyn15.dat';
     BDtemplate   = 'BeamDyn.dat';
+    EDtemplate   = 'ElastoDyn.dat';
     SrvDtemplate = 'ServoDyn.dat';
     FASTtemplate = 'enFAST.fst';
     HDtemplate   = 'HydroDyn.dat';
@@ -99,12 +101,30 @@ end
         Matlab2FAST(SrvDPar, template, newSrvDName, 2); %contains 2 header lines
     end    
     
+%%  %----------------------------------------------------------------------
+    % Get HD Data and write new HydroDyn file:
+    %----------------------------------------------------------------------
+    CompHydro = GetFASTPar(FP,'CompHydro');
+    if CompHydro == 1
+        [HDPar, newHDName] = GetFASTPar_Subfile(FP, 'HydroFile', oldDir, newDir, true);
+
+        template   = [templateDir filesep HDtemplate];  %template for primary file
+        Matlab2HD(HDPar, template, newHDName, 2); %contains 2 header lines
+    end    
+    
     
 %%  %----------------------------------------------------------------------
-    % Get BD Data and write new BD file:
+    % Get BD Data and write new BeamDyn file:
     %----------------------------------------------------------------------
     CompElast = GetFASTPar(FP,'CompElast');
-    if CompElast == 2 % BeamDyn
+    if CompElast == 1 % ElastoDyn
+        
+       [EDPar, newEDName] = GetFASTPar_Subfile(FP, 'EDFile', oldDir, newDir);            
+       
+       template   = [templateDir filesep EDtemplate];  %template for primary file
+       Matlab2FAST(EDPar,template,newEDName, 2); %contains 2 header lines
+        
+    elseif CompElast == 2 % BeamDyn
 
         % first get the number of blades from ElastoDyn:
         EDPar = GetFASTPar_Subfile(FP, 'EDFile', oldDir);            

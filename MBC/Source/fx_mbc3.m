@@ -1,4 +1,4 @@
-function [MBC, matData, FAST_linData] = fx_mbc3( FileNames ) 
+function [MBC, matData, FAST_linData, VTK] = fx_mbc3( FileNames, ModeVizFileName ) 
 % MBC: Multi-Blade Coordinate Transformation for a turbine with 3-blade rotor
 %
 % Developed by Gunjit Bir, NREL (303-384-6953, gunjit_bir@nrel.gov)
@@ -43,11 +43,6 @@ fprintf( '\n  Running %s\n\n', 'mbc3 (v2.0, 29-Jan-2018)' );
 MBC.DescStates = matData.DescStates; % save this in the MBC type for possible campbell_diagram processing later 
 MBC.ndof2 = matData.ndof2;
 MBC.ndof1 = matData.ndof1;
-MBC.StateOrderingIndx = matData.StateOrderingIndx;
-MBC.RotTripletIndicesStates2 = matData.RotTripletIndicesStates2;
-MBC.RotTripletIndicesStates1 = matData.RotTripletIndicesStates1;
-MBC.Azimuth = matData.Azimuth;
-
 MBC.RotSpeed_rpm = mean(matData.Omega)*(30/pi); %rad/s to rpm
 if isfield(matData,'WindSpeed')
     MBC.WindSpeed = mean(matData.WindSpeed);
@@ -226,7 +221,16 @@ end
 %% ------------- Eigensolution and Azimuth Averages -------------------------
 if isfield(MBC,'A')
     MBC.AvgA = mean(MBC.A,3); % azimuth-average of azimuth-dependent MBC.A matrices
-    MBC.eigSol = eiganalysis(MBC.AvgA,matData.ndof2, matData.ndof1);
+    [MBC.eigSol, EigenVects_save] = eiganalysis(MBC.AvgA,matData.ndof2, matData.ndof1);
+    
+    %% save eigenvectors (doing inverse of MBC3) for VTK visualization in FAST
+    if nargout > 3 || nargin > 1
+        [VTK] = GetDataForVTK(MBC, matData, nb, EigenVects_save);
+        if nargin > 1
+            WriteDataForVTK(VTK, ModeVizFileName)
+        end        
+    end
+    
 end
 
 if isfield(MBC,'B')
@@ -288,3 +292,85 @@ function [new_seq, nRotTriplets, nb] = get_new_seq(rot_triplet,ntot)
     
 end
 
+%% ------------------------------------------------------------------------
+function [VTK] = GetDataForVTK(MBC, matData, nb, EigenVects_save)
+
+    %% Get data required for VTK visualization:
+    % % % MBC.eigSol.EigenVects_save(:,SortedFreqIndx)       
+
+    [~, SortedFreqIndx] = sort(MBC.eigSol.NaturalFreqs_Hz);    
+    
+    %put these in order of natural frequency:
+    VTK.NaturalFreq_Hz = MBC.eigSol.NaturalFreqs_Hz(  SortedFreqIndx);
+    VTK.DampedFreq_Hz  = MBC.eigSol.DampedFreqs_Hz(   SortedFreqIndx);
+    VTK.DampingRatio   = MBC.eigSol.DampRatios(       SortedFreqIndx);
+        x_eig          =            EigenVects_save(:,SortedFreqIndx);
+    VTK.x_eig          = repmat( x_eig, 1, 1, length(matData.Azimuth) );
+                   
+
+    if (MBC.performedTransformation)
+        % inverse MBC3 (Eq. 4, to move from collective, sine, cosine back to blade 1, blade 2, blade 3):
+        dof1_offset = MBC.ndof2*2;
+
+        for iaz=1:length(matData.Azimuth)
+            % compute MBC3 transformation matrices
+            az = matData.Azimuth(iaz)*pi/180.0 + 2*pi/nb* (0:(nb-1)) ; % Eq. 1, azimuth in radians
+            tt = [ones(3,1), cos(az(:)), sin(az(:))];                % Eq. 9, t_tilde
+
+            for i2 = 1:size(matData.RotTripletIndicesStates2,1)
+                    %q2:
+                VTK.x_eig(matData.RotTripletIndicesStates2(i2,:),:,iaz) = tt * x_eig(matData.RotTripletIndicesStates2(i2,:),:);
+                    %q2_dot:
+                VTK.x_eig(matData.RotTripletIndicesStates2(i2,:)+MBC.ndof2,:,iaz) = tt * x_eig(matData.RotTripletIndicesStates2(i2,:)+MBC.ndof2,:);
+            end
+
+            for i1 = 1:length(matData.RotTripletIndicesStates1)
+                    %q1:
+                VTK.x_eig(matData.RotTripletIndicesStates1(i1,:)+dof1_offset,:,iaz) = tt * x_eig(matData.RotTripletIndicesStates1(i1,:)+dof1_offset,:);
+            end
+
+        end
+    end
+    % put this in order states are stored in FAST
+    VTK.x_desc = MBC.DescStates(matData.StateOrderingIndx);
+    VTK.x_eig = VTK.x_eig(matData.StateOrderingIndx,:,:);
+    
+    VTK.x_eig_magnitude = abs(  VTK.x_eig);
+    VTK.x_eig_phase     = angle(VTK.x_eig);
+
+    
+return;
+end
+
+%% ------------------------------------------------------------------------
+function WriteDataForVTK(VTK, ModeVizFileName)
+
+    fileFmt = 'float64'; %8-byte real numbers
+
+    fid = fopen(ModeVizFileName,'w');
+    if fid < 1
+        error(['Invalid file: ' ModeVizFileName])
+    end
+    [nStates, nModes, NLinTimes] = size(VTK.x_eig_magnitude);
+   
+    fwrite(fid, 1,        'int32' ); % write a file identifier in case we ever change this format
+    fwrite(fid, nModes,   'int32' ); % number of modes (for easier file reading)
+    fwrite(fid, nStates,  'int32' ); % number of states (for easier file reading)
+    fwrite(fid, NLinTimes,'int32' ); % number of azimuths (i.e., LinTimes) (for easier file reading)
+
+    % these are output, but not used in the FAST visualization algorithm
+    fwrite(fid, VTK.NaturalFreq_Hz, fileFmt);
+    fwrite(fid, VTK.DampingRatio,   fileFmt);
+    
+    fwrite(fid, VTK.DampedFreq_Hz,  fileFmt);
+   
+        % I am going to reorder these variables by mode (so if reading sequentially, 
+        % we don't have to read every mode)
+        
+    for iMode = 1:nModes
+        fwrite(fid, VTK.x_eig_magnitude(:,iMode,:), fileFmt);
+        fwrite(fid, VTK.x_eig_phase(    :,iMode,:), fileFmt);
+    end
+   
+return;
+end

@@ -46,7 +46,10 @@ function [outData]=PlotFASToutput(FASTfiles,FASTfilesDesc,ReferenceFile,Channels
 %  channel names must be the same [it does search for negatives]. 
 %..........................................................................
 
-
+if ~iscell(FASTfiles)
+    FASTfiles = {FASTfiles};
+end
+    
 numFiles = length(FASTfiles);
 if numFiles < 1 
     disp('PlotFASToutput:No files to plot.')

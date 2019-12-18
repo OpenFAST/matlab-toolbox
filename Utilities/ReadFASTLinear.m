@@ -126,13 +126,14 @@ function [op, desc, RF, DerivOrd] = readLinTable(fid,n)
         else
             op{row} = C{1};
         end
-  try % new format files
+        
         RF(row) = strcmp(C{end-1},'T');
-        DerivOrd(row) = C{end};
-  catch % older files don't have the DerivOrd column
-        RF(row) = strcmp(C{end},'T');
-        DerivOrd(row) = 0;
-  end
+        if isempty(C{end})
+            DerivOrd(row) = 0; % older files don't have the DerivOrd column
+        else
+            DerivOrd(row) = C{end};
+        end
+            
         desc{row}=strtrim( line(pos+1:end) );
   
     end

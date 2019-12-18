@@ -119,7 +119,6 @@ else
         else
            Channels = cell2mat( textscan( fid, fmtStr, 'delimiter', delim ) );
         end
-Channels = Channels(1:2:end,:);
 
         fclose(fid);
 
