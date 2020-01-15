@@ -371,6 +371,7 @@ function WriteDataForVTK(VTK, ModeVizFileName)
         fwrite(fid, VTK.x_eig_magnitude(:,iMode,:), fileFmt);
         fwrite(fid, VTK.x_eig_phase(    :,iMode,:), fileFmt);
     end
+    fclose(fid)
    
 return;
 end
