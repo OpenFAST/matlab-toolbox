@@ -63,7 +63,7 @@ function [data] = ReadFASTLinear(fileName)
         [data.x_op,    data.x_desc, data.x_rotFrame, data.x_DerivOrder] = readLinTable(fid,data.n_x);
         [data.xdot_op, data.xdot_desc]                                  = readLinTable(fid,data.n_x);
         if data.x_DerivOrder(1) == 0 % this is an older file without derivOrder columns
-            data.x_DerivOrder = 2; % (these are second-order states)
+            data.x_DerivOrder(:) = 2; % (these are second-order states)
             data.n_x2 = data.n_x; 
         else
             data.n_x2 = sum(data.x_DerivOrder == 2); % (number of second-order states)
@@ -128,7 +128,7 @@ function [op, desc, RF, DerivOrd] = readLinTable(fid,n)
         end
         
         RF(row) = strcmp(C{end-1},'T');
-        if isempty(C{end})
+        if isempty(C{end}) || isnan(C{end})
             DerivOrd(row) = 0; % older files don't have the DerivOrd column
         else
             DerivOrd(row) = C{end};
