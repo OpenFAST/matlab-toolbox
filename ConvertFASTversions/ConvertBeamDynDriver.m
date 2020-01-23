@@ -5,10 +5,10 @@ function ConvertBeamDynDriver(oldDriverName, newDir, templateDir)
         thisDir     = fileparts(thisFile);
         templateDir = strcat(thisDir,filesep, 'TemplateFiles' );
 
-        BDtemplate   = 'bd_primary.inp';
+        BDtemplate   = 'BeamDyn_Primary.inp';
         DriverTemplate = 'bd_driver.inp';
     else
-        BDtemplate     = 'bd_primary.inp';
+        BDtemplate     = 'BeamDyn_Primary.inp';
         DriverTemplate = 'bd_driver.inp';
     end
 
