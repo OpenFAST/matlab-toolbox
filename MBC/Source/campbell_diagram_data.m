@@ -128,7 +128,11 @@ end
 
 %% if requested, output this data to a Microsoft Excel spreadsheet file, in a sheet named 'Modes_Data'
 if outputXLSfile
-    xlswrite(xlsFileName,CampbellData.ModesTable, 'Modes_Data')
+    if (exist ("OCTAVE_VERSION", "builtin") > 0)
+        warning('xlswrite unavailable with Octave.')
+    else
+        xlswrite(xlsFileName,CampbellData.ModesTable, 'Modes_Data')
+    end
 end
 
 return
