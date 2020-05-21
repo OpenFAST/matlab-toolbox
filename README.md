@@ -13,7 +13,7 @@ git clone https://github.com/OpenFAST/matlab-toolbox
 From a MATLAB command window:
 
 ```
-addpath( getpath('AbsolutePathToToolbox') )
+addpath( genpath('AbsolutePathToToolbox') )
 ```
 where `AbsolutePathToToolbox` is the name of the absolute path where you cloned this toolbox. 
 Adding this command to your MATLAB `startup.m` file will make sure these tools are avalible every time you
