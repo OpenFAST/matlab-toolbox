@@ -6,7 +6,7 @@ wind turbine state-space models.
 ## Download 
 From a command line:
 ```
-git clone https://github.com/OpenFAST/MATLAB-mbc
+git clone https://github.com/OpenFAST/matlab-toolbox
 ```
 
 ## Install in MATLAB
