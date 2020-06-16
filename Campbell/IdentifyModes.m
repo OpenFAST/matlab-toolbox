@@ -1,4 +1,21 @@
-function [modeID_table, modesDesc] = IdentifyModes(CampbellData)
+function [ModesData] = identifyModes(CampbellData)
+% Identify modes from CampbellData and creates a ModesData structure with fields:
+%  - modeID_table
+%  - modeID_name
+%  - opTable
+%  - ModesTable (one per OP)
+%  - ModesTable_names (one per OP)
+%
+% INPUTS:
+%   - CampbellData: cell-array of CampbellData (one per operating point), as returned for instance by getCampbellData
+%
+% OUPUTS:
+%  - ModesData: structure
+%
+% Inspired by script from Bonnie Jonkman
+% (c) 2016 National Renewable Energy Laboratory
+% (c) 2018 Envision Energy, USA
+
 
 modesDesc = { 
 {'Generator DOF (not shown)'     , 'ED Variable speed generator DOF, rad'}
@@ -24,7 +41,6 @@ modesDesc = {
 };
 
 %%
-
 nModes = length(modesDesc);
 nRuns = length(CampbellData);
 modeID_table = zeros(nModes,nRuns);
@@ -88,7 +104,21 @@ for i=1:nRuns
     end
 end
 
+
+% --- Creating tables to be written to file
+[idTable, modeID_name, ModesTable_names] = createIDTable(CampbellData, modeID_table, modesDesc);
+[opTable]                                = createOPTable(CampbellData);
+
+% --- Creating an output structure to store all tables (and potentially more in the future..)
+ModesData=struct();
+nOP = length(CampbellData);
+for iOP = 1:nOP
+    ModesData.ModesTable{iOP} = CampbellData{iOP}.ModesTable;
+end
+ModesData.ModesTable_names    = ModesTable_names;
+ModesData.modeID_table    = idTable;
+ModesData.modeID_name     = modeID_name;
+ModesData.opTable         = opTable;
+
+
 return
-%     
-% for m = l:nModes
-% end
