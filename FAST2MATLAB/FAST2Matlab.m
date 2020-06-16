@@ -1,4 +1,4 @@
-function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
+function DataOut = FAST2Matlab(FST_file,hdrLines,DataOut)
 %% Fast2Matlab
 % DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 % Function for reading FAST input files in to a MATLAB struct.
@@ -286,7 +286,7 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
     
         % we've read the line of the table that includes the header 
         % let's parse it now, getting the number of columns as well:
-        if contains(line,',')
+        if ~isempty(strfind(line,','))
             % these will be assumed to be comma delimited:
             TmpHdr  = textscan(line,'%s', 'Delimiter',',');
         else

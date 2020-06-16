@@ -36,7 +36,7 @@ function [MBC, matData, FAST_linData, VTK] = fx_mbc3( FileNames, ModeVizFileName
 % Equation numbers are from this document: https://nwtc.nrel.gov/system/files/MBC3.pdf
 % -----------------------------------------------------------------------------------------
 
-fprintf( '\n  Running %s\n\n', 'mbc3 (v2.0, 29-Jan-2018)' );
+% fprintf( '\n  Running %s\n\n', 'mbc3 (v2.0, 29-Jan-2018)' );
 
 [matData, FAST_linData] = fx_getMats(FileNames);
 
@@ -245,8 +245,8 @@ if isfield(MBC,'D')
     MBC.AvgD = mean(MBC.D,3); % azimuth-average of azimuth-dependent MBC.D matrices
 end
 
-  disp('  ');
-  disp(' Multi-Blade Coordinate transformation completed ');
+%   disp('  ');
+%   disp(' Multi-Blade Coordinate transformation completed ');
 %-----------------------------------------------------------
 return;
 end

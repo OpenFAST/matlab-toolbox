@@ -74,7 +74,7 @@ while true
         HaveNewLineChar = true;
     end
     
-    if contains(upper(line),upper('OutList'))        
+    if ~isempty(strfind(upper(line),upper('OutList')))
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
@@ -352,7 +352,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
         
         
         
-        if contains(HdrLine,',')
+        if ~isempty(strfind(HdrLine,','))
             TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
         else
             TmpHdr = textscan(HdrLine,'%s');

@@ -173,8 +173,11 @@ figure;
 for p=1:2
     ax=subplot(1,2,p);
     hold on;
-    ax.Box = 'on';
-    ax.FontSize = 15;
+    try
+        ax.Box = 'on';
+        ax.FontSize = 15;
+    catch
+    end
     xlabel( xAxisLabel )
     grid on;
 end

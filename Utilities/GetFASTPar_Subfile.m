@@ -8,21 +8,17 @@ function [p, newSubfileName] = GetFASTPar_Subfile(FP, VarName, oldDir, newDir, r
 
         % see if we need to make a new directory for the new AD root
     if nargin > 3
-        % this is the new file name:
+        % Change filename, potentially create parent directory if needed
         % get it here before potentially changing it relative to the old
         % directory name
-        newSubfileName = GetFullFileName( SubfileName, newDir ); % new path + name
-        
-        [newSubfilePath] = fileparts(newSubfileName);
-        if ~isempty(newSubfilePath)
-            if 7~=exist(newSubfilePath,'dir')
-               mkdir(newSubfilePath)
-            end
-        end
+        newSubfileName = RebaseFile( SubfileName, newDir ); % new path + name
     end
     
         % get the full path name, relative to the old directory location:
     SubfileName = GetFullFileName( SubfileName, oldDir );
+    if ~exist(SubfileName,'file')
+        error('File not found: %s', SubfileName)
+    end
     try
         if readHD
             p = HD2Matlab(SubfileName,2); % get parameter data (2 header lines)
