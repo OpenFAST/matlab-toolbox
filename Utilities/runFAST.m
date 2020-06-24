@@ -16,20 +16,20 @@ function status = runFAST(FASTfilenames, FASTexe, varargin)
 
 
 % --- Optional arguments
-OptsFields={'flag'};
+OptsFields={'flag',};
 opts=struct();
 % Default values
-opts.flag = ''   ; % Extra flag
+opts.flag = ''   ; % Extra flag passed as command line argument
 % Values input by users % NOTE: inputParser not available in Octave
-if nargin >=3
-    for iOpts = 1:length(OptsFields)
-        i = find( strcmp( varargin, OptsFields{iOpts}) == 1);
-        if ~isempty(i)
-            opts.(OptsFields{iOpts}) = varargin{i + 1};
-        end
+if mod(length(varargin),2)~=0; error('Varargin should have an even number of values, for key/values pairs'); end
+for iVar = 1:2:length(varargin)
+    i = find( strcmp( OptsFields, varargin{iVar}) == 1);
+    if ~isempty(i)
+        opts.(OptsFields{i}) = varargin{iVar + 1};
+    else
+        warning('Optional key `%s` not supported by function %s',varargin{iVar},mfilename)
     end
 end
-
 % --- Inputs sanity
 if ispc()
     FASTexe = strrep(FASTexe,'/','\');
@@ -37,23 +37,16 @@ end
 
 status=zeros(1,length(FASTfilenames));
 
-% --- Running
+% --- Creating a list of commands
+commands=cell(1,length(inputFiles));
 for isim = 1:length(FASTfilenames)
     FASTfile = FASTfilenames{isim};
     if ispc()
         FASTfile = strrep(FASTfile,'/','\');
     end
     sCmd= [FASTexe ' ' opts.flag ' ' FASTfile];
-    fprintf('Running: %s \n',sCmd);
-    sim_status = system(sCmd);
-    status(isim) = sim_status;
-    % we don't abort if one fails
 end
 
-% --- Check
-if any(status);
-   I=find(status);
-   disp('The following simulations failed');
-   disp(FASTfilenames(I));
-   error('%d/%d simulations failed',length(I),length(FASTfilenames))
-end
+% --- Running
+status = runCommands(commands);
+

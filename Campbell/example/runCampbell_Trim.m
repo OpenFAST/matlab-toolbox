@@ -12,9 +12,13 @@ addpath(genpath('C:/Work/FAST/matlab-toolbox'));
 %% Parameters
 
 % Main Flags
-writeFASTfilesAndRun = true; % write FAST input files and Run OpenFAST
-postproLin           = true;
-writeVTK             = false;
+writeFSTfiles = logical(1); % write FAST input files 
+runFST        = logical(1); % run FAST simulations
+postproLin     = logical(1);
+writeVIZ       = logical(1;
+runVIZ         = logical(1);
+writeAVI       = logical(1);
+
 outputFormat='xls';
 
 FASTexe = '../../_ExampleData/openfast_x64_2.3-linear.exe'; % Adapt me
@@ -36,10 +40,6 @@ operatingPointsFile = 'LinearizationPoints.csv';
 %      
 %      
 
-templateVizFile    = '../ConvertFASTversions/TemplateFiles/OpenFAST-Modes.viz';
-
-
-
 %% --- Step 1: Create a structure or file with operating points where linearization is to occur
 % NOTE: 
 %       The file written is a CSV file with one line of header.  
@@ -54,19 +54,28 @@ OP.GeneratorTorque  = [0.606 ,  5.611  , 14.62   , 25.51  , 40.014 , 43.094 , 43
 writeOperatingPoints(operatingPointsFile, OP);
 %OP = readOperatingPoints(operatingPointsFile);
 
-%% --- Step 2: Write OpenFAST inputs files for each operating points and run OpenFAST
+%% --- Step 2a: Write OpenFAST inputs files for each operating points 
 % NOTE: 
-%      The function can take an operatingPointsFile or the structure OP above.
+%      The function can take an operatingPointsFile or the structure OP 
 %      Comment this section if the inputs files were already generated
 %      See writeLinearizationFiles for key/value arguments available.
 %      Consider writing your own batch file and parallize the computations of runFAST.
-if writeFASTfilesAndRun
-    FASTfilenames = writeLinearizationFiles(templateFstFile, simulationFolder, operatingPointsFile,'writeVTKmodes',true);
+if writeFSTfiles
+    FSTfilenames = writeLinearizationFiles(simulationFolder, operatingPointsFile,'writeVTKmodes',true);
 end
+%% --- Step 2b: run OpenFAST 
+% NOTE: 
+%       Potentially write a batch file for external run.
 %      Comment this section if the simulations were already run
-if writeFASTfilesAndRun
+%       Batch and commands are relative to the parent directory of the batch file.
+%       
+if runFST
     [FASTfilenames] = getFullFilenamesOP(simulationFolder, operatingPointsFile);
-    runFAST(FASTfilenames, FASTexe);
+    % --- Option 1: Batch
+    [FASTcommands, batchFilename, runFolder] = writeBatch([simulationFolder '/_RunFAST.bat'], FSTfilenames, FASTexe);
+    %runBatch(batchFilename, runFolder); 
+    % --- Option 2: direct calls
+    runFAST(FSTfilenames, FASTexe); 
 end
 
 %% --- Step 3: Run MBC, identify modes and generate XLS or CSV file
@@ -77,10 +86,33 @@ if postproLin
     [ModesData, outputFiles] = postproLinearization(simulationFolder, operatingPointsFile, outputFormat);
 end
 
-%% --- Step 3b: 
-if writeVTK
-    runFASTForVisualization(templateVizFile, simulationFolder, operatingPointsFile, FASTexe);
-end
 
 %% --- Step 4: Campbell diagram plot
 %Plot_CampbellData(outputFiles);
+
+
+
+%% --- Step 5: Generate visualization data
+% --- Step 5a: Write VIZ files
+if writeVIZ
+    [VIZfilenames] = writeVizualizationFiles(simulationFolder, operatingPointsFile,'VTKLinModes',12);
+end
+% --- Step 5b: Run FAST with VIZ files to generate VTKs
+if runVIZ
+    % --- Option 1: batch
+    [VIZcommands, VIZbatch, runFolder] = writeBatch([simulationFolder '/_RunVIZ.bat'], VIZfilenames, FASTexe, 'flag','-VTKLin');
+    %runBatch(batchFilename, runFolder); 
+    % --- Option 2: direct calls
+    %runFAST(VIZfilenames, FASTexe, 'flag','-VTKLin');
+end
+% --- Step 5c: Convert VTKs to AVI
+% NOTE: this generates the batch file only
+%       Also, this is experimental and users might need to adapt the inputs and batchfile content
+if writeAVI
+    pvPython          = 'pvpython'; % path to paraview-python binary
+    pythonPlotScript  = 'C:/Work/FAST/matlab-toolbox/Campbell/plotModeShapes.py'; % path to python plot script
+    paraviewStateFile = 'C:/Work/FAST/matlab-toolbox/Campbell/ED_Surfaces.pvsm';  % path  to paraview State file
+    writeAVIbatch([simulationFolder '/_RunAVI.bat'], simulationFolder, operatingPointsFile, pvPython, pythonPlotScript, paraviewStateFile);
+end
+
+

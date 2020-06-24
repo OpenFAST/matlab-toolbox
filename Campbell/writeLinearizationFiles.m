@@ -61,6 +61,7 @@ end
 CompInflow = GetFASTPar(FP,'CompInflow');
 CompServo  = GetFASTPar(FP,'CompServo') ;
 CompAero   = GetFASTPar(FP,'CompAero')  ;
+CompElast  = GetFASTPar(FP,'CompElast')  ;
 hasTrimFeature  = any(strcmp(FP.Label,'TrimGain'));
 if hasTrimFeature
     calcSteady  = lower(GetFASTPar(FP,'CalcSteady'));

@@ -12,8 +12,10 @@ addpath(genpath('C:/Work/FAST/matlab-toolbox'));
 %% Parameters
 
 % Main Flags
-writeFASTfilesAndRun = true; % write FAST input files and Run OpenFAST
-postproLin           = true;
+writeFSTfiles = logical(1); % write FAST input files 
+runFST        = logical(1); % run FAST simulations
+postproLin     = logical(1);
+writeVIZ       = logical(1;
 outputFormat='xls';
 
 FASTexe = '..\..\_ExampleData\5MW_Land_Lin\openfast2.3_x64s.exe'; % Adapt
@@ -52,19 +54,28 @@ OP.GeneratorTorque  = [0.606 ,  5.611  , 14.62   , 25.51  , 40.014 , 43.094 , 43
 writeOperatingPoints(operatingPointsFile, OP);
 %OP = readOperatingPoints(operatingPointsFile);
 
-%% --- Step 2: Write OpenFAST inputs files for each operating points and run OpenFAST
+%% --- Step 2a: Write OpenFAST inputs files for each operating points 
 % NOTE: 
-%      The function can take an operatingPointsFile or the structure OP above.
+%      The function can take an operatingPointsFile or the structure OP 
 %      Comment this section if the inputs files were already generated
 %      See writeLinearizationFiles for key/value arguments available.
 %      Consider writing your own batch file and parallize the computations of runFAST.
-if writeFASTfilesAndRun
-    FASTfilenames = writeLinearizationFiles(templateFstFile,simulationFolder,operatingPointsFile);
+if writeFSTfiles
+    FSTfilenames = writeLinearizationFiles(simulationFolder, operatingPointsFile,'writeVTKmodes',true);
 end
+%% --- Step 2b: run OpenFAST 
+% NOTE: 
+%       Potentially write a batch file for external run.
 %      Comment this section if the simulations were already run
-if writeFASTfilesAndRun
+%       Batch and commands are relative to the parent directory of the batch file.
+%       
+if runFST
     [FASTfilenames] = getFullFilenamesOP(simulationFolder, operatingPointsFile);
-    runFAST(FASTfilenames, FASTexe);
+    % --- Option 1: Batch
+    [FASTcommands, batchFilename, runFolder] = writeBatch([simulationFolder '/_RunFAST.bat'], FSTfilenames, FASTexe);
+    %runBatch(batchFilename, runFolder); 
+    % --- Option 2: direct calls
+    runFAST(FSTfilenames, FASTexe); 
 end
 
 %% --- Step 3: Run MBC, identify modes and generate XLS or CSV file
