@@ -11,14 +11,6 @@ if (exist ("OCTAVE_VERSION", "builtin") > 0)
     pkg load io  % for xlswrite
 end
 
-nOP=length(ModesData);
-
-%--- Write Cambell identification Table to separate sheet
-try
-    xlswrite(XLSname, ModesData.modeID_table, ModesData.modeID_name); % create a worksheet with these modes
-catch
-    disp('warning::could not write modes identification to Excel.')
-end
 
 % --- Write Operating points to seperate sheet
 try
@@ -27,8 +19,16 @@ catch
     disp('warning::could not write operating points table to Excel. ')
 end
 
+%--- Write Cambell identification Table to separate sheet
+try
+    xlswrite(XLSname, ModesData.modeID_table, ModesData.modeID_name); % create a worksheet with these modes
+catch
+    disp('warning::could not write modes identification to Excel.')
+end
+
+nOP=length(ModesData.ModesTable);
 %--- Write individual Linearization data to different spreadsheets
-for iOP =nOP:-1:1
+for iOP =1:nOP
     try
         xlswrite(XLSname, ModesData.ModesTable{iOP}, ModesData.ModesTable_names{iOP}); % create a worksheet with these modes
     catch
@@ -37,3 +37,4 @@ for iOP =nOP:-1:1
 end
 
 end
+
