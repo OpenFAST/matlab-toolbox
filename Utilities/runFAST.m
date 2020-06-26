@@ -38,13 +38,14 @@ end
 status=zeros(1,length(FASTfilenames));
 
 % --- Creating a list of commands
-commands=cell(1,length(inputFiles));
+commands=cell(1,length(FASTfilenames));
 for isim = 1:length(FASTfilenames)
     FASTfile = FASTfilenames{isim};
     if ispc()
         FASTfile = strrep(FASTfile,'/','\');
     end
     sCmd= [FASTexe ' ' opts.flag ' ' FASTfile];
+    commands{isim}=sCmd;
 end
 
 % --- Running

@@ -14,9 +14,9 @@ addpath(genpath('C:/Work/FAST/matlab-toolbox'));
 % Main Flags
 writeFSTfiles = logical(1); % write FAST input files 
 runFST        = logical(1); % run FAST simulations
-postproLin     = logical(1);
-writeVIZ       = logical(1;
-outputFormat='xls';
+postproLin    = logical(1);
+writeVIZ      = logical(1);
+outputFormat  ='xls';
 
 FASTexe = '..\..\_ExampleData\5MW_Land_Lin\openfast2.3_x64s.exe'; % Adapt
 
@@ -61,7 +61,7 @@ writeOperatingPoints(operatingPointsFile, OP);
 %      See writeLinearizationFiles for key/value arguments available.
 %      Consider writing your own batch file and parallize the computations of runFAST.
 if writeFSTfiles
-    FSTfilenames = writeLinearizationFiles(simulationFolder, operatingPointsFile,'writeVTKmodes',true);
+    FSTfilenames = writeLinearizationFiles(templateFstFile, simulationFolder, operatingPointsFile);
 end
 %% --- Step 2b: run OpenFAST 
 % NOTE: 
