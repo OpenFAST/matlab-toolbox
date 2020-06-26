@@ -51,13 +51,13 @@ for iOP = 1:nOP
         FileNames{iT}=sprintf('%s.%d.lin',fullbase,iT);
         if exist(FileNames{iT}, 'file')~=2
             nPerPeriod=iT-1;
-            disp(['warning::' sprintf('Linearization data %d missing for base %s',iT, base)]);
+            disp(['warning::' sprintf('Linearization data %d missing for base %s',iT, fbase)]);
             break
         end
     end
     fprintf('(%d)\n',nPerPeriod);
     if nPerPeriod<=0
-        disp(['warning::' sprintf('No linearization data for base %s',base)]);
+        disp(['warning::' sprintf('No linearization data for base %s',fbase)]);
         continue
     end
     FileNames=FileNames(1:nPerPeriod);

@@ -1,28 +1,31 @@
 function OP = readOperatingPoints(filename, delim)
     % Reads an "Operating Point" delimited file to a structure. 
     %
-    % The first line should be a header line defining the column names
+    % FILE SPECIFICATION
+    %  - HEADER: 
+    %    The first line should be a header line defining the column names
+    %    An example of header line with the units that are assumed by this script:
+    %       WindSpeed_[m/s], RotorSpeed_[rpm], PitchAngle_[deg], GeneratorTorque_[Nm], Filename_[-]
+    %    The header columns will become field names after the following manipulations:
+    %     - units marked with () or [] are stripped
+    %     - spaces are removed
+    %     - replacements are made to ensure standardization.
     %
-    % An example of header line with the units that are assumed by this script:
-    %    WindSpeed_[m/s], RotSpeed_[rpm], PitchAngle_[deg], GeneratorTorque_[Nm], Filename_[-]
+    %  - COLUMNS: 
+    %    The file should at the minimum contain the "RotorSpeed" column
+    %    Column order does not matter.
+    %    Column `WindSpeed` is necessary for linearization with AeroDyn and InflowWind (most situation).
+    %    Column `GeneratorTorque` is only necessary for linearization with Controller.
+    %    Column with all numerical values will become numerical array
+    %    Column that contains strings will be stored as cell arrays
+    %    Column `Filename` can be provided, with a list of "fst" files (without folder)
+    %            for custom filenaming (not recommended)
     % 
-    % The file should at the minimum contain the rotor speed or the wind speed.
-    % The field "Filename" is added to the structure if this column is not provided.
-    %
-    % The header columns will become field names after the following manipulations:
-    %  - units () [] are stripped
-    %  - spaces  are removed
-    %  - replacements are made to ensure standardization.
-    % 
-    % Columns that are made of numerical values only, will become regular array
-    % Columns that contain strings will be stored as cell arrays
-    % 
-    %
     % INPUTS
     %  - filename: CSV filename (string)
     %
     % OPTIONAL INPUTS
-    %  - delim: delimiter for csv file
+    %  - delim: delimiter for csv file. Default: ','
     %
     % OUTPUTS:
     %  - OP : structure with standardized fields:

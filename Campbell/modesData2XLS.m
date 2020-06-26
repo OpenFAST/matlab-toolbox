@@ -22,6 +22,7 @@ end
 %--- Write Cambell identification Table to separate sheet
 try
     xlswrite(XLSname, ModesData.modeID_table, ModesData.modeID_name); % create a worksheet with these modes
+%     xlswrite(XLSname, ModesData.modeID_table, 'ModesID'); % create a worksheet with these modes
 catch
     disp('warning::could not write modes identification to Excel.')
 end

@@ -109,7 +109,7 @@ False         Furling     - Read in additional model properties for furling turb
          20   TwrNodes    - Number of tower nodes used for analysis (-)
 "../5MW_Baseline/NRELOffshrBsline5MW_Onshore_ElastoDyn_Tower.dat"    TwrFile     - Name of file containing tower properties (quoted string)
 ---------------------- OUTPUT --------------------------------------------------
-True          SumPrint    - Print summary data to "<RootName>.sum" (flag)
+False          SumPrint    - Print summary data to "<RootName>.sum" (flag)
           1   OutFile     - Switch to determine where output will be placed: {1: in module output file only; 2: in glue code output file only; 3: both} (currently unused)
 True          TabDelim    - Use tab delimiters in text tabular output file? (flag) (currently unused)
 "ES10.3E2"    OutFmt      - Format used for text tabular output (except time).  Resulting field should be 10 characters. (quoted string) (currently unused)
@@ -120,24 +120,30 @@ True          TabDelim    - Use tab delimiters in text tabular output file? (fla
           3   NBlGages    - Number of blade nodes that have strain gages for output [0 to 9] (-)
           5,          9,         13    BldGagNd    - List of blade nodes that have strain gages [1 to BldNodes] (-) [unused if NBlGages=0]
               OutList     - The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
-"OoPDefl1"                - Blade 1 out-of-plane and in-plane deflections and tip twist
-"IPDefl1"                 - Blade 1 out-of-plane and in-plane deflections and tip twist
-"TwstDefl1"               - Blade 1 out-of-plane and in-plane deflections and tip twist
-"BldPitch1"               - Blade 1 pitch angle
 "Azimuth"                 - Blade 1 azimuth angle
 "RotSpeed"                - Low-speed shaft and high-speed shaft speeds
 "GenSpeed"                - Low-speed shaft and high-speed shaft speeds
 "TTDspFA"                 - Tower fore-aft and side-to-side displacements and top twist
 "TTDspSS"                 - Tower fore-aft and side-to-side displacements and top twist
 "TTDspTwst"               - Tower fore-aft and side-to-side displacements and top twist
-"Spn2MLxb1"               - Blade 1 local edgewise and flapwise bending moments at span station 2 (approx. 50% span)
-"Spn2MLyb1"               - Blade 1 local edgewise and flapwise bending moments at span station 2 (approx. 50% span)
 "RootFxb1"                - Out-of-plane shear, in-plane shear, and axial forces at the root of blade 1
 "RootFyb1"                - Out-of-plane shear, in-plane shear, and axial forces at the root of blade 1
 "RootFzb1"                - Out-of-plane shear, in-plane shear, and axial forces at the root of blade 1
 "RootMxb1"                - In-plane bending, out-of-plane bending, and pitching moments at the root of blade 1
 "RootMyb1"                - In-plane bending, out-of-plane bending, and pitching moments at the root of blade 1
 "RootMzb1"                - In-plane bending, out-of-plane bending, and pitching moments at the root of blade 1
+"RootFxb2"                - Out-of-plane shear, in-plane shear, and axial forces at the root of blade 1
+"RootFyb2"                - Out-of-plane shear, in-plane shear, and axial forces at the root of blade 1
+"RootFzb2"                - Out-of-plane shear, in-plane shear, and axial forces at the root of blade 1
+"RootMxb2"                - In-plane bending, out-of-plane bending, and pitching moments at the root of blade 1
+"RootMyb2"                - In-plane bending, out-of-plane bending, and pitching moments at the root of blade 1
+"RootMzb2"                - In-plane bending, out-of-plane bending, and pitching moments at the root of blade 1
+"RootFxb3"                - Out-of-plane shear, in-plane shear, and axial forces at the root of blade 1
+"RootFyb3"                - Out-of-plane shear, in-plane shear, and axial forces at the root of blade 1
+"RootFzb3"                - Out-of-plane shear, in-plane shear, and axial forces at the root of blade 1
+"RootMxb3"                - In-plane bending, out-of-plane bending, and pitching moments at the root of blade 1
+"RootMyb3"                - In-plane bending, out-of-plane bending, and pitching moments at the root of blade 1
+"RootMzb3"                - In-plane bending, out-of-plane bending, and pitching moments at the root of blade 1
 "RotTorq"                 - Rotor torque and low-speed shaft 0- and 90-bending moments at the main bearing
 "LSSGagMya"               - Rotor torque and low-speed shaft 0- and 90-bending moments at the main bearing
 "LSSGagMza"               - Rotor torque and low-speed shaft 0- and 90-bending moments at the main bearing

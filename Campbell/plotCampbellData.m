@@ -1,4 +1,4 @@
-function [num,txt,CampbellPlotData] = Plot_CampbellData(xlsx_file,SheetName,TitleText)
+function [num,txt,CampbellPlotData] = plotCampbellData(xlsx_file,SheetName,TitleText)
 %% [num,txt,CampbellPlotData] = Plot_CampbellData(xlsx_file,SheetName,TitleText)
 % Required Input:
 %  xlsx_file        - name of the Excel file with Campbell data in it. This
@@ -60,7 +60,7 @@ if nargin < 3
     TitleText = 'Campbell Diagram';
     
     if nargin < 2
-        SheetName = ''; %default to the first sheet in the Excel file
+        SheetName = 'ModesID'; %default to the first sheet in the Excel file
     end
 end
 ReadFromXLS = true;
@@ -72,6 +72,11 @@ PlotRevs = false;
 FreqCutoff = 300; %Hz
 
 if ReadFromXLS
+    if (exist ("OCTAVE_VERSION", "builtin") > 0)
+        pkg load io  % for xlswrite
+    end
+
+
     [num,txt] = xlsread(xlsx_file,SheetName);
 
     % remove table name (so indices between num and txt match better)

@@ -8,7 +8,7 @@ False         Echo               - Echo the input to "<rootname>.AD.ech"?  (flag
           1   TwrPotent          - Type tower influence on wind based on potential flow around the tower (switch) {0=none, 1=baseline potential flow, 2=potential flow with Bak correction}
 False         TwrShadow          - Calculate tower influence on wind based on downstream tower shadow? (flag)
 True          TwrAero            - Calculate tower aerodynamic loads? (flag)
-False         FrozenWake         - Assume frozen wake during linearization? (flag) [used only when WakeMod=1 and when linearizing]
+True          FrozenWake         - Assume frozen wake during linearization? (flag) [used only when WakeMod=1 and when linearizing]
 False         CavitCheck         - Perform cavitation check? (flag) [AFAeroMod must be 1 when CavitCheck=true]
 ======  Environmental Conditions  ===================================================================
       1.225   AirDens            - Air density (kg/m^3)
@@ -71,11 +71,13 @@ TwrElev        TwrDiam        TwrCd
 8.5268000E+01  3.8700000E+00  1.0000000E+00  
 8.7600000E+01  3.8700000E+00  1.0000000E+00  
 ======  Outputs  ====================================================================================
-True          SumPrint            - Generate a summary file listing input options and interpolated properties to "<rootname>.AD.sum"?  (flag)
+False          SumPrint            - Generate a summary file listing input options and interpolated properties to "<rootname>.AD.sum"?  (flag)
           0   NBlOuts             - Number of blade node outputs [0 - 9] (-)
           1,          9,         19    BlOutNd             - Blade nodes whose values will be output  (-)
           0   NTwOuts             - Number of tower node outputs [0 - 9]  (-)
           1,          2,          6    TwOutNd             - Tower nodes whose values will be output  (-)
                    OutList             - The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
+"RtAeroCp"
+"RtAeroCt"
 END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
 ---------------------------------------------------------------------------------------

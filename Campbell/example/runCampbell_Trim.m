@@ -49,7 +49,7 @@ operatingPointsFile = 'LinearizationPoints.csv';
 OP=struct();
 OP.WindSpeed        = [3     ,  5      , 7       , 9      , 11     , 13     , 15     , 17     , 19     , 21     , 23     , 25   ]; %(m/sec)
 OP.RotorSpeed       = [6.972 ,  7.506  , 8.469   , 10.296 , 11.89  , 12.1   , 12.1   , 12.1   , 12.1   , 12.1   , 12.1   , 12.1 ]; %(rpm)
-OP.BladePitch       = [0     ,  0      , 0       , 0      , 0      , 6.602  , 10.45  , 13.536 , 16.226 , 18.699 , 21.177 , 23.469]; % (deg)
+OP.PitchAngle       = [0     ,  0      , 0       , 0      , 0      , 6.602  , 10.45  , 13.536 , 16.226 , 18.699 , 21.177 , 23.469]; % (deg)
 OP.GeneratorTorque  = [0.606 ,  5.611  , 14.62   , 25.51  , 40.014 , 43.094 , 43.094 , 43.094 , 43.094 , 43.094 , 43.094 , 43.094]*1000; %(N-m)
 writeOperatingPoints(operatingPointsFile, OP);
 %OP = readOperatingPoints(operatingPointsFile);

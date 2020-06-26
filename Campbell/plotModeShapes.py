@@ -2,6 +2,7 @@ from paraview.simple import *
 import os 
 import sys
 import glob
+import numpy as np
 
 if len(sys.argv) not in [3,4]:
     print('Error: Not enough argument provided.')
@@ -29,8 +30,10 @@ else:
 
 # --- Script Parameters
 Suffix = 'LinTime1.' # Depends on viz option VTKLinTim= 1 or 2
-fps    =  5          # frames per second (rate to save in the .avi file)
+fps    =  3          # frames per second (rate to save in the .avi file)
 nModes = 15           # number of modes to visualize
+
+vFPS= np.linspace(5,1,nModes).astype(int)
 
 # --- Derived params
 parentDir   = os.path.dirname(RootPath)
@@ -122,7 +125,7 @@ for iMode in range(nModes):  # iMode starts at 0, so add 1
       
       animFile= os.path.join(OutputDir, rootSim+'.Mode{:d}.avi'.format(iMode+1))
       print('Saving animation... ',animFile, end='')
-      WriteAnimation(animFile, viewOrLayout=layout, FrameRate=fps, ImageResolution=(1544,784), Compression=True)#  ImageResolution=(1544,784) 
+      WriteAnimation(animFile, viewOrLayout=layout, FrameRate=vFPS[iMode], ImageResolution=(1544,784), Compression=True)#  ImageResolution=(1544,784) 
 #      SaveAnimation(rootMode + 'avi', viewOrLayout=layout, FrameRate=fps, ImageResolution=(1544,784) ) 
       # this .pvsm file defaults to (2734,1178) without ImageResolution arguments, resulting in a bunch of warnings
       # For some reason, ParaView is ignoring the FrameRate argument and always uses a value of 1.

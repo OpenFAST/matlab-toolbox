@@ -74,14 +74,5 @@ else
     outputFiles = {XLSname};
 end
 
-%% Plotting
-% % Suffix='_NewLin'
-% % wkSheetName = 'WS_ModesID';
-% % outbase = ['_Outputs/NREL_OpenFAST_Phase4.3_BD' Suffix];
-% % XLSname = [outbase '_CampbellData.xlsx'];
-% % [num,txt,CampbellPlotData] = Plot_CampbellData(XLSname,wkSheetName);
-% 
-%% Storing to simple matrices
-
 % Printing a banner since this might be run in terminal
 disp('--------------- END of MATLAB function postproLinearization -------------')

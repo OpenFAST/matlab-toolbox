@@ -35,10 +35,10 @@ opts.simTime           = NaN  ; % time in seconds that the first linearization o
 opts.TrimGainPitch     = 0.001; % [only for OpenFAST>2.3] Gain for Pitch trim (done around Max Torque)
 opts.TrimGainGenTorque = 300  ; % [only for OpenFAST>2.3] Gain for GenTrq trim (done below Max Torque)
 opts.writeVTKmodes     = false; % [only for OpenFAST>2.3] Export VTK for mode shape visualizations
-opts.CompAero          = NaN  ; % Turn Aero   compputation on/off, overrides template file
+opts.CompAero          = NaN  ; % Turn Aero   computation on/off, overrides template file
 opts.CompInflow        = NaN  ; % Turn Inflow computation on/off, overrides template file
-opts.CompServo         = NaN  ; % Turn Servo  compuation on/off, overrides template file
-opts.NLinTimes         = 36   ; % Number of linearization times
+opts.CompServo         = NaN  ; % Turn Servo  computation on/off, overrides template file
+opts.NLinTimes         = 36   ; % Number of linearization times (along one rotation), typically 12 or 36
 % Values input by users % NOTE: inputParser not available in Octave
 if nargin >=4
     for iOpts = 1:length(OptsFields)
@@ -172,9 +172,9 @@ end
 
 
 % --- 
-fprintf('Points:  %d\n',OP.nOP)
+fprintf('Points:  %d operating points\n',OP.nOP)
 fprintf('Folder:  %s\n',simulationFolder)
-fprintf('Writing input files...\n')
+fprintf('Writing OpenFAST input files...\n')
 for iOP = OP.nOP:-1:1
 
     % --- Filenames and fullpaths for this operating point input files
