@@ -14,12 +14,12 @@ if ~exist('nFreqOut','var'); nFreqOut=20; end;
 
 nOP = length(CampbellData);
 
-nModesKeep=min([length(CampbellData{1}.NaturalFreq_Hz), 20]);
 MFreq = zeros(nModesKeep,nOP);
 MDamp = zeros(nModesKeep,nOP);
 MDesc = cell(nModesKeep ,nOP) ;
 for iOP = 1:nOP
     CD=CampbellData{iOP};
+    nModesKeep=min([length(CD.Modes), 20]);
     for i = 1:nModesKeep
         DescCat = ShortModeDescr(CD,i);
         %fprintf('%8.3f ; %7.4f ; %s\n',CD.NaturalFreq_Hz(i),CD.DampingRatio(i),DescCat(1:min(120,length(DescCat))));
