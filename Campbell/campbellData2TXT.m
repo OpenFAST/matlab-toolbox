@@ -11,15 +11,17 @@ function campbellData2TXT(TxtFilename, CampbellData, nFreqOut )
 %
 %
 if ~exist('nFreqOut','var'); nFreqOut=20; end;
+nModesMax=20;
 
 nOP = length(CampbellData);
 
-MFreq = zeros(nModesKeep,nOP);
-MDamp = zeros(nModesKeep,nOP);
-MDesc = cell(nModesKeep ,nOP) ;
+
+MFreq = zeros(nModesMax,nOP);
+MDamp = zeros(nModesMax,nOP);
+MDesc = cell( nModesMax,nOP) ;
 for iOP = 1:nOP
     CD=CampbellData{iOP};
-    nModesKeep=min([length(CD.Modes), 20]);
+    nModesKeep=min([length(CD.Modes), nModesMax]);
     for i = 1:nModesKeep
         DescCat = ShortModeDescr(CD,i);
         %fprintf('%8.3f ; %7.4f ; %s\n',CD.NaturalFreq_Hz(i),CD.DampingRatio(i),DescCat(1:min(120,length(DescCat))));

@@ -390,7 +390,7 @@ methods(Static=true);
                 end
             end
         end
-        if (exist ("OCTAVE_VERSION", "builtin") > 0)
+        if (exist ('OCTAVE_VERSION', 'builtin') > 0)
             comps = strsplit(p,good_slash);
         else
             comps = regexp(p, good_slash, 'split');
@@ -438,7 +438,7 @@ methods(Static=true);
         if ~is_unc
             [prefix, rest] = os_path.splitdrive(pabs);
 
-            if (exist ("OCTAVE_VERSION", "builtin") > 0)
+            if (exist ('OCTAVE_VERSION', 'builtin') > 0)
                 rest=strsplit(rest,'\');
             else
                 rest = regexp(rest, '\', 'split');

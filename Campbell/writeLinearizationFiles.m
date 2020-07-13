@@ -121,10 +121,10 @@ if opts.CompAero
     if length(paramAD.Label)==0
         error('Template AeroDyn file couldnt be read, but CompAero is >0: %s',templateFilenameAD)
     end
-    if GetFASTPar(paramAD,'WakeMod')!=1 
+    if GetFASTPar(paramAD,'WakeMod')~=1 
         warning('WakeMod should be 1 for now when using linearization')
     end
-    if GetFASTPar(paramAD,'AFAeroMod')!=1 
+    if GetFASTPar(paramAD,'AFAeroMod')~=1 
         warning('AFAeroMod should be 1 for now when using linearization')
     end
     FrozenWake=lower(GetFASTPar(paramAD,'FrozenWake'));
