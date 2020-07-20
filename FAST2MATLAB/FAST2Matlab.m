@@ -102,7 +102,7 @@ while true %loop until discovering Outlist or end of file, than break
         break
     end
     
-        % Check to see if the value is Outlist
+        % Check to see if the value is Outlist or OUTPUTS (for MoorDyn)
 
     %if ~isempty(strfind(upper(line),upper('OutList'))) 
     if ~isempty(strfind( upper(line), upper('OutList') )) || contains(upper(line),upper('OUTPUTS'))
