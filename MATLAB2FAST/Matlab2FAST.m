@@ -58,7 +58,7 @@ printTableComments = 0;
 NextMatrix = '';
 isInteger = false;
 
-%loop through the template up until OUTLIST or end of file
+%loop through the template up until OUTLIST, OUTPUTS or end of file
 while true
     
     line = fgets(fidIN); %get the next line from the template
@@ -74,19 +74,19 @@ while true
         HaveNewLineChar = true;
     end
     
-    if contains(upper(line),upper('OutList'))        
+    if contains(upper(line),upper('OutList')) || contains(upper(line),upper('OUTPUTS'))
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
         [value2, ~, ~, nextindex] = sscanf(line,'%s', 1); 
-        if strcmpi(value2,'OutList')
+        if strcmpi(value2,'OutList') || strcmpi(value2,'OUTPUTS')
             ContainsOutList = true;
             fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
             break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
         else
             % try the second
             [value2] = sscanf(line(nextindex+1:end),'%s', 1); 
-            if strcmpi(value2,'OutList')
+            if strcmpi(value2,'OutList') || strcmpi(value2,'OUTPUTS')
                 ContainsOutList = true;
                 fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
                 break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
