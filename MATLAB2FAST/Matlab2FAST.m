@@ -235,6 +235,49 @@ while true
             
         elseif strcmpi(label,'NOPRINT') || strcmpi(label,'PRINT')
             continue;  % this comes from AeroDyn BldNodes table                                    
+            
+        elseif strcmpi(label,'NTypes') %we've reached MoorDyn parameter NTypes, so we save its value to be able to skip the table content from the template file when writing the new file
+            NTypes = value;        
+        elseif strcmpi(value,'"Name"') %we've reached the MoorDyn line types table (and we think it's a string value so it's in quotes)
+            if ~isfield(FastPar,'LineTypes')
+                disp( 'WARNING: MoorDyn line types table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.LineTypes, FastPar.LineTypesHdr, newline, 1); %write the MoorDyn line types table 
+                for k = 1:NTypes
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end                
+                continue; %let's continue reading the template file            
+            end   
+        elseif strcmpi(label,'NConnects') %we've reached MoorDyn parameter NConnects, so we save its value to be able to skip the table content from the template file when writing the new file
+            NConnects = value;
+        elseif strcmpi(value,'"Node"') %we've reached the MoorDyn connection properties table (and we think it's a string value so it's in quotes)
+            if ~isfield(FastPar,'ConProp')
+                disp( 'WARNING: MoorDyn connection properties table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                IntegerCols = {'Node'};
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.ConProp, FastPar.ConPropHdr, newline, 1, IntegerCols); %write the MoorDyn connection properties table
+                for k = 1:NConnects
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end
+                continue; %let's continue reading the template file            
+            end   
+        elseif strcmpi(label,'NLines') %we've reached MoorDyn parameter NLines, so we save its value to be able to skip the table content from the template file when writing the new file
+            NLines = value;               
+        elseif strcmpi(value,'"Line"') %we've reached the MoorDyn line properties table (and we think it's a string value so it's in quotes)
+            if ~isfield(FastPar,'LineProp')
+                disp( 'WARNING: MoorDyn line properties table not found in the FAST data structure.' );
+                printTable = true;
+            else
+                IntegerCols = {'Line','NumSegs','NodeAnch','NodeFair'};
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.LineProp, FastPar.LinePropHdr, newline, 1, IntegerCols); %write the MoorDyn line properties table
+                for k = 1:NLines
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end                
+                continue; %let's continue reading the template file            
+            end               
+            
         else
 
             line = GetLineToWrite( line, FastPar, label, TemplateFile, value );
