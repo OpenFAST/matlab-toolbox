@@ -105,18 +105,18 @@ while true %loop until discovering Outlist or end of file, than break
         % Check to see if the value is Outlist
 
     %if ~isempty(strfind(upper(line),upper('OutList'))) 
-    if ~isempty(strfind( upper(line), upper('OutList') )) 
+    if ~isempty(strfind( upper(line), upper('OutList') )) || contains(upper(line),upper('OUTPUTS'))
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
         [value, ~, ~, nextindex] = sscanf(line,'%s', 1); 
-        if strcmpi(value,'OutList')
+        if strcmpi(value,'OutList') || strcmpi(value,'OUTPUTS')
             [DataOut.OutList DataOut.OutListComments] = ParseFASTOutList(fid);
             break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
         else
             % try the second
             [value] = sscanf(line(nextindex+1:end),'%s', 1); 
-            if strcmpi(value,'OutList')
+            if strcmpi(value,'OutList') || strcmpi(value,'OUTPUTS')
                 [DataOut.OutList DataOut.OutListComments] = ParseFASTOutList(fid);
                 break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
             end
