@@ -1,4 +1,4 @@
-function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
+function DataOut = FAST2Matlab(FST_file,hdrLines,DataOut)
 %% Fast2Matlab
 % DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 % Function for reading FAST input files in to a MATLAB struct.
@@ -202,6 +202,20 @@ while true %loop until discovering Outlist or end of file, than break
             line = fgetl(fid);  % the next line is the header, and it may have comments
             [DataOut.profile] = ParseFASTNumTable(line, fid, NumUSRz, 2 );
             continue; %let's continue reading the file
+            
+        elseif strcmpi(value,'"Name"') %we've reached the MoorDyn line types table (and we think it's a string value so it's in quotes)
+            NTypes = GetFASTPar(DataOut,'NTypes');  %get number of LineTypes
+            [DataOut.LineTypes, DataOut.LineTypesHdr] = ParseFASTFmtTable( line, fid, NTypes, true ); %parse the MoorDyn line types table
+            continue;   
+        elseif strcmpi(value,'"Node"') %we've reached the MoorDyn connection properties table (and we think it's a string value so it's in quotes)
+            NConnects = GetFASTPar(DataOut,'NConnects'); %get number of connections (incl. anchors and fairleads)
+            [DataOut.ConProp, DataOut.ConPropHdr] = ParseFASTFmtTable( line, fid, NConnects, true ); %parse the MoorDyn connection properties table
+            continue;   
+        elseif strcmpi(value,'"Line"') %we've reached the MoorDyn line properties table (and we think it's a string value so it's in quotes)
+            NLines = GetFASTPar(DataOut,'NLines'); %get number of line objects  
+            [DataOut.LineProp, DataOut.LinePropHdr] = ParseFASTFmtTable( line, fid, NLines, true ); %parse the MoorDyn line properties table
+            continue;               
+            
         else         
             
             if NextIsMatrix > 0
