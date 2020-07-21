@@ -421,8 +421,18 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
         return
     end
     
-    colFmtR='%11.7E  ';
-    colFmtI='%9i      ';
+    if strcmpi(TemplateHeaders{1}, 'Name') || strcmpi(TemplateHeaders{1}, 'Node') || strcmpi(TemplateHeaders{1}, 'Line')
+        % We are dealing with a MoorDyn input file, so let's adjust the
+        % format specifier to get a nice readable table.
+        colFmtR='%9.3f ';
+        colFmtI='%- 7i';
+        colFmtS='%-6s ';
+    else
+        colFmtR='%11.7E  ';
+        colFmtI='%9i      ';
+        colFmtS='%s ';
+    end
+    
     if nargin < 8
         IntegerCols={};
     end
@@ -470,7 +480,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
                         fmt = colFmtR;
                     end
                 else                    
-                    fmt = '%s ';
+                    fmt = colFmtS;
                 end
                 fprintf(fidOUT, fmt, Table{i,j} );
             end
