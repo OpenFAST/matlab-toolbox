@@ -1,4 +1,4 @@
-function DataOut = FAST2Matlab(FST_file,hdrLines,DataOut)
+function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %% Fast2Matlab
 % DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 % Function for reading FAST input files in to a MATLAB struct.
