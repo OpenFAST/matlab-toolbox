@@ -424,9 +424,9 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
     if strcmpi(TemplateHeaders{1}, 'Name') || strcmpi(TemplateHeaders{1}, 'Node') || strcmpi(TemplateHeaders{1}, 'Line')
         % We are dealing with a MoorDyn input file, so let's adjust the
         % format specifier to get a nice readable table.
-        colFmtR='%9.3f ';
-        colFmtI='%- 7i';
-        colFmtS='%-6s ';
+        colFmtR='%-8G ';
+        colFmtI='  %-5i ';
+        colFmtS='%-9s ';
     else
         colFmtR='%11.7E  ';
         colFmtI='%9i      ';
