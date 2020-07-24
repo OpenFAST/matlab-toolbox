@@ -105,7 +105,7 @@ while true %loop until discovering Outlist or end of file, than break
         % Check to see if the value is Outlist or OUTPUTS (for MoorDyn)
 
     %if ~isempty(strfind(upper(line),upper('OutList'))) 
-    if ~isempty(strfind( upper(line), upper('OutList') )) || contains(upper(line),upper('OUTPUTS'))
+    if ~isempty(strfind( upper(line), upper('OutList') )) || (contains(upper(line),upper('OUTPUTS')) && isfield(DataOut,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.

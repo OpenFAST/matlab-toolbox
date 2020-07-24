@@ -58,7 +58,7 @@ printTableComments = 0;
 NextMatrix = '';
 isInteger = false;
 
-%loop through the template up until OUTLIST, OUTPUTS or end of file
+%loop through the template up until OUTLIST, OUTPUTS (for MoorDyn files) or end of file
 while true
     
     line = fgets(fidIN); %get the next line from the template
@@ -74,7 +74,7 @@ while true
         HaveNewLineChar = true;
     end
     
-    if contains(upper(line),upper('OutList')) || contains(upper(line),upper('OUTPUTS'))
+    if contains(upper(line),upper('OutList')) || (contains(upper(line),upper('OUTPUTS')) && isfield(FastPar,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
