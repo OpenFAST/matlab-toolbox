@@ -10,6 +10,7 @@
 % Paul Fleming, JUNE 2011
 % Using code copied from functions written by Knud Kragh
 % Modified by Bonnie Jonkman, Feb 2013
+% Modified by Paul Schünemann, July 2020 (to allow us to write MoorDyn files, too)
 % Note: the template must not contain the string "OutList" anywhere
 %  except for the actual "OutList" output parameter lists.
 

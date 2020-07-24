@@ -47,6 +47,15 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.kpHdr            A cell array of headers corresponding to the kp table
 %
 %.profile          A table of profile values defined in TurbSim
+%
+%.LineTypes        A matrix (cell array) of line types and its properties with columns .LineTypesHdr
+%.LineTypesHdr     A cell array of headers corresponding to the LineTypes table
+%
+%.ConProp          A matrix (cell array) of connection properties with columns .ConPropHdr
+%.ConPropHdr       A cell array of headers corresponding to the ConProp table
+%
+%.LineProp         A matrix (cell array) of blade properties with columns .LinePropHdr
+%.LinePropHdr      A cell array of headers corresponding to the LineProp table
 %--------------------------------------------------------------------------
 
 %These arrays are extracted from the FAST input file
@@ -59,6 +68,7 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 % Modified by Paul Fleming, JUNE 2011
 % Modified by Bonnie Jonkman, February 2013 (to allow us to read the 
 % platform file, too)
+% Modified by Paul Schünemann, July 2020 (to allow us to read MoorDyn files, too)
 %%
 if nargin < 2
     hdrLines = 0;
