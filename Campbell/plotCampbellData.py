@@ -63,3 +63,4 @@ figName = os.path.join(baseDir,basename+'_'+ws_or_rpm+'.png')
 print('Figure saved to:',figName)
 fig.savefig(figName, dpi=300)
 
+#plt.show()

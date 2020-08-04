@@ -11,7 +11,7 @@ function filenames = defaultFilenames(OP, rpmSweep)
 
 % --- optional arguments
 if ~exist('rpmSweep','var'); 
-    rpmSweep = isfield(OP,'WindSpeed');
+    rpmSweep = ~isfield(OP,'WindSpeed');
 end
 
 

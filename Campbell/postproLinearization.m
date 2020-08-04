@@ -48,7 +48,6 @@ if ~isstruct(OP_file_or_struct)
     fprintf('OP file:    %s\n',OP_file_or_struct);
 end
 fprintf('Folder:     %s\n',folder);
-fprintf('OutBase:    %s\n',outbase);
 
 %% --- Extract operating points to know FAST filenames
 [FastFiles, OP] = getFullFilenamesOP(folder, OP_file_or_struct);
@@ -61,6 +60,7 @@ else
     CampbellData = getCampbellData(FastFiles);
 end
 campbellData2TXT([outbase '_Summary.txt'],CampbellData)
+fprintf('Written:    %s\n',[outbase '_Summary.txt']);
 
 %% --- Match mode names / identify modes
 [ModesData] = identifyModes(CampbellData);
@@ -68,10 +68,13 @@ campbellData2TXT([outbase '_Summary.txt'],CampbellData)
 %% --- Write tables to csv or Excel
 if isequal(lower(outputFormat),'csv')
     outputFiles = modesData2CSV(outbase, ModesData);
+    fprintf('Written:    %s\n',[outbase '*.csv']);
 else
     XLSname = [outbase '_DataSummary.xlsx'];
     modesData2XLS(XLSname, ModesData);
     outputFiles = {XLSname};
+    fprintf('Written:    %s\n',XLSname);
+
 end
 
 % Printing a banner since this might be run in terminal
