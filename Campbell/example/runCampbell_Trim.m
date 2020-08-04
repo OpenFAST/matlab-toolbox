@@ -1,8 +1,10 @@
 %% Documentation   
 % Example script to create a Campbell diagram with OpenFAST
 %
-% NOTE: this script is only an example. 
-% Adapt this scripts to your need, by calling the different subfunctions presented.
+% NOTE: This script is only an example. 
+%       The example data is suitable for the dev branch of OpenFAST 2.3 only (August 2020).
+%     
+% Adapt this script to your need, by calling the different subfunctions presented.
 %
 %% Initialization
 clear all; close all; clc; 

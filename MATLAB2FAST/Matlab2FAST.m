@@ -75,7 +75,7 @@ while true
         HaveNewLineChar = true;
     end
     
-    if containstring(upper(line),upper('OutList')) || (containsring(upper(line),upper('OUTPUTS')) && isfield(FastPar,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
+    if containstring(upper(line),upper('OutList')) || (containstring(upper(line),upper('OUTPUTS')) && isfield(FastPar,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
@@ -572,11 +572,11 @@ function [newline] = getNewlineChar(line)
     return;
 end
 
-function containstring(str, pattern)
+function b=containstring(str, pattern)
     % function contains not available in Octave..
     if (exist ("OCTAVE_VERSION", "builtin") > 0)
-        return ~isempty(strfind(str,pattern))
+        b=~isempty(strfind(str,pattern));
     else
-        return contains(str,pattern)
+        b=contains(str,pattern);
     end
 end

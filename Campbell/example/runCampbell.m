@@ -1,8 +1,10 @@
 %% Documentation   
 % Example script to create a Campbell diagram with OpenFAST
 %
-% NOTE: this script is only an example.
-% Adapt this scripts to your need, by calling the different subfunctions presented.
+% NOTE: This script is only an example.
+%       The example data is suitable for OpenFAST 2.3 only.
+%
+% Adapt this script to your need, by calling the different subfunctions presented.
 %
 %% Initialization
 clear all; close all; clc; 
@@ -33,6 +35,7 @@ simulationFolder    = '../../_ExampleData/5MW_Land_Lin/';
 
 operatingPointsFile = 'LinearizationPoints_NoServo.csv'; 
 %      File defining the operating conditions for linearization (e.g. RotorSpeeed, WindSpeed).
+%      If special filenames are needed, the filenames can be defined in this file as well.
 %      See function `readOperatingPoints` for more info.
 %      You can define this data using a matlab structure, but an input file is recommended.
 
@@ -47,7 +50,7 @@ operatingPointsFile = 'LinearizationPoints_NoServo.csv';
 %      `simTime` needs to be large enough for a periodic equilibrium to be reached
 %      (trim option will be available in a next release of OpenFAST)
 if writeFSTfiles
-    FSTfilenames = writeLinearizationFiles(templateFstFile, simulationFolder, operatingPointsFile, 'simTime',300,'NLinTimes',12); % NOTE: simTime and NLinTimes given as examples
+    FSTfilenames = writeLinearizationFiles(templateFstFile, simulationFolder, operatingPointsFile, 'simTime',500,'NLinTimes',36); % NOTE: simTime and NLinTimes given as examples
 end
 %% --- Step 2: run OpenFAST 
 % NOTE: 
