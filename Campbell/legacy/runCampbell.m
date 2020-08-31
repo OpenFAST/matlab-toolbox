@@ -4,6 +4,17 @@
 % (c) 2018 Envision Energy, USA
 %--------------------------------------------------------------------------
 
+%% ED 5MW values:
+WindSpeedAry =[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]; %(m/sec)
+RotSpeedAry = [6.972, 7.183, 7.506, 7.942, 8.469, 9.156, 10.296, 11.431, 11.89, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1]; %(rpm)
+BldPitch1   = [0, 0, 0, 0, 0, 0, 0, 0, 0, 3.823, 6.602, 8.668, 10.45, 12.055, 13.536, 14.92, 16.226, 17.473, 18.699, 19.941, 21.177, 22.347, 23.469]; % (deg)
+GenTqAry    = [0.606, 2.58, 5.611, 9.686, 14.62, 20.174, 25.51, 31.455, 40.014, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094]*1000; %(N-m)
+
+SimTime   = 5600; % time in seconds that the first linearization output will happen (maximum time to converge to steady-state solution)
+RatedWindSpeed = 11.4;
+
+
+
 %% let's get the directory that contains the template files
 templateDir = [ '..\..\ConvertFASTversions\TemplateFiles'];
 
@@ -68,14 +79,6 @@ end
 % CompAero = 0;
 
 
-%% ED 5MW values:
-WindSpeedAry =[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]; %(m/sec)
-RotSpeedAry = [6.972, 7.183, 7.506, 7.942, 8.469, 9.156, 10.296, 11.431, 11.89, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1, 12.1]; %(rpm)
-BldPitch1   = [0, 0, 0, 0, 0, 0, 0, 0, 0, 3.823, 6.602, 8.668, 10.45, 12.055, 13.536, 14.92, 16.226, 17.473, 18.699, 19.941, 21.177, 22.347, 23.469]; % (deg)
-GenTqAry    = [0.606, 2.58, 5.611, 9.686, 14.62, 20.174, 25.51, 31.455, 40.014, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094, 43.094]*1000; %(N-m)
-
-SimTime   = 5600; % time in seconds that the first linearization output will happen (maximum time to converge to steady-state solution)
-RatedWindSpeed = 11.4;
 
 %%
 nPoints = max( length(RotSpeedAry), length(WindSpeedAry) );
@@ -125,6 +128,7 @@ for i_case = nPoints:-1:1
             Matlab2FAST(IfWP_mod,IfWtemplate,  InflowFile, 2); %contains 2 header lines
         end
 
+%function Matlab2FAST(FastPar,TemplateFile,OutputFilename,hdrLines)
         
         % ServoDyn
         if CompServo > 0 

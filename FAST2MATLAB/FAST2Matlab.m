@@ -1,4 +1,4 @@
-function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
+function DataOut = FAST2Matlab(FST_file,hdrLines,DataOut)
 %% Fast2Matlab
 % DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 % Function for reading FAST input files in to a MATLAB struct.
@@ -47,6 +47,15 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 %.kpHdr            A cell array of headers corresponding to the kp table
 %
 %.profile          A table of profile values defined in TurbSim
+%
+%.LineTypes        A matrix (cell array) of line types and its properties with columns .LineTypesHdr
+%.LineTypesHdr     A cell array of headers corresponding to the LineTypes table
+%
+%.ConProp          A matrix (cell array) of connection properties with columns .ConPropHdr
+%.ConPropHdr       A cell array of headers corresponding to the ConProp table
+%
+%.LineProp         A matrix (cell array) of blade properties with columns .LinePropHdr
+%.LinePropHdr      A cell array of headers corresponding to the LineProp table
 %--------------------------------------------------------------------------
 
 %These arrays are extracted from the FAST input file
@@ -59,6 +68,7 @@ function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 % Modified by Paul Fleming, JUNE 2011
 % Modified by Bonnie Jonkman, February 2013 (to allow us to read the 
 % platform file, too)
+% Modified by Paul Schünemann, July 2020 (to allow us to read MoorDyn files, too)
 %%
 if nargin < 2
     hdrLines = 0;
@@ -102,21 +112,21 @@ while true %loop until discovering Outlist or end of file, than break
         break
     end
     
-        % Check to see if the value is Outlist
+        % Check to see if the value is Outlist or OUTPUTS (for MoorDyn)
 
     %if ~isempty(strfind(upper(line),upper('OutList'))) 
-    if ~isempty(strfind( upper(line), upper('OutList') )) 
+    if ~isempty(strfind( upper(line), upper('OutList') )) || (containstring(upper(line),upper('OUTPUTS')) && isfield(DataOut,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
         [value, ~, ~, nextindex] = sscanf(line,'%s', 1); 
-        if strcmpi(value,'OutList')
+        if strcmpi(value,'OutList') || strcmpi(value,'OUTPUTS')
             [DataOut.OutList DataOut.OutListComments] = ParseFASTOutList(fid);
             break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
         else
             % try the second
             [value] = sscanf(line(nextindex+1:end),'%s', 1); 
-            if strcmpi(value,'OutList')
+            if strcmpi(value,'OutList') || strcmpi(value,'OUTPUTS')
                 [DataOut.OutList DataOut.OutListComments] = ParseFASTOutList(fid);
                 break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
             end
@@ -202,6 +212,20 @@ while true %loop until discovering Outlist or end of file, than break
             line = fgetl(fid);  % the next line is the header, and it may have comments
             [DataOut.profile] = ParseFASTNumTable(line, fid, NumUSRz, 2 );
             continue; %let's continue reading the file
+            
+        elseif strcmpi(value,'"Name"') %we've reached the MoorDyn line types table (and we think it's a string value so it's in quotes)
+            NTypes = GetFASTPar(DataOut,'NTypes');  %get number of LineTypes
+            [DataOut.LineTypes, DataOut.LineTypesHdr] = ParseFASTFmtTable( line, fid, NTypes, true ); %parse the MoorDyn line types table
+            continue;   
+        elseif strcmpi(value,'"Node"') %we've reached the MoorDyn connection properties table (and we think it's a string value so it's in quotes)
+            NConnects = GetFASTPar(DataOut,'NConnects'); %get number of connections (incl. anchors and fairleads)
+            [DataOut.ConProp, DataOut.ConPropHdr] = ParseFASTFmtTable( line, fid, NConnects, true ); %parse the MoorDyn connection properties table
+            continue;   
+        elseif strcmpi(value,'"Line"') %we've reached the MoorDyn line properties table (and we think it's a string value so it's in quotes)
+            NLines = GetFASTPar(DataOut,'NLines'); %get number of line objects  
+            [DataOut.LineProp, DataOut.LinePropHdr] = ParseFASTFmtTable( line, fid, NLines, true ); %parse the MoorDyn line properties table
+            continue;               
+            
         else         
             
             if NextIsMatrix > 0
@@ -286,7 +310,7 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
     
         % we've read the line of the table that includes the header 
         % let's parse it now, getting the number of columns as well:
-        if contains(line,',')
+        if ~isempty(strfind(line,','))
             % these will be assumed to be comma delimited:
             TmpHdr  = textscan(line,'%s', 'Delimiter',',');
         else
@@ -412,3 +436,11 @@ end %end function
 
 
 
+function b=containstring(str, pattern)
+    % function contains not available in Octave..
+    if (exist ("OCTAVE_VERSION", "builtin") > 0)
+        b=~isempty(strfind(str,pattern));
+    else
+        b=contains(str,pattern);
+    end
+end

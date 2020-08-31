@@ -6,20 +6,105 @@ wind turbine state-space models.
 ## Download 
 From a command line:
 ```
-git clone https://github.com/OpenFAST/MATLAB-mbc
+git clone https://github.com/OpenFAST/matlab-toolbox
 ```
 
 ## Install in MATLAB
 From a MATLAB command window:
 
 ```
-addpath( getpath('AbsolutePathToToolbox') )
+addpath( genpath('AbsolutePathToToolbox') )
 ```
 where `AbsolutePathToToolbox` is the name of the absolute path where you cloned this toolbox. 
 Adding this command to your MATLAB `startup.m` file will make sure these tools are avalible every time you
 use MATLAB.
 
-## MBC3 by Gungit Bir, NREL
+
+## Folders 
+
+The scripts are organized in the following folders:
+- `Campbell`: contains scripts to produce a Campbell diagram (work in progress, see [here](#campbell-diagram). 
+- `ConvertFASTversions:` scripts to convert input files from different versions of OpenFAST (in particular FAST7 and FAST8, some scripts are not up to date for the latest OpenFAST)
+- `FAST2MATLAB` and `MATLAB2FAST`: scripts to read and write FAST input files
+- `MBC`: scripts to perform the multi-blade coordinate  transformation (see [here](#MBC))
+- `Plots`: plotting scripts
+- `ProgrammingTools`: tools for OpenFAST developers
+- `Utilities`: miscellaneous tools used in the library
+- `math`: generic mathematical tools used in the library
+- `_ExampleData`: data used in some examples (e.g. the Campbell Diagram example)
+
+
+## Campbell diagram
+
+Tools to generate a Campbell diagram are provided in the `Campbell` folder. 
+The scripts are operational but are still considered work in progress as they require the user to be quite familiar with OpenFAST and the linearization process. 
+
+The mode identification is not fully automated, and the user will have to perform a manual modification of the XLS or CSV file ("Modes\_ID" tab or file).
+
+
+
+The following example script is provided:
+```
+Campbell/examples/runCampbell.m
+```
+This script requires OpenFAST 2.3. 
+
+
+Before additional documentation is provided, some answers may be found in the following link:
+
+- [Issue 480 on Campbell diagram](https://github.com/OpenFAST/openfast/issues/480)
+
+
+
+### Campbell diagram with trim option
+
+The trim option has been introduced in the dev branch of OpenFAST in August 2020. Limited documentation and support is currently provided. 
+
+
+The following example script is provided:
+```
+Campbell/examples/runCampbell_Trim.m
+```
+This script requires OpenFAST 2.3 dev (August 2020). 
+
+
+Before additional documentation is provided, some answers may be found in the following links
+
+- [Implementation plan for the Trim Option](https://github.com/ebranlard/temp-lin/blob/master/ForceSetPoint.pdf)
+
+- [Pull request for Trim and Mode shape](https://github.com/OpenFAST/openfast/pull/373)
+
+- [Issue 480 on Campbell diagram](https://github.com/OpenFAST/openfast/issues/480)
+
+
+
+
+
+### Mode shapes visualization
+
+Mode shape visualization has been introduced in the dev branch of OpenFAST in August 2020. Limited documentation and support is currently provided. 
+
+
+The following example script is provided:
+```
+Campbell/examples/runCampbell_Trim.m
+```
+This script requires OpenFAST 2.3 dev (August 2020). 
+
+
+Before additional documentation is provided, some answers may be found in the following links:
+
+- [Pull request for Trim and Mode shape](https://github.com/OpenFAST/openfast/pull/373)
+
+- [VTK visualization](https://github.com/OpenFAST/r-test/blob/dev/glue-codes/openfast/5MW_Land_ModeShapes/vtk-visualization.md): this describe the underlying steps to produce the visualization. These steps are not required when running the example scripts since these steps have been wrapped by some matlab function. Yet, it is still necessary to install paraview-python, and this documentation is useful to understand the process.
+
+- [Issue 480 on Campbell diagram](https://github.com/OpenFAST/openfast/issues/480)
+
+
+
+
+
+## MBC
 
 MBC is a set of MATLAB scripts that performs multi-blade coordinate transformation (MBC) on wind turbine system models.
 The dynamics of wind turbine rotor blades are conventionally expressed in rotating frames attached to the individual blades.
