@@ -75,7 +75,7 @@ while true
         HaveNewLineChar = true;
     end
     
-    if contains(upper(line),upper('OutList')) || (contains(upper(line),upper('OUTPUTS')) && isfield(FastPar,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
+    if containstring(upper(line),upper('OutList')) || (containstring(upper(line),upper('OUTPUTS')) && isfield(FastPar,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
@@ -396,7 +396,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
         
         
         
-        if contains(HdrLine,',')
+        if ~isempty(strfind(HdrLine,','))
             TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
         else
             TmpHdr = textscan(HdrLine,'%s');
@@ -570,4 +570,13 @@ function [newline] = getNewlineChar(line)
     end
     
     return;
+end
+
+function b=containstring(str, pattern)
+    % function contains not available in Octave..
+    if (exist ("OCTAVE_VERSION", "builtin") > 0)
+        b=~isempty(strfind(str,pattern));
+    else
+        b=contains(str,pattern);
+    end
 end

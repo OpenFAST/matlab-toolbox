@@ -1,4 +1,4 @@
-function DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
+function DataOut = FAST2Matlab(FST_file,hdrLines,DataOut)
 %% Fast2Matlab
 % DataOut = Fast2Matlab(FST_file,hdrLines,DataOut)
 % Function for reading FAST input files in to a MATLAB struct.
@@ -115,7 +115,7 @@ while true %loop until discovering Outlist or end of file, than break
         % Check to see if the value is Outlist or OUTPUTS (for MoorDyn)
 
     %if ~isempty(strfind(upper(line),upper('OutList'))) 
-    if ~isempty(strfind( upper(line), upper('OutList') )) || (contains(upper(line),upper('OUTPUTS')) && isfield(DataOut,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
+    if ~isempty(strfind( upper(line), upper('OutList') )) || (containstring(upper(line),upper('OUTPUTS')) && isfield(DataOut,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
@@ -310,7 +310,7 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
     
         % we've read the line of the table that includes the header 
         % let's parse it now, getting the number of columns as well:
-        if contains(line,',')
+        if ~isempty(strfind(line,','))
             % these will be assumed to be comma delimited:
             TmpHdr  = textscan(line,'%s', 'Delimiter',',');
         else
@@ -436,3 +436,11 @@ end %end function
 
 
 
+function b=containstring(str, pattern)
+    % function contains not available in Octave..
+    if (exist ("OCTAVE_VERSION", "builtin") > 0)
+        b=~isempty(strfind(str,pattern));
+    else
+        b=contains(str,pattern);
+    end
+end
