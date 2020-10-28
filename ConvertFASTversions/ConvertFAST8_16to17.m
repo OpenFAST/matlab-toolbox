@@ -40,6 +40,7 @@ if nargin < 3
     SrvDtemplate = 'SrvD_Primary_v1.05.x.dat';
     FASTtemplate = 'OpenFAST.dat';
     HDtemplate   = 'HydroDyn.dat';
+    IfWtemplate  = 'InflowWind.dat';
 else
     ADtemplate   = 'AeroDyn15.dat';
     BDtemplate   = 'BeamDyn.dat';
@@ -47,6 +48,7 @@ else
     SrvDtemplate = 'ServoDyn.dat';
     FASTtemplate = 'enFAST.fst';
     HDtemplate   = 'HydroDyn.dat';
+    IfWtemplate  = 'InflowWind.dat';
 end
 %%
         % Primary input file:
@@ -142,12 +144,45 @@ end
         
     end    
 
-
 %%  %----------------------------------------------------------------------
-    % Write new model data to the FAST input files:
+    % Get InflowWind Data and write new InflowWind file:
     %----------------------------------------------------------------------
-    template   = [templateDir filesep FASTtemplate];  %template for primary file
-    Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
+    CompInflow = GetFASTPar(FP,'CompInflow');
+    if CompInflow == 1
+        [IfWPar, newIfWName] = GetFASTPar_Subfile(FP, 'InflowFile', oldDir, newDir);
+
+            % if there are multiple instances of RefHt and PLExp, rename
+            % them:
+        RefHt_Uni = GetFASTPar(IfWPar,'RefHt_Uni');
+        if isempty(RefHt_Uni)
+            RefHt = GetFASTPar(IfWPar,'RefHt',2);
+            if ~isempty(RefHt)
+                IfWPar = SetFASTPar(IfWPar,'RefHt_Uni',RefHt);
+                RefHt = GetFASTPar(IfWPar,'RefHt',3);
+                IfWPar = SetFASTPar(IfWPar,'RefHt_Hawc',RefHt);
+            end
+
+            PLExp = GetFASTPar(IfWPar,'PLExp',2);
+            if ~isempty(PLExp)
+                IfWPar = SetFASTPar(IfWPar,'PLExp_Hawc',PLExp);
+            end
+
+            FileName_IfW2 = GetFASTPar(IfWPar,'Filename',2);
+            if ~isempty(FileName_IfW2)
+                IfWPar = SetFASTPar(IfWPar,'Filename_BTS',FileName_IfW2);
+            end
+        end
+        
+        template   = [templateDir filesep IfWtemplate];  %template for primary file
+        Matlab2FAST(IfWPar, template, newIfWName, 2); %contains 2 header lines
+    end    
+    
+
+% % %%  %----------------------------------------------------------------------
+% %     % Write new model data to the FAST input files:
+% %     %----------------------------------------------------------------------
+% %     template   = [templateDir filesep FASTtemplate];  %template for primary file
+% %     Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
 
 return
 
