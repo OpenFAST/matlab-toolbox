@@ -38,7 +38,7 @@ if nargin < 3
     BDtemplate   = 'BeamDyn_Primary.inp';
     EDtemplate   = 'ElastoDyn_Primary.dat';
     SrvDtemplate = 'SrvD_Primary_v1.05.x.dat';
-    FASTtemplate = 'OpenFAST.dat';
+    FASTtemplate = 'OpenFAST.fst';
     HDtemplate   = 'HydroDyn.dat';
     IfWtemplate  = 'InflowWind.dat';
 else
@@ -119,19 +119,30 @@ end
     % Get BD Data and write new BeamDyn file:
     %----------------------------------------------------------------------
     CompElast = GetFASTPar(FP,'CompElast');
+    
+    [EDPar, newEDName] = GetFASTPar_Subfile(FP, 'EDFile', oldDir, newDir);            
+    NumBl = GetFASTPar(EDPar, 'NumBl');
+
     if CompElast == 1 % ElastoDyn
         
-       [EDPar, newEDName] = GetFASTPar_Subfile(FP, 'EDFile', oldDir, newDir);            
-       
-       template   = [templateDir filesep EDtemplate];  %template for primary file
-       Matlab2FAST(EDPar,template,newEDName, 2); %contains 2 header lines
+        for i = 1:NumBl
+            varName = ['BldFile(' num2str(i) ')'];
+
+            [BldFile] = GetFASTPar(EDPar, varName);            
+            if isempty(BldFile)
+                varName_alt = ['BldFile' num2str(i)];
+                [BldFile] = GetFASTPar(EDPar, varName_alt);
+                if ~isempty(BldFile)
+                    EDPar = SetFASTPar(EDPar,varName,BldFile);
+                end
+            end
+        end
+        
+        template   = [templateDir filesep EDtemplate];  %template for primary file
+        Matlab2FAST(EDPar,template,newEDName, 2); %contains 2 header lines
         
     elseif CompElast == 2 % BeamDyn
 
-        % first get the number of blades from ElastoDyn:
-        EDPar = GetFASTPar_Subfile(FP, 'EDFile', oldDir);            
-        NumBl = GetFASTPar(EDPar, 'NumBl');
-            
         for i = 1:NumBl
             varName = ['BDBldFile(' num2str(i) ')'];
             
@@ -178,11 +189,11 @@ end
     end    
     
 
-% % %%  %----------------------------------------------------------------------
-% %     % Write new model data to the FAST input files:
-% %     %----------------------------------------------------------------------
-% %     template   = [templateDir filesep FASTtemplate];  %template for primary file
-% %     Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
+%%  %----------------------------------------------------------------------
+    % Write new model data to the FAST input files:
+    %----------------------------------------------------------------------
+    template   = [templateDir filesep FASTtemplate];  %template for primary file
+    Matlab2FAST(FP,template,newFSTname, 2); %contains 2 header lines
 
 return
 

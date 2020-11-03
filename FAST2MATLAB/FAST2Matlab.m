@@ -15,47 +15,35 @@ function DataOut = FAST2Matlab(FST_file,hdrLines,DataOut)
 %.OutList          An array of variables to output
 %.OutListComments  An array of descriptions of the .OutList values
 %
-%.TowProp          A matrix of tower properties with columns .TowPropHdr 
-%.TowPropHdr       A cell array of headers corresponding to the TowProp table
+%.TowProp          A data structure of tower properties 
 %
-%.BldProp          A matrix of blade properties with columns .BldPropHdr
-%.BldPropHdr       A cell array of headers corresponding to the BldProp table
+%.BldProp          A data structure of blade properties with columns .BldPropHdr
 %
-%.DLLProp          A matrix of properties for the Bladed DLL Interface with columns .DLLPropHdr
-%.DLLPropHdr       A cell array of headers corresponding to the DLLProp table
+%.DLLProp          A data structure of properties for the Bladed DLL Interface with columns .DLLPropHdr
 %
-%.FoilNm           A Cell array of foil names
+%.FoilNm           A data structure of foil names
 %
-%.BldNodesHdr      A cell array of headers corresponding to the BldNodes table 
-%.BldNodes         A matrix of blade nodes with columns RNodes, AeroTwst DRNodes Chord and Nfoil
+%.BldNodes         A data structure of blade nodes with columns RNodes, AeroTwst DRNodes Chord and Nfoil
 %
-%.CasesHdr         A cell array of headers corresponding to the Cases table
-%.Cases            A matrix of properties for individual cases in a driver file
+%.Cases            A data structure of properties for individual cases in a driver file
 %
-%.AFCoeffHdr       A cell array of headers corresponding to the AFCoeff table
-%.AFCoeff          A matrix of airfoil coefficients
+%.AFCoeff          A data structure of airfoil coefficients
 %
-%.TMDspProp        A matrix of TMD spring forces
-%.TMDspPropHdr     A cell array of headers corresponding to the TMDspProp table
+%.TMDspProp        A data structure of TMD spring forces
 %
-% .PointLoads      A table of point loads in the BeamDyn driver input file
-% .PointLoadsHdr   A the headers for the point loads table
+%.PointLoads      A data structure of point loads in the BeamDyn driver input file
 %
 %.PrnElm           An array determining whether or not to print a given element
 %
-%.kp               A table of key points defined in BeamDyn
-%.kpHdr            A cell array of headers corresponding to the kp table
+%.kp               A data structure of key points defined in BeamDyn
 %
-%.profile          A table of profile values defined in TurbSim
+%.profile          A data structure of profile values defined in TurbSim
 %
-%.LineTypes        A matrix (cell array) of line types and its properties with columns .LineTypesHdr
-%.LineTypesHdr     A cell array of headers corresponding to the LineTypes table
+%.LineTypes        A data structure of line types and its properties
 %
-%.ConProp          A matrix (cell array) of connection properties with columns .ConPropHdr
-%.ConPropHdr       A cell array of headers corresponding to the ConProp table
+%.ConProp          A data structure of connection properties
 %
-%.LineProp         A matrix (cell array) of blade properties with columns .LinePropHdr
-%.LinePropHdr      A cell array of headers corresponding to the LineProp table
+%.LineProp         A data structure of blade properties
 %--------------------------------------------------------------------------
 
 %These arrays are extracted from the FAST input file
@@ -141,23 +129,23 @@ while true %loop until discovering Outlist or end of file, than break
         
         if strcmpi(value,'"HtFract"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)
             NTwInpSt = GetFASTPar(DataOut,'NTwInpSt');        
-            [DataOut.TowProp, DataOut.TowPropHdr] = ParseFASTNumTable(line, fid, NTwInpSt);
+            [DataOut.TowProp] = ParseFASTNumTable(line, fid, NTwInpSt);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"TwrElev"') %we've reached the distributed tower properties table (and we think it's a string value so it's in quotes)
             NumTwrNds = GetFASTPar(DataOut,'NumTwrNds');        
-            [DataOut.TowProp, DataOut.TowPropHdr] = ParseFASTNumTable(line, fid, NumTwrNds);
+            [DataOut.TowProp] = ParseFASTNumTable(line, fid, NumTwrNds);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"BlFract"') %we've reached the distributed blade properties table (and we think it's a string value so it's in quotes)
             NBlInpSt = GetFASTPar(DataOut,'NBlInpSt');        
-            [DataOut.BldProp, DataOut.BldPropHdr] = ParseFASTNumTable(line, fid, NBlInpSt);
+            [DataOut.BldProp] = ParseFASTNumTable(line, fid, NBlInpSt);
             continue; %let's continue reading the file
         elseif strcmpi(label,'F_X') %we've reached the TMD spring forces table
             NKInpSt = GetFASTPar(DataOut,'NKInpSt');        
-            [DataOut.TMDspProp, DataOut.TMDspPropHdr] = ParseFASTNumTable(line, fid, NKInpSt);
+            [DataOut.TMDspProp] = ParseFASTNumTable(line, fid, NKInpSt);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"GenSpd_TLU"') %we've reached the DLL torque-speed lookup table (and we think it's a string value so it's in quotes)
             DLL_NumTrq = GetFASTPar(DataOut,'DLL_NumTrq');        
-            [DataOut.DLLProp, DataOut.DLLPropHdr] = ParseFASTNumTable(line, fid, DLL_NumTrq);
+            [DataOut.DLLProp] = ParseFASTNumTable(line, fid, DLL_NumTrq);
             continue; %let's continue reading the file
         elseif strcmpi(label,'FoilNm') %note NO quotes because it's a label
             NumFoil = GetFASTPar(DataOut,'NumFoil');
@@ -169,15 +157,15 @@ while true %loop until discovering Outlist or end of file, than break
             continue; %let's continue reading the file  
         elseif strcmpi(value,'"RNodes"')
             BldNodes = GetFASTPar(DataOut,'BldNodes');  
-            [DataOut.BldNodes, DataOut.BldNodesHdr] = ParseFASTFmtTable( line, fid, BldNodes, false );
+            [DataOut.BldNodes] = ParseFASTFmtTable( line, fid, BldNodes, false );
             continue;
         elseif strcmpi(value,'"BlSpn"')
             NumBlNds = GetFASTPar(DataOut,'NumBlNds');  
-            [DataOut.BldNodes, DataOut.BldNodesHdr] = ParseFASTNumTable( line, fid, NumBlNds );
+            [DataOut.BldNode] = ParseFASTNumTable( line, fid, NumBlNds );
             continue;            
-        elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
+        elseif strcmpi(value,'"WndSpeed"') %we've reached the AD cases table (and we think it's a string value so it's in quotes)
             NumCases = GetFASTPar(DataOut,'NumCases');        
-            [DataOut.Cases, DataOut.CasesHdr] = ParseFASTNumTable(line, fid, NumCases);
+            [DataOut.Cases] = ParseFASTFmtTable(line, fid, NumCases);
             continue; %let's continue reading the file
         elseif strcmpi(label,'NumPointLoads') 
             DataOut.Label{count,1} = label;
@@ -186,7 +174,7 @@ while true %loop until discovering Outlist or end of file, than break
             
             NumPointLoads = value;
             line = fgetl(fid);  % the next line is the header, and it may have comments
-            [DataOut.PointLoads, DataOut.PointLoadsHdr] = ParseFASTNumTable(line, fid, NumPointLoads);
+            [DataOut.PointLoads] = ParseFASTNumTable(line, fid, NumPointLoads);
             continue; %let's continue reading the file            
             
         elseif strcmpi(label,'NumAlf')
@@ -197,11 +185,11 @@ while true %loop until discovering Outlist or end of file, than break
             NumAlf = value;
             line = fgetl(fid);  % the next line is the header, and it may have comments
             line = line(2:end);
-            [DataOut.AFCoeff, DataOut.AFCoeffHdr] = ParseFASTNumTable(line, fid, NumAlf);
+            [DataOut.AFCoeff] = ParseFASTNumTable(line, fid, NumAlf);
             continue; %let's continue reading the file            
         elseif strcmpi(label,'kp_yr') %we've reached the BD key-points table
             kp_total = GetFASTPar(DataOut,'kp_total');        
-            [DataOut.kp, DataOut.kpHdr] = ParseFASTNumTable(line, fid, kp_total);
+            [DataOut.kp] = ParseFASTNumTable(line, fid, kp_total);
             continue; %let's continue reading the file
         elseif strcmpi(label,'StdScale3') %we've reached the TurbSim profiles table
             DataOut.Label{count,1} = label;
@@ -215,15 +203,15 @@ while true %loop until discovering Outlist or end of file, than break
             
         elseif strcmpi(value,'"Name"') %we've reached the MoorDyn line types table (and we think it's a string value so it's in quotes)
             NTypes = GetFASTPar(DataOut,'NTypes');  %get number of LineTypes
-            [DataOut.LineTypes, DataOut.LineTypesHdr] = ParseFASTFmtTable( line, fid, NTypes, true ); %parse the MoorDyn line types table
+            [DataOut.LineTypes] = ParseFASTFmtTable( line, fid, NTypes, true ); %parse the MoorDyn line types table
             continue;   
         elseif strcmpi(value,'"Node"') %we've reached the MoorDyn connection properties table (and we think it's a string value so it's in quotes)
             NConnects = GetFASTPar(DataOut,'NConnects'); %get number of connections (incl. anchors and fairleads)
-            [DataOut.ConProp, DataOut.ConPropHdr] = ParseFASTFmtTable( line, fid, NConnects, true ); %parse the MoorDyn connection properties table
+            [DataOut.ConPro] = ParseFASTFmtTable( line, fid, NConnects, true ); %parse the MoorDyn connection properties table
             continue;   
         elseif strcmpi(value,'"Line"') %we've reached the MoorDyn line properties table (and we think it's a string value so it's in quotes)
             NLines = GetFASTPar(DataOut,'NLines'); %get number of line objects  
-            [DataOut.LineProp, DataOut.LinePropHdr] = ParseFASTFmtTable( line, fid, NLines, true ); %parse the MoorDyn line properties table
+            [DataOut.LineProp] = ParseFASTFmtTable( line, fid, NLines, true ); %parse the MoorDyn line properties table
             continue;               
             
         else         
@@ -298,7 +286,8 @@ function [OutList OutListComments] = ParseFASTOutList( fid )
     
 end %end function
 %%
-function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
+function [FullTable] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
+
 
     % read a numeric table from the FAST file
     
@@ -335,6 +324,7 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
         
     % now initialize Table and read its values from the file:
     Table = zeros(InpSt, nc);   %this is the size table we'll read
+    TableComments = cell(InpSt,1);
     i = 0;                      % this the line of the table we're reading           
     while i < InpSt
         
@@ -342,7 +332,7 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
         if isnumeric(line)      % we reached the end prematurely
             break
         elseif i == 0            
-            [~,cnt]=sscanf(line,'%f',nc);
+            [~,cnt]=sscanf(line,'%50f',nc);
             if cnt==0
                 break
                 % stop reading and return because the line was not numeric
@@ -355,7 +345,13 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
         end        
 
         i = i + 1;
-        Table(i,:) = sscanf(line,'%f',nc);       
+        [Table(i,:),~,~,nextIndex] = sscanf(line,'%f',nc);
+
+        if nextIndex < length(line)
+            TableComments{i} = line(nextIndex:end);
+        else
+            TableComments{i} = '';
+        end
 
     end
     
@@ -363,9 +359,13 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
         disp(['Warning: There are fewer rows in the table than expected. Ignoring the last ' num2str(InpSt-i) ' row(s).'])
         Table = Table(1:i,:);
     end
+    
+    FullTable.Table    = Table;
+    FullTable.Headers  = Headers;
+    FullTable.Comments = TableComments;
 end %end function
 %%
-function [Table, Headers] = ParseFASTFmtTable( line, fid, InpSt, unitsLine )
+function [FullTable] = ParseFASTFmtTable( line, fid, InpSt, unitsLine )
 
     % we've read the line of the table that includes the header 
     % let's parse it now, getting the number of columns as well:
@@ -380,6 +380,7 @@ function [Table, Headers] = ParseFASTFmtTable( line, fid, InpSt, unitsLine )
         
     % now initialize Table and read its values from the file:
     Table = cell(InpSt,nc);   % this is the size table we'll read
+    TableComments = cell(InpSt,1); % these are comments that we add to the end of the line
     i = 0;                    % this the line of the table we're reading    
     while i < InpSt
         
@@ -409,6 +410,10 @@ function [Table, Headers] = ParseFASTFmtTable( line, fid, InpSt, unitsLine )
         %Table(i,:) = TmpValue{1};       
 
     end
+    
+    FullTable.Table    = Table;
+    FullTable.Headers  = Headers;
+    FullTable.Comments = TableComments; % note that we aren't reading comments here. FIX ME later.
     
 end %end function
 

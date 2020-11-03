@@ -111,7 +111,7 @@ while true
                 disp(  'WARNING: tower properties table not found in the FAST data structure.' );
                 printTable = true;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.TowProp, FastPar.TowPropHdr, newline);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.TowProp, newline);
                 continue; %let's continue reading the template file            
             end
 
@@ -120,7 +120,7 @@ while true
                 disp( 'WARNING: blade properties table not found in the FAST data structure.' );
                 printTable = true;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldProp, FastPar.BldPropHdr, newline);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldProp, newline);
                 continue; %let's continue reading the template file            
             end
             
@@ -129,7 +129,7 @@ while true
                 disp( 'WARNING: TMD spring forces table not found in the FAST data structure.' );
                 printTable = true;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.TMDspProp, FastPar.TMDspPropHdr, newline);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.TMDspProp, newline);
                 continue; %let's continue reading the template file            
             end
             
@@ -138,7 +138,7 @@ while true
                 disp( 'WARNING: Bladed Interface torque-speed look-up table not found in the FAST data structure.' );
                 printTable = true;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.DLLProp, FastPar.DLLPropHdr, newline);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.DLLProp, newline);
                 continue; %let's continue reading the template file            
             end            
             
@@ -160,7 +160,7 @@ while true
                 disp( 'WARNING: AeroDyn airfoil coefficients not found in the FAST data structure.' );
                 printTable = true;
             else                
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.AFCoeff, FastPar.AFCoeffHdr, newline, 1);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.AFCoeff, newline, 1);
             end            
             continue; %let's continue reading the template file            
             
@@ -174,7 +174,7 @@ while true
                 printTableComments = 2;
             else                
                 line = fgets(fidIN); %get the next (header) line from the template
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.PointLoads, FastPar.PointLoadsHdr, newline, 1);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.PointLoads, newline, 1);
             end            
             continue; %let's continue reading the template file            
             
@@ -184,7 +184,7 @@ while true
                 printTable = true;
             else
                 IntegerCols = {'NFoil'};
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, 0, IntegerCols);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, newline, 0, IntegerCols);
                 continue; %let's continue reading the template file            
             end   
             
@@ -194,7 +194,7 @@ while true
                 printTable = true;
             else
                 IntegerCols = {'BlAFID'};
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, FastPar.BldNodesHdr, newline, 1, IntegerCols);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.BldNodes, newline, 1, IntegerCols);
                 continue; %let's continue reading the template file            
             end   
             
@@ -203,7 +203,7 @@ while true
                 disp( 'WARNING: BeamDyn key-point table not found in the FAST data structure.' );
                 printTable = true;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.kp, FastPar.kpHdr, newline, 1);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.kp, newline, 1);
                 continue; %let's continue reading the template file            
             end   
             
@@ -222,7 +222,7 @@ while true
                 printTable = true;
                 printTableComments = 2;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.profile, [], newline, 0);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.profile, newline, 0);
                 continue; %let's continue reading the template file            
             end
         elseif strcmpi(value,'"WndSpeed"') %we've reached the cases table (and we think it's a string value so it's in quotes)
@@ -230,7 +230,7 @@ while true
                 disp( 'WARNING: AeroDyn driver cases properties table not found in the FAST data structure.' );
                 printTable = true;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.Cases, FastPar.CasesHdr, newline);
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.Cases, newline);
                 continue; %let's continue reading the template file            
             end   
             
@@ -242,7 +242,7 @@ while true
                 disp( 'WARNING: MoorDyn line types table not found in the FAST data structure.' );
                 printTable = true;
             else
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.LineTypes, FastPar.LineTypesHdr, newline, 1); %write the MoorDyn line types table 
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.LineTypes, newline, 1); %write the MoorDyn line types table 
                 for k = 1:NTypes_old
                     fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
                 end                
@@ -254,7 +254,7 @@ while true
                 printTable = true;
             else
                 IntegerCols = {'Node'};
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.ConProp, FastPar.ConPropHdr, newline, 1, IntegerCols); %write the MoorDyn connection properties table
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.ConProp, newline, 1, IntegerCols); %write the MoorDyn connection properties table
                 for k = 1:NConnects_old
                     fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
                 end
@@ -266,7 +266,7 @@ while true
                 printTable = true;
             else
                 IntegerCols = {'Line','NumSegs','NodeAnch','NodeFair'};
-                WriteFASTTable(line, fidIN, fidOUT, FastPar.LineProp, FastPar.LinePropHdr, newline, 1, IntegerCols); %write the MoorDyn line properties table
+                WriteFASTTable(line, fidIN, fidOUT, FastPar.LineProp, newline, 1, IntegerCols); %write the MoorDyn line properties table
                 for k = 1:NLines_old
                     fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
                 end                
@@ -358,6 +358,8 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
             writeVal= getNumericVal2Write( val2Write, '%11G' );
             if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
                 writeVal=getNumericVal2Write( val2Write, '%15G' );
+                disp(writeVal)
+                disp(str2num(writeVal))
             end
         else
             writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
@@ -385,17 +387,15 @@ function [writeVal] = getNumericVal2Write( val2Write, fmt )
     return;
 end
 
-function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUnitLines, IntegerCols )
+function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines, IntegerCols )
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
     if strncmp(HdrLine,'--------------------------------------------', 20)
         % this assumes we are using TurbSim profiles file
-        nc = size(Table,2); 
+        nc = size(TableIn.Table,2); 
     else
-        
-        
-        
+                        
         if ~isempty(strfind(HdrLine,','))
             TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
         else
@@ -410,7 +410,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
     
     fprintf(fidOUT,'%s',HdrLine);           % print the new headers
 
-    if nargin < 7 
+    if nargin < 6 
         NumUnitLines = 1;
     end
     
@@ -418,7 +418,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
         fprintf(fidOUT,'%s',fgets(fidIN));      % print the new units (we're assuming they are the same)
     end
         
-    if ~iscell(Table) && size(Table,1) < 1
+    if ~iscell(TableIn.Table) && size(TableIn.Table,1) < 1
         return
     end
     
@@ -434,20 +434,20 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
         colFmtS='%s ';
     end
     
-    if nargin < 8
+    if nargin < 7
         IntegerCols={};
     end
     
     % let's figure out which columns in the old Table match the headers
     % in the new table:
     colIsInteger = false(1,nc);        
-    if isempty(Headers)
+    if isempty(TableIn.Headers)
         ColIndx = 1:nc;
     else
         ColIndx = ones(1,nc);
         
         for i=1:nc
-            indx = strcmpi(TemplateHeaders{i}, Headers);
+            indx = strcmpi(TemplateHeaders{i}, TableIn.Headers);
             if sum(indx) > 0
                 ColIndx(i) = find(indx,1,'first');
                 if sum(indx) ~= 1
@@ -471,10 +471,10 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
     ColIndx=ColIndx(1:nc);
     
     % now we'll write the table:    
-    if iscell(Table)
-        for i=1:size(Table,1)
+    if iscell(TableIn.Table)
+        for i=1:size(TableIn.Table,1)
             for j=ColIndx
-                if isnumeric(Table{i,j})
+                if isnumeric(TableIn.Table{i,j})
                     if colIsInteger(j)
                         fmt = colFmtI;
                     else
@@ -483,13 +483,14 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, NumUni
                 else                    
                     fmt = colFmtS;
                 end
-                fprintf(fidOUT, fmt, Table{i,j} );
+                fprintf(fidOUT, fmt, TableIn.Table{i,j} );
             end
+            fprintf(fidOUT, TableIn.Comments{i}); % print any comments that may exist for this line
             fprintf(fidOUT, newline);
         end        
     else        
-        for i=1:size(Table,1) 
-            fprintf(fidOUT, '%11.7E  ', Table(i,ColIndx) );  %write all of the columns
+        for i=1:size(TableIn.Table,1) 
+            fprintf(fidOUT, '%11.7E  ', TableIn.Table(i,ColIndx) );  %write all of the columns
             fprintf(fidOUT, newline);
         end
     end    
@@ -539,6 +540,9 @@ function WriteFASTMatrix( FastPar, fidOUT, matrixName, newline, UseIntFormat )
     % now we'll write the table:    
     for i=1:size(matrix,1) 
         fprintf(fidOUT, fmt, matrix(i,:) );  %write all of the columns
+        if (i == 1 && strcmpi(matrixName,'MemberKeyPtTable'))
+            fprintf(fidOUT, '                - Member number; Number of key points in this member');
+        end
         fprintf(fidOUT, newline);
     end
     return;
