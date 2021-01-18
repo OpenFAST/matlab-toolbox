@@ -80,7 +80,7 @@ while true %loop until discovering Outlist or end of file, than break
         % Check to see if the value is PLATFORM OUTPUTS  deprecated at v2.00.03
     if ~isempty(strfind(upper(line),upper('PLATFORM OUTPUTS'))) 
         [DataOut.PtfmOutList DataOut.PtfmOutListComments] = ParseFASTOutList(fid);
-        continue; % break; %bjj: we could continue now if we wanted to afssume OutList wasn't the end of the file...
+        continue; % break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end   
     
         % Check to see if the value is MESH-BASED OUTPUTS  deprecated at v2.00.03
