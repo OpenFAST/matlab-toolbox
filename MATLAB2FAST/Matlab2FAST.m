@@ -10,7 +10,7 @@
 % Paul Fleming, JUNE 2011
 % Using code copied from functions written by Knud Kragh
 % Modified by Bonnie Jonkman, Feb 2013
-% Modified by Paul Schünemann, July 2020 (to allow us to write MoorDyn files, too)
+% Modified by Paul SchÃ¼nemann, July 2020 (to allow us to write MoorDyn files, too)
 % Note: the template must not contain the string "OutList" anywhere
 %  except for the actual "OutList" output parameter lists.
 
@@ -358,8 +358,6 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
             writeVal= getNumericVal2Write( val2Write, '%11G' );
             if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
                 writeVal=getNumericVal2Write( val2Write, '%15G' );
-                disp(writeVal)
-                disp(str2num(writeVal))
             end
         else
             writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
