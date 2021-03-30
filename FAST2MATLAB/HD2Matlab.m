@@ -109,44 +109,44 @@ while true %loop until discovering Outlist or end of file, than break
         
         if  strcmpi(value,'"HvCoefID"') %we've reached the heave coefficients table (and we think it's a string value so it's in quotes)  deprecated at version v2.00.03
             NHvCoef = GetFASTPar(DataOut,'NHvCoef');        
-            [DataOut.HvCoefs, DataOut.HvCoefsHdr] = ParseFASTTable(line, fid, NHvCoef);
+            [DataOut.HvCoefs] = ParseFASTTable(line, fid, NHvCoef);
             continue; %let's continue reading the file
         elseif  strcmpi(value,'"AxCoefID"') %we've reached the axial coefficients table (and we think it's a string value so it's in quotes)  v2.00.03 of input specification
             NAxCoef = GetFASTPar(DataOut,'NAxCoef');        
-            [DataOut.AxCoefs, DataOut.AxCoefsHdr] = ParseFASTTable(line, fid, NAxCoef);
+            [DataOut.AxCoefs] = ParseFASTTable(line, fid, NAxCoef);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"JointID"') %we've reached the member joints table (and we think it's a string value so it's in quotes)
             NJoints = GetFASTPar(DataOut,'NJoints');        
-            [DataOut.Joints, DataOut.JointsHdr] = ParseFASTTable(line, fid, NJoints);
+            [DataOut.Joints] = ParseFASTTable(line, fid, NJoints);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"PropSetID"') %we've reached the member cross-section properties table (and we think it's a string value so it's in quotes)
             NPropSets = GetFASTPar(DataOut,'NPropSets');        
-            [DataOut.MemberSectionProp, DataOut.MemberSectionPropHdr] = ParseFASTTable(line, fid, NPropSets);
+            [DataOut.MemberSectionProp] = ParseFASTTable(line, fid, NPropSets);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"SimplCd"') %we've reached the simple hydrodynamic coefficients table (and we think it's a string value so it's in quotes)        
-            [DataOut.SmplProp, DataOut.SmplPropHdr] = ParseFASTTable(line, fid, 1);
+            [DataOut.SmplProp] = ParseFASTTable(line, fid, 1);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"Dpth"') %we've reached the member depth-based hydrodynamic coefficients table (and we think it's a string value so it's in quotes)
             NCoefDpth = GetFASTPar(DataOut,'NCoefDpth');        
-            [DataOut.DpthProp, DataOut.DpthPropHdr] = ParseFASTTable(line, fid, NCoefDpth);
+            [DataOut.DpthProp] = ParseFASTTable(line, fid, NCoefDpth);
             continue; %let's continue reading the file
         elseif strcmpi(value,'"MemberID"') 
             if strcmpi(DataOut.Label(end), 'NCoefMembers') %we've reached the member-based hydrodynamic coefficients table 
                NCoefMembers = GetFASTPar(DataOut,'NCoefMembers');        
-               [DataOut.MemberProp, DataOut.MemberPropHdr] = ParseFASTTable(line, fid, NCoefMembers);
+               [DataOut.MemberProp] = ParseFASTTable(line, fid, NCoefMembers);
                continue; %let's continue reading the file
             elseif strcmpi(DataOut.Label(end), 'NMembers') %we've reached the member table 
                NMembers = GetFASTPar(DataOut,'NMembers');        
-               [DataOut.Members, DataOut.MembersHdr] = ParseMembersTable(line, fid, NMembers);
+               [DataOut.Members] = ParseMembersTable(line, fid, NMembers);
                continue; %let's continue reading the file
             elseif strcmpi(DataOut.Label(end), 'NMOutputs') %we've reached the member output list table 
                NMOutputs = GetFASTPar(DataOut,'NMOutputs');        
-               [DataOut.MemberOuts, DataOut.MemberOutsHdr] = ParseMemberOutputs(line, fid, NMOutputs);
+               [DataOut.MemberOuts] = ParseMemberOutputs(line, fid, NMOutputs);
                continue; %let's continue reading the file
             end
         elseif strcmpi(value,'"FillNumM"') %we've reached the filled members table (and we think it's a string value so it's in quotes)
             NFillGroups = GetFASTPar(DataOut,'NFillGroups');        
-            [DataOut.FillGroups, DataOut.FillGroupsHdr] = ParseFillGroups(line, fid, NFillGroups);
+            [DataOut.FillGroups] = ParseFillGroups(line, fid, NFillGroups);
             continue; %let's continue reading the file
         elseif strcmpi(DataOut.Label(end), 'NJOutputs') && ~readJOut  %we've reached the joint outputs table (and we think it's a string value so it's in quotes)
             NJOutputs = GetFASTPar(DataOut,'NJOutputs'); 
@@ -162,7 +162,7 @@ while true %loop until discovering Outlist or end of file, than break
             continue; %let's continue reading the file
         elseif strcmpi(value,'"MGDpth"') %we've reached the marine growth table (and we think it's a string value so it's in quotes)
             NMGDepths = GetFASTPar(DataOut,'NMGDepths');        
-            [DataOut.MGProp, DataOut.MGPropHdr] = ParseFASTTable(line, fid, NMGDepths);
+            [DataOut.MGProp] = ParseFASTTable(line, fid, NMGDepths);
             continue; %let's continue reading the file
         else                
             DataOut.Label{count,1} = label;
@@ -255,7 +255,7 @@ function [AddF0, AddCLin, AddBLin, AddBQuad] = ParseHDAddMatrices(fid)
 end
 
 
-function [Table, Headers] = ParseFASTTable( line, fid, InpSt  )
+function [FullTable] = ParseFASTTable( line, fid, InpSt  )
 
     % we've read the line of the table that includes the header 
     % let's parse it now, getting the number of columns as well:
@@ -269,6 +269,7 @@ function [Table, Headers] = ParseFASTTable( line, fid, InpSt  )
         
     % now initialize Table and read its values from the file:
     Table = zeros(InpSt, nc);   %this is the size table we'll read
+    FullTable.Comments = cell(InpSt,1);
     i = 0;                      % this the line of the table we're reading    
     while i < InpSt
         
@@ -278,13 +279,19 @@ function [Table, Headers] = ParseFASTTable( line, fid, InpSt  )
         end        
 
         i = i + 1;
-        Table(i,:) = sscanf(line,'%f',nc);       
-
+        [Table(i,:),~,~,nextIndex] = sscanf(line,'%f',nc);       
+        if nextIndex < length(line)
+            FullTable.Comments{i} = line(nextIndex:end);
+        else
+            FullTable.Comments{i} = '';
+        end
     end
     
+    FullTable.Table = Table;
+    FullTable.Headers = Headers;
 end %end function
 
-function [Table, Headers] = ParseFillGroups( line, fid, InpSt )
+function [FullTable] = ParseFillGroups( line, fid, InpSt )
 
       % we've read the line of the table that includes the header 
       % let's parse it now, getting the number of columns as well:
@@ -298,6 +305,7 @@ function [Table, Headers] = ParseFillGroups( line, fid, InpSt )
     
       % now initialize Table and read its values from the file:
     Table = repmat( struct( 'NumM','', 'MList','', 'FSLoc','','Dens','' ), double( InpSt ), 1 );
+    FullTable.Comments = cell(InpSt,1);
     i = 0;                      % this the line of the table we're reading    
     while i < InpSt
         
@@ -309,12 +317,21 @@ function [Table, Headers] = ParseFillGroups( line, fid, InpSt )
         i = i + 1;      
         nc     = sscanf(line,'%f',1);
         group  = zeros(1,nc+3);
-        group(:)  = sscanf(line,'%f',nc+3); 
+        [group(:), ~,~,nextIndex]  = sscanf(line,'%f',nc+3); 
         Table(i).NumM  = group(1);
         Table(i).MList = group(2:nc+1); 
         Table(i).FSLoc = group(nc+2);
         Table(i).Dens  = group(nc+3);
+        
+        if nextIndex < length(line)
+            FullTable.Comments{i} = line(nextIndex:end);
+        else
+            FullTable.Comments{i} = '';
+        end
     end
+    
+    FullTable.Table = Table;
+    FullTable.Headers = Headers;
     
 end
 
@@ -332,7 +349,7 @@ function [Table] = ParseJointOutputs( line, InpSt )
     
 end
 
-function [Table, Headers] = ParseMemberOutputs( line, fid, InpSt )
+function [FullTable] = ParseMemberOutputs( line, fid, InpSt )
 
       % we've read the line of the table that includes the header 
       % let's parse it now, getting the number of columns as well:
@@ -346,6 +363,7 @@ function [Table, Headers] = ParseMemberOutputs( line, fid, InpSt )
     
       % now initialize Table and read its values from the file:
     Table = repmat( struct( 'ID','', 'NOutLoc','', 'NodeLocs','' ), double( InpSt ), 1 );
+    FullTable.Comments = cell(InpSt,1);
     i = 0;                      % this the line of the table we're reading    
     while i < InpSt
         
@@ -357,16 +375,23 @@ function [Table, Headers] = ParseMemberOutputs( line, fid, InpSt )
         i = i + 1;      
         nc     = sscanf(line,'%f',2);
         outputs = zeros(nc(2)+2,1);
-        outputs(:)  = sscanf(line,'%f',nc(2)+2); 
+        [outputs(:),~,~,nextIndex]  = sscanf(line,'%f',nc(2)+2); 
         Table(i).ID  = outputs(1);
         Table(i).NOutLoc = outputs(2); 
         Table(i).NodeLocs = outputs(3:nc(2)+2);
-    
+        
+        if nextIndex < length(line)
+            FullTable.Comments{i} = line(nextIndex,end);
+        else
+            FullTable.Comments{i} = '';
+        end
     end
     
+    FullTable.Table = Table;
+    FullTable.Headers = Headers;
 end
 
-function [Table, Headers] = ParseMembersTable( line, fid, InpSt  )
+function [FullTable] = ParseMembersTable( line, fid, InpSt  )
 
     % we've read the line of the table that includes the header 
     % let's parse it now, getting the number of columns as well:
@@ -380,6 +405,7 @@ function [Table, Headers] = ParseMembersTable( line, fid, InpSt  )
         
     % now initialize Table and read its values from the file:
     Table = zeros(InpSt, nc);   %this is the size table we'll read
+    FullTable.Comments = cell(InpSt,1);
     i = 0;                      % this the line of the table we're reading    
     while i < InpSt
         
@@ -389,10 +415,15 @@ function [Table, Headers] = ParseMembersTable( line, fid, InpSt  )
       end        
 
       i = i + 1;
-       Table(i,1:nc-1)  = sscanf(line,'%f',nc-1); 
-       [junk, count] = textscan(line,'%f',nc-1);
-      logical = sscanf(line(count+1:end),'%s',1);
+      [Table(i,1:nc-1),~,~,nextIndex1]  = sscanf(line,'%f',nc-1); 
+      [logical,~,~,nextIndex] = sscanf(line(nextIndex1:end),'%s',1);
       
+      if nextIndex+nextIndex1-1 < length(line)
+        FullTable.Comments{i} = line((nextIndex+nextIndex1-1):end);
+      else
+        FullTable.Comments{i} = '';
+      end
+        
       switch lower( logical )
       case 'true'
          Table(i,nc) = true;
@@ -403,6 +434,9 @@ function [Table, Headers] = ParseMembersTable( line, fid, InpSt  )
          error( sprintf( '  The logical variable must be "true" or "false".  Instead, it was "%s".', logical ) );
       end
     end
+    
+    FullTable.Table = Table;
+    FullTable.Headers = Headers;
     
 end %end function
 

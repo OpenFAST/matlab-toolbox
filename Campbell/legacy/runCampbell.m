@@ -28,7 +28,7 @@ WriteVTKmodes = true;
 WriteFASTfiles = true;
 
 WriteVTKmodes = false;
-WriteFASTfiles = false;
+% WriteFASTfiles = false;
 
 %% Executable and base file:       
 FASTexe = '..\..\bin\openFAST_Win32.exe';

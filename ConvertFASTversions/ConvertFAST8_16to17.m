@@ -38,8 +38,9 @@ if nargin < 3
     BDtemplate   = 'BeamDyn_Primary.inp';
     EDtemplate   = 'ElastoDyn_Primary.dat';
     SrvDtemplate = 'SrvD_Primary_v1.05.x.dat';
-    FASTtemplate = 'OpenFAST.dat';
+    FASTtemplate = 'OpenFAST.fst';
     HDtemplate   = 'HydroDyn.dat';
+    IfWtemplate  = 'InflowWind.dat';
 else
     ADtemplate   = 'AeroDyn15.dat';
     BDtemplate   = 'BeamDyn.dat';
@@ -47,6 +48,7 @@ else
     SrvDtemplate = 'ServoDyn.dat';
     FASTtemplate = 'enFAST.fst';
     HDtemplate   = 'HydroDyn.dat';
+    IfWtemplate  = 'InflowWind.dat';
 end
 %%
         % Primary input file:
@@ -117,19 +119,30 @@ end
     % Get BD Data and write new BeamDyn file:
     %----------------------------------------------------------------------
     CompElast = GetFASTPar(FP,'CompElast');
+    
+    [EDPar, newEDName] = GetFASTPar_Subfile(FP, 'EDFile', oldDir, newDir);            
+    NumBl = GetFASTPar(EDPar, 'NumBl');
+
     if CompElast == 1 % ElastoDyn
         
-       [EDPar, newEDName] = GetFASTPar_Subfile(FP, 'EDFile', oldDir, newDir);            
-       
-       template   = [templateDir filesep EDtemplate];  %template for primary file
-       Matlab2FAST(EDPar,template,newEDName, 2); %contains 2 header lines
+        for i = 1:NumBl
+            varName = ['BldFile(' num2str(i) ')'];
+
+            [BldFile] = GetFASTPar(EDPar, varName);            
+            if isempty(BldFile)
+                varName_alt = ['BldFile' num2str(i)];
+                [BldFile] = GetFASTPar(EDPar, varName_alt);
+                if ~isempty(BldFile)
+                    EDPar = SetFASTPar(EDPar,varName,BldFile);
+                end
+            end
+        end
+        
+        template   = [templateDir filesep EDtemplate];  %template for primary file
+        Matlab2FAST(EDPar,template,newEDName, 2); %contains 2 header lines
         
     elseif CompElast == 2 % BeamDyn
 
-        % first get the number of blades from ElastoDyn:
-        EDPar = GetFASTPar_Subfile(FP, 'EDFile', oldDir);            
-        NumBl = GetFASTPar(EDPar, 'NumBl');
-            
         for i = 1:NumBl
             varName = ['BDBldFile(' num2str(i) ')'];
             
@@ -142,6 +155,39 @@ end
         
     end    
 
+%%  %----------------------------------------------------------------------
+    % Get InflowWind Data and write new InflowWind file:
+    %----------------------------------------------------------------------
+    CompInflow = GetFASTPar(FP,'CompInflow');
+    if CompInflow == 1
+        [IfWPar, newIfWName] = GetFASTPar_Subfile(FP, 'InflowFile', oldDir, newDir);
+
+            % if there are multiple instances of RefHt and PLExp, rename
+            % them:
+        RefHt_Uni = GetFASTPar(IfWPar,'RefHt_Uni');
+        if isempty(RefHt_Uni)
+            RefHt = GetFASTPar(IfWPar,'RefHt',2);
+            if ~isempty(RefHt)
+                IfWPar = SetFASTPar(IfWPar,'RefHt_Uni',RefHt);
+                RefHt = GetFASTPar(IfWPar,'RefHt',3);
+                IfWPar = SetFASTPar(IfWPar,'RefHt_Hawc',RefHt);
+            end
+
+            PLExp = GetFASTPar(IfWPar,'PLExp',2);
+            if ~isempty(PLExp)
+                IfWPar = SetFASTPar(IfWPar,'PLExp_Hawc',PLExp);
+            end
+
+            FileName_IfW2 = GetFASTPar(IfWPar,'Filename',2);
+            if ~isempty(FileName_IfW2)
+                IfWPar = SetFASTPar(IfWPar,'Filename_BTS',FileName_IfW2);
+            end
+        end
+        
+        template   = [templateDir filesep IfWtemplate];  %template for primary file
+        Matlab2FAST(IfWPar, template, newIfWName, 2); %contains 2 header lines
+    end    
+    
 
 %%  %----------------------------------------------------------------------
     % Write new model data to the FAST input files:

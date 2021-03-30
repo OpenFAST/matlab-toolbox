@@ -47,7 +47,7 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
         isComment = false;
 
         % Get the Value, number or string
-        [value, cnt, ~, nextindex] = sscanf(line,'%f', 1);  %First check if line begins with a number
+        [value, cnt, ~, nextindex] = sscanf(line,'%50f', 1);  %First check if line begins with a number
 % disp ([ '"' line(nextindex:end) '"']);
         
         if cnt == 0 || ...  % we didn't find a number so...

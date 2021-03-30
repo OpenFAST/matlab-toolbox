@@ -1,9 +1,10 @@
-function [Mesh1_I,Mesh1_O,Mesh2_I,Mesh2_O, f1, MotionMap, LoadMap] ...
-    = PlotFASTIOMeshes_mapping( MeshInputFile )
+function [out, f1] = PlotFASTIOMeshes_mapping( MeshInputFile )
+
 
 %% -----------------
 % Read file:
 
+    out.fileName = MeshInputFile;
 
     [fid, message] = fopen( MeshInputFile );
     if fid < 1
@@ -16,28 +17,32 @@ function [Mesh1_I,Mesh1_O,Mesh2_I,Mesh2_O, f1, MotionMap, LoadMap] ...
         
     
    % DO NOT REORDER THESE READ STATEMENTS!!!! 
-Mesh1_I = ReadFASTmesh(Mesh1_Input);
-Mesh1_O = ReadFASTmesh(Mesh1_Output); %data not needed for Only2 plots (but used in the output list)
+out.Mesh1_LoadInput = ReadFASTmesh(Mesh1_Input);
+out.Mesh1_MotionOutput = ReadFASTmesh(Mesh1_Output); %data not needed for Only2 plots (but used in the output list)
 
-Mesh2_I = ReadFASTmesh(Mesh2_Input);
-Mesh2_O = ReadFASTmesh(Mesh2_Output); %data not needed for Only1 plots (but used in the output list)
+out.Mesh2_MotionInput = ReadFASTmesh(Mesh2_Input);
+out.Mesh2_LoadOutput = ReadFASTmesh(Mesh2_Output); %data not needed for Only1 plots (but used in the output list)
 
-Mesh1_I_1pt = ReadFASTmesh(fid);
-Mesh2_O_1pt = ReadFASTmesh(fid);
-Mesh1_O_1PT = ReadFASTmesh(fid);
 
-[MotionMap] = ReadFASTmappingData(fid);
-[~, LoadMap, Mesh2_O_aug, Mesh2_O_lump, Mesh1_I_lump] = ReadFASTmappingData(fid);
-[~, Mesh1LoadMap,Mesh1LoadAug, Mesh2_O_lump,] = ReadFASTmappingData(fid);
-[~, Mesh2LoadMap,Mesh2_O_aug, Mesh2_O_lump,] = ReadFASTmappingData(fid);
+out.Mesh1_I_1pt = ReadFASTmesh(fid);
+out.Mesh2_O_1pt = ReadFASTmesh(fid);
+out.Mesh1_O_1PT = ReadFASTmesh(fid);
+
+
+[out.MotionMap] = ReadFASTmappingData(fid);
+[~, out.LoadMap, out.Mesh2_LoadOutput_aug, out.Mesh2_LoadOutput_lump, out.Mesh1_LoadInput_lump] = ReadFASTmappingData(fid);
+
+%% not sure I care about this
+[~, out.Mesh1_I_1pt_LoadMap, out.Mesh1_I_1pt_aug, out.Mesh1_I_1pt_lumpSrc, out.Mesh1_I_1pt_lumpDest] = ReadFASTmappingData(fid);
+[~, out.Mesh2_O_1pt_LoadMap, out.Mesh2_O_1pt_aug, out.Mesh2_O_1pt_lumpSrc, out.Mesh2_O_1pt_lumpDest] = ReadFASTmappingData(fid);
 
 %% -----------------
 % plot motions mapping (Dest nodes from Src nodes):
 
 Mesh2PlotOffset  = [0,0,0]'; %[30,0,0]';
 
-Mesh2_I.Position = Mesh2_I.Position + repmat(Mesh2PlotOffset,1,Mesh2_I.Nnodes);
-Mesh2_O.Position = Mesh2_O.Position + repmat(Mesh2PlotOffset,1,Mesh2_O.Nnodes);
+out.Mesh2_MotionInput.Position = out.Mesh2_MotionInput.Position + repmat(Mesh2PlotOffset,1,out.Mesh2_MotionInput.Nnodes);
+out.Mesh2_LoadOutput.Position  = out.Mesh2_LoadOutput.Position  + repmat(Mesh2PlotOffset,1,out.Mesh2_LoadOutput.Nnodes );
 
 
 RefColor1     = [0,0,0];
@@ -49,11 +54,11 @@ ScaleSize = 1;
 f1=figure;
 subplot(1,1,1)
 hold on;
-title('Motion mapping (Mesh1 to Mesh 2)')
+title('Motion mapping (Mesh 1 to Mesh 2)')
 
-DrawMesh(Mesh1_O, RefColor1, ScaleSize );
-DrawMesh(Mesh2_I, RefColor2, ScaleSize );
-DrawMapping(Mesh1_O.Position,Mesh2_I.Position,MotionMap);
+DrawMesh(out.Mesh1_MotionOutput, RefColor1, ScaleSize );
+DrawMesh(out.Mesh2_MotionInput,  RefColor2, ScaleSize );
+DrawMapping(out.Mesh1_MotionOutput.Position,  out.Mesh2_MotionInput.Position,  out.MotionMap);
 axis equal;
 
 
@@ -62,16 +67,16 @@ axis equal;
 f2=figure;
 subplot(1,1,1)
 hold on;
-title('Loads mapping (Mesh2 to Mesh 1)')
+title('Loads mapping (Mesh 2 to Mesh 1)')
 
-DrawMesh(Mesh1_I, RefColor1, ScaleSize );
-DrawMesh(Mesh2_O, RefColor2, ScaleSize );
-if ~isempty(Mesh2_O_aug) && Mesh2_O_aug.Nnodes > 0 
-    Mesh2_O_aug.Position = Mesh2_O_aug.Position + repmat(Mesh2PlotOffset,1,Mesh2_O_aug.Nnodes);
-    DrawMesh(Mesh2_O_aug, RefColor2_aug, ScaleSize );    
-    DrawMapping(Mesh2_O_aug.Position,Mesh1_I.Position,LoadMap);   
+DrawMesh(out.Mesh1_LoadInput,  RefColor1, ScaleSize );
+DrawMesh(out.Mesh2_LoadOutput, RefColor2, ScaleSize );
+if ~isempty(out.Mesh2_LoadOutput_aug) && out.Mesh2_LoadOutput_aug.Nnodes > 0 
+    out.Mesh2_LoadOutput_aug.Position = out.Mesh2_LoadOutput_aug.Position + repmat(Mesh2PlotOffset,1,out.Mesh2_LoadOutput_aug.Nnodes);
+    DrawMesh(out.Mesh2_LoadOutput_aug, RefColor2_aug, ScaleSize );    
+    DrawMapping(out.Mesh2_LoadOutput_aug.Position,   out.Mesh1_LoadInput.Position,  out.LoadMap);   
 else
-    DrawMapping(Mesh2_O.Position,Mesh1_I.Position,LoadMap);
+    DrawMapping(out.Mesh2_LoadOutput.Position,   out.Mesh1_LoadInput.Position,  out.LoadMap);
 end
 axis equal;
    
@@ -82,6 +87,18 @@ end % function
 
 function DrawMapping(SrcPos,DestPos,mapping)
     MarkerColor = 'r';
+    if size(mapping,2) ~= size(DestPos,2)
+        disp('wrong destination sizes!')
+        size(mapping)
+        size(DestPos)
+        return
+    end
+    if size(mapping,1) ~= size(SrcPos,2)
+        disp('wrong source sizes!')
+        size(mapping)
+        size(SrcPos)
+        return
+    end
     
     for j=1:size(mapping,2)
         for i=1:size(mapping,1)            

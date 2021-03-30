@@ -48,6 +48,12 @@ fieldmask  = fieldmask_int~=0; % convert to logical values
 
 Mesh.Nnodes             = fread( fid, 1, 'int32'); 
 Mesh.NElemList          = fread( fid, 1, 'int32'); 
+if fieldmask(9)
+    Mesh.nScalars = fread(fid, 1,'int32');
+else
+    Mesh.nScalars = 0;
+end
+
 Mesh.Position           = reshape( fread( fid,   3*Mesh.Nnodes, nbits     ),    3, Mesh.Nnodes ); 
 Mesh.RefOrientation     = reshape( fread( fid, 3*3*Mesh.Nnodes, 'float64' ), 3, 3, Mesh.Nnodes ); 
 
@@ -84,7 +90,7 @@ if fieldmask(8)
 end
 
 if fieldmask(9)
-    Mesh.Scalars        = fread( fid,   [3, Mesh.Nnodes], nbits );
+    Mesh.Scalars        = fread( fid,   [Mesh.nScalars, Mesh.Nnodes], nbits );
 end
 
 if Mesh.NElemList > 0
