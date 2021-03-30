@@ -347,7 +347,7 @@ function [Table, Headers] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
                 break
                 % stop reading and return because the line was not numeric
             elseif cnt<nc
-                disp(['Warning: There are more headers in the table than columns. Ignoring the last ' num2str(nc-cnt) ' column(s).'])
+                disp(['Warning: There are more headers in the table than columns. Ignoring the last ' num2str(nc-cnt) ' column(s). Problematic line:', line])
                 Headers = Headers(1:cnt);
                 Table = Table(:,1:cnt);
                 nc = cnt;

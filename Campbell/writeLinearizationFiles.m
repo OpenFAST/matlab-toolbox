@@ -31,6 +31,7 @@ function [mainFSTFiles] = writeLinearizationFiles(templateFilenameFST, simulatio
 OptsFields={'writeVTKmodes','simTime','CompAero','CompInflow','CompServo','TrimGainPitch','TrimGainGenTorque','NLinTimes'};
 opts=struct();
 % Default values
+opts.calcSteady        = true ; % use trim or not
 opts.simTime           = NaN  ; % time in seconds that the first linearization output will happen (maximum time to converge to steady-state solution).  Default value 300s
 opts.TrimGainPitch     = 0.001; % [only for OpenFAST>2.3] Gain for Pitch trim (done around Max Torque)
 opts.TrimGainGenTorque = 300  ; % [only for OpenFAST>2.3] Gain for GenTrq trim (done below Max Torque)
@@ -64,8 +65,9 @@ CompAero   = GetFASTPar(FP,'CompAero')  ;
 CompElast  = GetFASTPar(FP,'CompElast')  ;
 hasTrimFeature  = any(strcmp(FP.Label,'TrimGain'));
 if hasTrimFeature
-    calcSteady  = lower(GetFASTPar(FP,'CalcSteady'));
-    calcSteady  = calcSteady(1)=='t'; % convert to logical
+    %calcSteady  = lower(GetFASTPar(FP,'CalcSteady'));
+    calcSteady  = opts.calcSteady;
+    FP = SetFASTPar(FP,'CalcSteady',opts.calcSteady);
 else
     calcSteady=false;
 end
@@ -166,7 +168,8 @@ if calcSteady
     if opts.CompServo>0 
         % fine
     else
-        warning('CalcSteady with CompServo=0 might not work fully');
+        % Actually works fine
+        % warning('CalcSteady with CompServo=0 might not work fully');
     end
 end
 
