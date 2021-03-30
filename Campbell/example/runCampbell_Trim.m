@@ -2,7 +2,7 @@
 % Example script to create a Campbell diagram with OpenFAST
 %
 % NOTE: This script is only an example. 
-%       The example data is suitable for the dev branch of OpenFAST 2.3 only (August 2020).
+%       The example data is suitable for OpenFAST 2.5.
 %     
 % Adapt this script to your need, by calling the different subfunctions presented.
 %
@@ -21,10 +21,12 @@ writeVIZ      = logical(1);
 runVIZ        = logical(1);
 writeAVI      = logical(1);
 outputFormat  ='XLS';       % Output format XLS, or CSV
-
+% Linearization options
+simTime   = 500; % Time after which the simulation will stop if no periodic steady state is found by the trim solution
+nLinTimes = 12 ; % Number of linearization done over one rotor rotation (e.g. 12 to 36)
 % Main Inputs
-FASTexe = '..\..\_ExampleData\openfast2.3_x64s.exe'; % path to an openfast executable
-templateFstFile     = '../../_ExampleData/5MW_Land_Lin_Templates/Main_5MW_Land_Lin_Trim.fst'; 
+FASTexe = '..\..\_ExampleData\openfast2.5_x64.exe'; % path to an openfast executable
+templateFstFile     = '../../_ExampleData/5MW_Land_Lin_Templates/Main_5MW_Land_Lin.fst'; 
 %      Template file used to create linearization files. 
 %      This template file should point to a valid ElastoDyn file, and,
 %      depending on the linearization type, valid AeroDyn, InflowWind and Servodyn files.
@@ -51,9 +53,8 @@ operatingPointsFile = 'LinearizationPoints_NoServo.csv';
 %        - override options of the main fst file (e.g. CompServo, CompAero) 
 %        - set some linearization options (e.g. simTime, NLinTimes)
 %      `simTime` needs to be large enough for a periodic equilibrium to be reached
-%      (trim option will be available in a next release of OpenFAST)
 if writeFSTfiles
-    FSTfilenames = writeLinearizationFiles(simulationFolder, operatingPointsFile,'simTime',300,'NLinTimes',12,'writeVTKmodes',true);
+    FSTfilenames = writeLinearizationFiles(templateFstFile, simulationFolder, operatingPointsFile, 'simTime', simTime, 'NLinTimes', nLinTimes,'writeVTKmodes',true);
 end
 %% --- Step 2: run OpenFAST 
 % NOTE: 
@@ -97,6 +98,8 @@ elseif isequal(lower(outputFormat),'csv')
     fprintf('\nUse python script to visualize CSV data: \n\n')
     fprintf('usage:  \n')
     fprintf('python plotCampbellData.py XLS_OR_CSV_File [WS_OR_RPM] [sheetname]\n\n')
+    fprintf('\n')
+    fprintf('for instance:  python plotCampbellData.py Campbell_ModesID.csv \n')
 
 end
 

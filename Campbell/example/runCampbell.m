@@ -1,8 +1,9 @@
 %% Documentation   
 % Example script to create a Campbell diagram with OpenFAST
+% This script does not use the "trim" option, which means the user needs to provide a large simulation time (simTime) after which linearization will be done.
 %
 % NOTE: This script is only an example.
-%       The example data is suitable for OpenFAST 2.3 only.
+%       The example data is suitable for OpenFAST 2.5.
 %
 % Adapt this script to your need, by calling the different subfunctions presented.
 %
@@ -18,9 +19,11 @@ writeFSTfiles = logical(1); % write FAST input files for linearization
 runFST        = logical(1); % run FAST simulations
 postproLin    = logical(1); % Postprocess .lin files, perform MBC, and write XLS or CSV files
 outputFormat  ='XLS';       % Output format XLS, or CSV
-
+% Linearization options
+simTime   = 500; % Time at which the system is expected to have reached a periodic equilibrium (should be large enough)
+nLinTimes = 36 ; % Number of linearization done over one rotor rotation (e.g. 12 to 36)
 % Main Inputs
-FASTexe = '..\..\_ExampleData\openfast2.3_x64s.exe'; % path to an openfast executable
+FASTexe = '..\..\_ExampleData\openfast2.5_x64.exe'; % path to an openfast executable
 templateFstFile     = '../../_ExampleData/5MW_Land_Lin_Templates/Main_5MW_Land_Lin.fst'; 
 %      Template file used to create linearization files. 
 %      This template file should point to a valid ElastoDyn file, and,
@@ -37,7 +40,7 @@ operatingPointsFile = 'LinearizationPoints_NoServo.csv';
 %      File defining the operating conditions for linearization (e.g. RotorSpeeed, WindSpeed).
 %      If special filenames are needed, the filenames can be defined in this file as well.
 %      See function `readOperatingPoints` for more info.
-%      You can define this data using a matlab structure, but an input file is recommended.
+%      You can also define this data using a matlab structure, but an input file is recommended.
 
 %% --- Step 1: Write OpenFAST inputs files for each operating points 
 % NOTE: 
@@ -47,10 +50,8 @@ operatingPointsFile = 'LinearizationPoints_NoServo.csv';
 %      The key/values are used to:
 %        - override options of the main fst file (e.g. CompServo, CompAero) 
 %        - set some linearization options (e.g. simTime, NLinTimes)
-%      `simTime` needs to be large enough for a periodic equilibrium to be reached
-%      (trim option will be available in a next release of OpenFAST)
 if writeFSTfiles
-    FSTfilenames = writeLinearizationFiles(templateFstFile, simulationFolder, operatingPointsFile, 'simTime',500,'NLinTimes',36); % NOTE: simTime and NLinTimes given as examples
+    FSTfilenames = writeLinearizationFiles(templateFstFile, simulationFolder, operatingPointsFile, 'simTime',simTime,'NLinTimes',nLinTimes, 'calcSteady', false);
 end
 %% --- Step 2: run OpenFAST 
 % NOTE: 
@@ -94,5 +95,7 @@ elseif isequal(lower(outputFormat),'csv')
     fprintf('\nUse python script to visualize CSV data: \n\n')
     fprintf('usage:  \n')
     fprintf('python plotCampbellData.py XLS_OR_CSV_File [WS_OR_RPM] [sheetname]\n\n')
+    fprintf('\n')
+    fprintf('for instance:  python plotCampbellData.py Campbell_ModesID.csv \n')
 
 end
