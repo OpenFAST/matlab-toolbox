@@ -67,7 +67,7 @@ function DescCat = ShortModeDescr(CD,i)
     nBD=0;
     for iD=1:length(Desc)
         s=Desc{iD};
-        s=fReplaceModeDescription(s);
+        s=replaceModeDescription(s);
         if Desc{iD}(1:2)=='BD'
             nBD=nBD+1;
         elseif Desc{iD}(1:2)=='ED'
