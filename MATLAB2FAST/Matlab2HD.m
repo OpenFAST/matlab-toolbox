@@ -116,7 +116,7 @@ while true
                 printTable = true;
             else
                 frmt = ' %4i %8.2f %8.2f %8.2f';
-                WriteFASTTable(line, fidIN, fidOUT, HDPar.AxCoefs, HDPar.AxCoefsHdr, newline, frmt);
+                WriteFASTTable(line, fidIN, fidOUT, HDPar.AxCoefs, newline, frmt);
                 continue; %let's continue reading the template file            
             end
         elseif  strcmpi(lastLabel,'NJOutputs')  %we've reached the Joint Output list
@@ -133,7 +133,7 @@ while true
                 printTable = true;
             else
                 frmt = ' %4i %11.5f %11.5f %11.5f %6i %12i';
-                WriteFASTTable(line, fidIN, fidOUT, HDPar.Joints, HDPar.JointsHdr, newline, frmt);
+                WriteFASTTable(line, fidIN, fidOUT, HDPar.Joints, newline, frmt);
                 continue; %let's continue reading the template file            
             end
             
@@ -143,7 +143,7 @@ while true
                 printTable = true;
             else
                 frmt = ' %4i %14.5f %14.5f';
-                WriteFASTTable(line, fidIN, fidOUT, HDPar.MemberSectionProp, HDPar.MemberSectionPropHdr, newline, frmt);
+                WriteFASTTable(line, fidIN, fidOUT, HDPar.MemberSectionProp, newline, frmt);
                 continue; %let's continue reading the template file            
             end 
             
@@ -153,7 +153,7 @@ while true
                 printTable = true;
             else
                 frmt = repmat( '%11.2f ', 1, 10 );
-                WriteFASTTable(line, fidIN, fidOUT, HDPar.SmplProp, HDPar.SmplPropHdr, newline, frmt);
+                WriteFASTTable(line, fidIN, fidOUT, HDPar.SmplProp, newline, frmt);
                 continue; %let's continue reading the template file            
             end
         
@@ -164,7 +164,7 @@ while true
                 printTable = true;
             else
                 frmt = '%8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f';
-                WriteFASTTable(line, fidIN, fidOUT, HDPar.DpthProp, HDPar.DpthPropHdr, newline, frmt);
+                WriteFASTTable(line, fidIN, fidOUT, HDPar.DpthProp, newline, frmt);
                 continue; %let's continue reading the template file            
             end
             
@@ -174,7 +174,7 @@ while true
                 printTable = true;
             else
                 frmt = ' %6.2f %9.3f %7.0f';
-                WriteFASTTable(line, fidIN, fidOUT, HDPar.MGProp, HDPar.MGPropHdr, newline, frmt);
+                WriteFASTTable(line, fidIN, fidOUT, HDPar.MGProp, newline, frmt);
                 continue; %let's continue reading the template file            
             end
         elseif strcmpi(value,'"FillNumM"') %we've reached the fill group table (and we think it's a string value so it's in quotes)
@@ -182,7 +182,7 @@ while true
                 disp( 'WARNING: the fill group table not found in the HD data structure.' );
                 printTable = true;
               else
-                WriteFillGroupTable(line, fidIN, fidOUT, HDPar.FillGroups, HDPar.FillGroupsHdr, newline);
+                WriteFillGroupTable(line, fidIN, fidOUT, HDPar.FillGroups, newline);
                 continue; %let's continue reading the template file            
               end     
         elseif strcmpi(value,'"MemberID"')
@@ -193,7 +193,7 @@ while true
               else
                  frmt = [' %4i' repmat(' %13.2f', 1, 20) ];
                  % '%11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f';
-                WriteFASTTable(line, fidIN, fidOUT, HDPar.MemberProp, HDPar.MemberPropHdr, newline, frmt);
+                WriteFASTTable(line, fidIN, fidOUT, HDPar.MemberProp, newline, frmt);
                 continue; %let's continue reading the template file            
               end
            elseif strcmpi(lastLabel, 'NMembers') %we've reached the member table
@@ -201,7 +201,7 @@ while true
                 disp( 'WARNING: the members table not found in the HD data structure.' );
                 printTable = true;
               else
-                WriteMembersTable(line, fidIN, fidOUT, HDPar.Members, HDPar.MembersHdr, newline);
+                WriteMembersTable(line, fidIN, fidOUT, HDPar.Members, newline);
                 continue; %let's continue reading the template file            
               end
            elseif strcmpi(lastLabel, 'NMOutputs') %we've reached the member output list table
@@ -209,7 +209,7 @@ while true
                 disp( 'WARNING: the members output list table not found in the HD data structure.' );
                 printTable = true;
               else
-                WriteMemberOutputTable(line, fidIN, fidOUT, HDPar.MemberOuts, HDPar.MemberOutsHdr, newline);
+                WriteMemberOutputTable(line, fidIN, fidOUT, HDPar.MemberOuts, newline);
                 continue; %let's continue reading the template file            
               end
            end
@@ -307,7 +307,7 @@ end
 
 function WriteHDAddMatrices( fidIN, fidOUT, AddF0, AddCLin, AddBLin, AddBQuad, newline)
 
-   ColIndx = [1:6];
+   ColIndx = 1:6;
     
       % now we'll write the AddF0:
     
@@ -342,11 +342,11 @@ function WriteHDAddMatrices( fidIN, fidOUT, AddF0, AddCLin, AddBLin, AddBQuad, n
 end
 
 
-function WriteMembersTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
+function WriteMembersTable( HdrLine, fidIN, fidOUT, FullTable, newline )
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
-    [shrtLine, remain]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
+    [shrtLine, ~]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
     TmpHdr = textscan(shrtLine,'%s');
     TemplateHeaders = TmpHdr{1};
     nc = length(TemplateHeaders);
@@ -360,7 +360,7 @@ function WriteMembersTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
     
 
     for i=1:nc
-        indx = strcmpi(TemplateHeaders{i}, Headers);
+        indx = strcmpi(TemplateHeaders{i}, FullTable.Headers);
         if sum(indx) > 0
             ColIndx(i) = find(indx,1,'first');
             if sum(indx) ~= 1
@@ -373,27 +373,28 @@ function WriteMembersTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
     
     
     % now we'll write the table:
-    ColIndx = [1:nc-1];
-    for i=1:size(Table,1) 
-        if (Table(i,8))
+%     ColIndx = [1:nc-1];
+    for i=1:size(FullTable.Table,1) 
+        if (FullTable.Table(i,8))
            logic = 'TRUE';
         else
            logic = 'FALSE';
         end
-        fprintf(fidOUT, ' %4i %9i %10i %11i %12i ', Table(i,1:5) );
+        fprintf(fidOUT, ' %4i %9i %10i %11i %12i ', FullTable.Table(i,1:5) );
        
-        fprintf(fidOUT, '%14.4f', Table(i,6) );  %write all of the columns
-        fprintf(fidOUT, '%7i ', Table(i,7) );
+        fprintf(fidOUT, '%14.4f', FullTable.Table(i,6) );  %write all of the columns
+        fprintf(fidOUT, '%7i ', FullTable.Table(i,7) );
         fprintf(fidOUT, '       %s',logic);
+        fprintf(fidOUT, FullTable.Comments{i});
         fprintf(fidOUT, newline);
     end
               
 end
-function WriteFillGroupTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
+function WriteFillGroupTable( HdrLine, fidIN, fidOUT, FullTable, newline )
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
-    [shrtLine, remain]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
+    [shrtLine, ~]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
     TmpHdr = textscan(shrtLine,'%s');
     TemplateHeaders = TmpHdr{1};
     nc = length(TemplateHeaders);
@@ -407,7 +408,7 @@ function WriteFillGroupTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
     
 
     for i=1:nc
-        indx = strcmpi(TemplateHeaders{i}, Headers);
+        indx = strcmpi(TemplateHeaders{i}, FullTable.Headers);
         if sum(indx) > 0
             ColIndx(i) = find(indx,1,'first');
             if sum(indx) ~= 1
@@ -420,22 +421,23 @@ function WriteFillGroupTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
     
     
     % now we'll write the table:
-    for i=1:size(Table,1) 
-        ColIndx = [1:Table(i).NumM];
-        fprintf(fidOUT, '%5i ', Table(i).NumM );  
-        fprintf(fidOUT, '%3i ', Table(i).MList(ColIndx) );
-        fprintf(fidOUT, '%8.2f',Table(i).FSLoc);  
-        fprintf(fidOUT, '%15.0f',Table(i).Dens);  
+    for i=1:size(FullTable.Table,1) 
+        ColIndx = 1:FullTable.Table(i).NumM;
+        fprintf(fidOUT, '%5i ', FullTable.Table(i).NumM );  
+        fprintf(fidOUT, '%3i ', FullTable.Table(i).MList(ColIndx) );
+        fprintf(fidOUT, '%8.2f',FullTable.Table(i).FSLoc);  
+        fprintf(fidOUT, '%15.0f',FullTable.Table(i).Dens);  
+        fprintf(fidOUT, FullTable.Comments{i});
         fprintf(fidOUT, newline);
     end
               
 end
 
-function WriteMemberOutputTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
+function WriteMemberOutputTable( HdrLine, fidIN, fidOUT, FullTable, newline )
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
-    [shrtLine, remain]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
+    [shrtLine, ~]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
     TmpHdr = textscan(shrtLine,'%s');
     TemplateHeaders = TmpHdr{1};
     nc = length(TemplateHeaders);
@@ -449,7 +451,7 @@ function WriteMemberOutputTable( HdrLine, fidIN, fidOUT, Table, Headers, newline
     
 
     for i=1:nc
-        indx = strcmpi(TemplateHeaders{i}, Headers);
+        indx = strcmpi(TemplateHeaders{i}, FullTable.Headers);
         if sum(indx) > 0
             ColIndx(i) = find(indx,1,'first');
             if sum(indx) ~= 1
@@ -462,22 +464,23 @@ function WriteMemberOutputTable( HdrLine, fidIN, fidOUT, Table, Headers, newline
     
     
     % now we'll write the table:
-    for i=1:size(Table,1) 
-        ColIndx = [1:Table(i).NOutLoc];
-        fprintf(fidOUT, '%5i ', Table(i).ID );  
-        fprintf(fidOUT, '%10i ', Table(i).NOutLoc );
+    for i=1:size(FullTable.Table,1) 
+        ColIndx = 1:FullTable.Table(i).NOutLoc;
+        fprintf(fidOUT, '%5i ', FullTable.Table(i).ID );  
+        fprintf(fidOUT, '%10i ', FullTable.Table(i).NOutLoc );
         fprintf(fidOUT, '     ');
-        fprintf(fidOUT, '%7.3f',Table(i).NodeLocs(ColIndx));           
+        fprintf(fidOUT, '%7.3f',FullTable.Table(i).NodeLocs(ColIndx));           
+        fprintf(fidOUT, FullTable.Comments{i});
         fprintf(fidOUT, newline);
     end
               
 end
 
-function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, frmt )
+function WriteFASTTable( HdrLine, fidIN, fidOUT, FullTable, newline, frmt )
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
-    [shrtLine, remain]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
+    [shrtLine, ~]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
     TmpHdr = textscan(shrtLine,'%s');
     TemplateHeaders = TmpHdr{1};
     nc = length(TemplateHeaders);
@@ -491,7 +494,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, frmt )
     
 
     for i=1:nc
-        indx = strcmpi(TemplateHeaders{i}, Headers);
+        indx = strcmpi(TemplateHeaders{i}, FullTable.Headers);
         if sum(indx) > 0
             ColIndx(i) = find(indx,1,'first');
             if sum(indx) ~= 1
@@ -502,14 +505,15 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, frmt )
         end                
     end
     
-    if nargin < 7 
+    if nargin < 6 
        frmt = '%14.5E';
     end
     
     % now we'll write the table:
-    for i=1:size(Table,1) 
+    for i=1:size(FullTable.Table,1) 
         
-        fprintf(fidOUT, frmt, Table(i,ColIndx) );  %write all of the columns
+        fprintf(fidOUT, frmt, FullTable.Table(i,ColIndx) );  %write all of the columns
+        fprintf(fidOUT, FullTable.Comments{i});
         fprintf(fidOUT, newline);
     end
               

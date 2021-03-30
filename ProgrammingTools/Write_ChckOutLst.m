@@ -12,7 +12,7 @@ clear all
 
 ModuleName = input('Enter the module for which the output module will be generated (ElastoDyn, ServoDyn, etc.): ','s');
 
-XLS_file  = '../../../openfast/modules/openfast-library/src/OutListParameters.xlsx';
+XLS_file  = '../../../../openfast/docs/OtherSupporting/OutListParameters.xlsx';
 OutListSheet = ModuleName;
 addErrChk = false;
 

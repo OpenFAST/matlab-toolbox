@@ -10,7 +10,8 @@ function FASTPar=SetFASTPar(FASTPar,Par,Value)
 
 found = false;
 for i=1:length(FASTPar.Label)
-    if strcmp(FASTPar.Label{i},Par)
+    
+    if strcmpi(FASTPar.Label{i},Par)
         FASTPar.Val{i} = Value;
         found = true;
     end
