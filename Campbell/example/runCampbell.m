@@ -1,16 +1,15 @@
 %% Documentation   
 % Example script to create a Campbell diagram with OpenFAST
-% This script does not use the "trim" option, which means the user needs to provide a large simulation time (simTime) after which linearization will be done.
 %
-% NOTE: This script is only an example.
+% NOTE: This script is only an example. 
 %       The example data is suitable for OpenFAST 2.5.
-%
+%     
 % Adapt this script to your need, by calling the different subfunctions presented.
 %
 %% Initialization
 clear all; close all; clc; 
 restoredefaultpath;
-addpath(genpath('C:/Work/FAST/matlab-toolbox'));
+addpath(genpath('C:/Work/FAST/matlab-toolbox')); % TODO adapt me
 
 %% Parameters
 
@@ -18,9 +17,12 @@ addpath(genpath('C:/Work/FAST/matlab-toolbox'));
 writeFSTfiles = logical(1); % write FAST input files for linearization
 runFST        = logical(1); % run FAST simulations
 postproLin    = logical(1); % Postprocess .lin files, perform MBC, and write XLS or CSV files
-outputFormat  ='XLS';       % Output format XLS, or CSV
+writeVIZ      = logical(1);
+runVIZ        = logical(0);
+writeAVI      = logical(0);
+outputFormat  ='CSV';       % Output format XLS, or CSV
 % Linearization options
-simTime   = 500; % Time at which the system is expected to have reached a periodic equilibrium (should be large enough)
+simTime   = 500; % Time after which the simulation will stop if no periodic steady state is found by the trim solution
 nLinTimes = 36 ; % Number of linearization done over one rotor rotation (e.g. 12 to 36)
 % Main Inputs
 FASTexe = '..\..\_ExampleData\openfast2.5_x64.exe'; % path to an openfast executable
@@ -30,7 +32,7 @@ templateFstFile     = '../../_ExampleData/5MW_Land_Lin_Templates/Main_5MW_Land_L
 %      depending on the linearization type, valid AeroDyn, InflowWind and Servodyn files.
 %      The template files can be in the `simulationFolder` or a separate folder.
 
-simulationFolder    = '../../_ExampleData/5MW_Land_Lin/';
+simulationFolder    = '../../_ExampleData/5MW_Land_Lin_Trim/';
 %      Folder where OpenFAST simulations will be run for the linearization.
 %      OpenFAST input files for each operating point will be created there.
 %      Should contain all the necessary files for a OpenFAST simulation.
@@ -38,9 +40,9 @@ simulationFolder    = '../../_ExampleData/5MW_Land_Lin/';
 
 operatingPointsFile = 'LinearizationPoints_NoServo.csv'; 
 %      File defining the operating conditions for linearization (e.g. RotorSpeeed, WindSpeed).
-%      If special filenames are needed, the filenames can be defined in this file as well.
 %      See function `readOperatingPoints` for more info.
-%      You can also define this data using a matlab structure, but an input file is recommended.
+%      You can define this data using a matlab structure, but an input file is recommended.
+   
 
 %% --- Step 1: Write OpenFAST inputs files for each operating points 
 % NOTE: 
@@ -50,14 +52,15 @@ operatingPointsFile = 'LinearizationPoints_NoServo.csv';
 %      The key/values are used to:
 %        - override options of the main fst file (e.g. CompServo, CompAero) 
 %        - set some linearization options (e.g. simTime, NLinTimes)
+%      `simTime` needs to be large enough for a periodic equilibrium to be reached
 if writeFSTfiles
-    FSTfilenames = writeLinearizationFiles(templateFstFile, simulationFolder, operatingPointsFile, 'simTime',simTime,'NLinTimes',nLinTimes, 'calcSteady', false);
+    FSTfilenames = writeLinearizationFiles(templateFstFile, simulationFolder, operatingPointsFile, 'simTime', simTime, 'NLinTimes', nLinTimes,'writeVTKmodes',true);
 end
 %% --- Step 2: run OpenFAST 
 % NOTE: 
 %      Comment this section if the simulations were already run
 %      Potentially write a batch file for external run (can be more conveninet for many simulations).
-%      Batch and commands are relative to the parent directory of the batch file.
+%       Batch and commands are relative to the parent directory of the batch file.
 if runFST
     [FASTfilenames] = getFullFilenamesOP(simulationFolder, operatingPointsFile);
     % --- Option 1: Batch
@@ -99,3 +102,30 @@ elseif isequal(lower(outputFormat),'csv')
     fprintf('for instance:  python plotCampbellData.py Campbell_ModesID.csv \n')
 
 end
+
+
+
+%% --- Step 5: Generate visualization data
+% --- Step 5a: Write VIZ files
+if writeVIZ
+    [VIZfilenames] = writeVizualizationFiles(simulationFolder, operatingPointsFile,'VTKLinModes',12);
+end
+% --- Step 5b: Run FAST with VIZ files to generate VTKs
+if runVIZ
+    % --- Option 1: batch
+    [VIZcommands, VIZbatch, runFolder] = writeBatch([simulationFolder '/_RunVIZ.bat'], VIZfilenames, FASTexe, 'flag','-VTKLin');
+    %runBatch(batchFilename, runFolder); 
+    % --- Option 2: direct calls
+    %runFAST(VIZfilenames, FASTexe, 'flag','-VTKLin');
+end
+% --- Step 5c: Convert VTKs to AVI
+% NOTE: this generates the batch file only
+%       Also, this is experimental and users might need to adapt the inputs and batchfile content
+if writeAVI
+    pvPython          = 'pvpython'; % path to paraview-python binary
+    pythonPlotScript  = 'C:/Work/FAST/matlab-toolbox/Campbell/plotModeShapes.py'; % path to python plot script
+    paraviewStateFile = 'C:/Work/FAST/matlab-toolbox/Campbell/ED_Surfaces.pvsm';  % path  to paraview State file
+    writeAVIbatch([simulationFolder '/_RunAVI.bat'], simulationFolder, operatingPointsFile, pvPython, pythonPlotScript, paraviewStateFile);
+end
+
+

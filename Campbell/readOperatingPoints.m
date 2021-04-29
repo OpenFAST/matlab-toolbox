@@ -47,7 +47,7 @@ function OP = readOperatingPoints(filename, delim)
     OP=struct();
     for iField = 1:length(fieldnames_in)
         fieldname = strtrim(lower(fieldnames_in{iField}));
-        if any(strcmp({'windspeed','ws'},fieldname))
+        if any(strcmp({'wind','windspeed','ws'},fieldname))
             OP.WindSpeed = st0.(fieldnames_in{iField});
 
         elseif any(strcmp({'rotorspeed','rotspeed','rpm','omega'},fieldname))

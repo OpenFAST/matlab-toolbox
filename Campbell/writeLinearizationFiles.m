@@ -275,7 +275,7 @@ for iOP = OP.nOP:-1:1
 
     if noWind
         if opts.writeVTKmodes
-            FP_mod = SetFASTPar(FP_mod,'CompAero'  , 2); % We need AeroDyn for surface outputs..
+            FP_mod = SetFASTPar(FP_mod,'CompAero'  , 2); % We need AeroDyn for surface outputs.. # TODO TODO
         else
             FP_mod = SetFASTPar(FP_mod,'CompAero'  , 0); %
         end
