@@ -123,7 +123,7 @@ if nb == 3
         %---    
         T1q = eye(n_FixFrameStates1);               % Eq. 11 for first-order states (eq. 8 in MBC3 Update document)
         for ii = 1:matData.n_RotTripletStates1
-            T1q = blkdiag(T1, tt);
+            T1q = blkdiag(T1q, tt);
         end
 
         T1qv = eye(n_FixFrameStates1);              % inverse of T1q
