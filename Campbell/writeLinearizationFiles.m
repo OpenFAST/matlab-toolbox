@@ -45,7 +45,6 @@ if nargin >=4
     for iOpts = 1:length(OptsFields)
         i = find( strcmp( varargin, OptsFields{iOpts}) == 1);
         if ~isempty(i)
-            disp('Changing ');disp(OptsFields{iOpts})
             opts.(OptsFields{iOpts}) = varargin{i + 1};
         end
     end
