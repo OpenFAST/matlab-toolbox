@@ -28,7 +28,7 @@ function [mainFSTFiles] = writeLinearizationFiles(templateFilenameFST, simulatio
 % (c) 2018 Envision Energy, USA
 
 % --- Optional arguments
-OptsFields={'writeVTKmodes','simTime','CompAero','CompInflow','CompServo','TrimGainPitch','TrimGainGenTorque','NLinTimes'};
+OptsFields={'calcSteady','writeVTKmodes','simTime','CompAero','CompInflow','CompServo','TrimGainPitch','TrimGainGenTorque','NLinTimes'};
 opts=struct();
 % Default values
 opts.calcSteady        = true ; % use trim or not
@@ -45,6 +45,7 @@ if nargin >=4
     for iOpts = 1:length(OptsFields)
         i = find( strcmp( varargin, OptsFields{iOpts}) == 1);
         if ~isempty(i)
+            disp('Changing ');disp(OptsFields{iOpts})
             opts.(OptsFields{iOpts}) = varargin{i + 1};
         end
     end
@@ -67,7 +68,11 @@ hasTrimFeature  = any(strcmp(FP.Label,'TrimGain'));
 if hasTrimFeature
     %calcSteady  = lower(GetFASTPar(FP,'CalcSteady'));
     calcSteady  = opts.calcSteady;
-    FP = SetFASTPar(FP,'CalcSteady',opts.calcSteady);
+    if opts.calcSteady
+        FP = SetFASTPar(FP,'CalcSteady','True');
+    else
+        FP = SetFASTPar(FP,'CalcSteady','False');
+    end
 else
     calcSteady=false;
 end
