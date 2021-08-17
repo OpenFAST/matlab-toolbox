@@ -216,13 +216,13 @@ end
     
         % Change AeroCent from the blade file table to PitchAxis
     for k=1:NumBl
-        indx = find(strcmpi('AeroCent',BP{k}.BldPropHdr));
+        indx = find(strcmpi('AeroCent',BP{k}.BldProp.Headers));
         if isempty(indx)
             disp('Warning: AeroCent not found in blade properties table.')
         else        
-            PitchAxis = 0.5 - BP{k}.BldProp(:,indx);  
-            BP{k}.BldPropHdr = [BP{k}.BldPropHdr; 'PitchAxis'];
-            BP{k}.BldProp    = [BP{k}.BldProp PitchAxis];
+            PitchAxis = 0.5 - BP{k}.BldProp.Table(:,indx);  
+            BP{k}.BldProp.Headers = [BP{k}.BldProp.Headers; 'PitchAxis'];
+            BP{k}.BldProp.Table   = [BP{k}.BldProp.Table PitchAxis];
         end
     end
         % Get the variables from OutList and figure out which modules they need to go in
