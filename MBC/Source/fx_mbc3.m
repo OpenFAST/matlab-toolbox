@@ -50,12 +50,17 @@ end
 
 %%  nb = 3; % number of blades required for MBC3
 %% ---------- Multi-Blade-Coordinate transformation -------------------------------------------
-[new_seq_dof2, ~, nb] = get_new_seq(matData.RotTripletIndicesStates2,matData.ndof2); % these are the first ndof2 states (not "first time derivative" states); these values are used to calculate matrix transformations
-[new_seq_dof1] = get_new_seq(matData.RotTripletIndicesStates1,matData.ndof1); % these are the first-order ndof1 states; these values are used to calculate matrix transformations
+[new_seq_dof2, ~, nb]  = get_new_seq(matData.RotTripletIndicesStates2,matData.ndof2); % these are the first ndof2 states (not "first time derivative" states); these values are used to calculate matrix transformations
+[new_seq_dof1, ~, nb2] = get_new_seq(matData.RotTripletIndicesStates1,matData.ndof1); % these are the first-order ndof1 states; these values are used to calculate matrix transformations
 new_seq_states = [new_seq_dof2;  new_seq_dof2+matData.ndof2;  new_seq_dof1+matData.NumStates2]; % combine the second-order states, including "first time derivatives", with first-order states (assumes ordering of displacements and velocities in state matrices); these values are used to calculate matrix transformations 
      % second-order NonRotating q2, second-order Rotating q2, 
      % second-order NonRotating q2_dot, second-order Rotating q2_dot, 
      % first-order NonRotating q1, first-order Rotating q1
+nb = max(nb,nb2);     
+if (nb==0)    
+    disp(['*** fx_mbc3: no states were found, so assuming turbine has 3 blades. ***'] )
+    nb = 3;
+end
 
 if nb == 3
     MBC.performedTransformation = true;
@@ -63,7 +68,8 @@ if nb == 3
     if matData.n_RotTripletStates2 + matData.n_RotTripletStates1 < 1
         error('*** There are no rotating states. MBC transformation, therefore, cannot be performed.');
         % perhaps just warn and perform eigenanalysis anyway?
-    elseif(matData.n_RotTripletStates2*nb > matData.ndof2)
+    end
+    if(matData.n_RotTripletStates2*nb > matData.ndof2)
         error('**ERROR: the rotating second-order dof exceeds the total num of second-order dof');
     elseif(matData.n_RotTripletStates1*nb > matData.ndof1)
         error('**ERROR: the rotating first-order dof exceeds the total num of first-order dof');
