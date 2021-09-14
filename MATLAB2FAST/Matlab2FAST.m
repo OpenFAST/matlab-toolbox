@@ -98,6 +98,7 @@ while true
     
     
     [value, label, isComment, ~, ~] = ParseFASTInputLine(line);
+    
             
     if ~printTable && ~isComment && ~isempty(label)        
         
@@ -349,20 +350,9 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
 
         % The template label matches a label in FastPar
         %  so let's use the old value.
-        indx2 = find(indx,1,'first');       
-        val2Write = FastPar.Val{indx2}; 
+        indx2 = find(indx,1,'first');
 
-            % print the old value at the start of the line,
-            % using an appropriate format
-        if isnumeric(val2Write)
-            writeVal= getNumericVal2Write( val2Write, '%11G' );
-            if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
-                writeVal=getNumericVal2Write( val2Write, '%15G' );
-            end
-        else
-            writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
-        end
-
+        writeVal = getWriteVal( FastPar.Val{indx2} );     
 
         idx = strfind( line, label ); %let's just take the line starting where the label is first listed            
         line = [writeVal '   ' line(idx(1):end)];            
@@ -383,6 +373,31 @@ function [writeVal] = getNumericVal2Write( val2Write, fmt )
         writeVal = [writeVal sprintf([',' fmt],val2Write(2:end)) ' '];
     end
     return;
+end
+
+function [writeVal] = getWriteVal( val2Write )
+
+        % print the old value at the start of the line,
+        % using an appropriate format
+    if isnumeric(val2Write)
+        if all( int32(val2Write)==val2Write )
+            % this is an exact integer, so we'll use a different format
+            fmt  = '%11.0f';
+            fmt1 = '%15.0f';
+        else
+            fmt  = '%11G';
+            fmt1 = '%15G';
+        end
+        writeVal= getNumericVal2Write( val2Write, fmt );
+        if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
+            writeVal=getNumericVal2Write( val2Write, fmt1 );
+            disp(writeVal)
+            disp(str2num(writeVal))
+        end
+    else
+        writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
+    end
+
 end
 
 function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines, IntegerCols )
@@ -497,18 +512,10 @@ end
 
 function WriteFASTFileList( line, fidIN, fidOUT, List, label, newline )
 
-    val2Write = List{1};
         % print the old value at the start of the line,
         % using an appropriate format
-    if isnumeric(val2Write)
-        writeVal = getNumericVal2Write( val2Write, '%11G' );
-        if any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
-            writeVal=getNumericVal2Write( val2Write, '%15G' );
-        end
+    writeVal = getWriteVal( List{1} );     
 
-    else
-        writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
-    end
 
     idx = strfind( line, label ); %let's just take the line starting where the label is first listed            
     line = [writeVal '   ' line(idx(1):end)];    
