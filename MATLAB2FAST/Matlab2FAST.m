@@ -343,7 +343,7 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
     if any( indx )
 
         if sum(indx) > 1 % we found more than one....
-            vals2Write = FastPar.Val{indx};
+%             vals2Write = FastPar.Val{indx};
             disp( ['WARNING: multiple occurrences of ' label ' in the FAST data structure.'] );
         end
 
@@ -354,7 +354,7 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
 
             % print the old value at the start of the line,
             % using an appropriate format
-        if isnumeric(val2Write)
+        if isnumeric(val2Write) && ~isempty(val2Write)
             writeVal= getNumericVal2Write( val2Write, '%11G' );
             if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
                 writeVal=getNumericVal2Write( val2Write, '%15G' );
@@ -483,7 +483,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
                 end
                 fprintf(fidOUT, fmt, TableIn.Table{i,j} );
             end
-            fprintf(fidOUT, TableIn.Comments{i}); % print any comments that may exist for this line
+            fprintf(fidOUT, '%s', TableIn.Comments{i}); % print any comments that may exist for this line
             fprintf(fidOUT, newline);
         end        
     else        
