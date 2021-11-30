@@ -36,6 +36,6 @@ cd(oldFolder);
 if any(status)
    I=find(status);
    disp('The following simulations failed');
-   disp(commands{I});
+   fprintf('%s\n',commands{I});
    error('%d/%d simulations failed',length(I),length(commands))
 end
