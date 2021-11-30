@@ -33,9 +33,9 @@ cd(oldFolder);
 
 
 % --- Check
-if any(status);
+if any(status)
    I=find(status);
    disp('The following simulations failed');
-   disp(sCmd(I));
+   disp(commands{I});
    error('%d/%d simulations failed',length(I),length(commands))
 end
