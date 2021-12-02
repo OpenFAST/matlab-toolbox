@@ -2,7 +2,7 @@
 % Example script to create a Campbell diagram with OpenFAST
 %
 % NOTE: This script is only an example. 
-%       The example data is suitable for OpenFAST 2.5.
+%       The example data is suitable for a given version of OpenFAST and might need to be adapted
 %     
 % Adapt this script to your need, by calling the different subfunctions presented.
 %
