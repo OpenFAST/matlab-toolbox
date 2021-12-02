@@ -23,7 +23,7 @@ outputFormat  ='CSV';       % Output format XLS, or CSV
 simTime   = 500; % Time at which the system is expected to have reached a periodic equilibrium (should be large enough)
 nLinTimes = 36 ; % Number of linearization done over one rotor rotation (e.g. 12 to 36)
 % Main Inputs
-FASTexe = '..\..\_ExampleData\openfast2.5_x64.exe'; % path to an openfast executable
+FASTexe = '../../_ExampleData/openfast3.0_x64s.exe'; % path to an openfast executable
 templateFstFile     = '../../_ExampleData/5MW_Land_Lin_Templates/Main_5MW_Land_Lin.fst'; 
 %      Template file used to create linearization files. 
 %      This template file should point to a valid ElastoDyn file, and,

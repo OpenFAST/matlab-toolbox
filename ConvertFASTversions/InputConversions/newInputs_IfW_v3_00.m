@@ -94,6 +94,14 @@ function [IfWP, err1] = newInputs_IfW_v3_00(ADPar,EDPar)
     IfWP.Val{n}   = 0;    
     
     n = n + 1;
+    IfWP.Label{n} = 'PropagationDir';
+    IfWP.Val{n}   = 0;      
+
+    n = n + 1;
+    IfWP.Label{n} = 'VFlowAng';
+    IfWP.Val{n}   = 0;      
+    
+    n = n + 1;
     IfWP.Label{n} = 'Echo';
     IfWP.Val{n}   = 'False';    
         
