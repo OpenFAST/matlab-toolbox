@@ -29,9 +29,14 @@ The scripts are organized in the following folders:
 - `MBC`: scripts to perform the multi-blade coordinate  transformation (see [here](#MBC))
 - `Plots`: plotting scripts
 - `ProgrammingTools`: tools for OpenFAST developers
-- `Utilities`: miscellaneous tools used in the library
+- `Utilities`: miscellaneous tools used in the library (see [examples](Utilities/examples/)).
 - `math`: generic mathematical tools used in the library
 - `_ExampleData`: data used in some examples (e.g. the Campbell Diagram example)
+
+
+The content of some of these folders are described below.
+
+
 
 
 ## Campbell diagram
@@ -136,3 +141,16 @@ After the MBC3 transformation, the `campbell_diagram_data` function can be calle
 
 Note that the blade and tower lengths are inputs to this function. Also, if the optional `xlsFileName` is used, the CampbellData is written to an Excel 
 file, which can be useful for analyzing the results.
+
+
+
+
+
+## Utilities
+Various utilities used by other scripts. Examples are:
+- run OpenFAST simulations. 
+- read OpenFAST input files 
+- read OpenFAST output files
+
+See [examples](Utilities/examples/)
+
