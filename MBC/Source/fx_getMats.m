@@ -95,7 +95,7 @@ end
 if ( matData.NumStates > 0 )
         % keep StateOrderingIndx for applying inverse of MBC3 later
         % (to visualize mode shapes)
-    [matData.StateOrderingIndx, checkEDstates]    = getStateOrderingIndx(matData);
+    [matData.StateOrderingIndx]    = getStateOrderingIndx(matData);
     
     x_rotFrame(matData.StateOrderingIndx)         = data(matData.NAzimStep).x_rotFrame;
     matData.DescStates(matData.StateOrderingIndx) = data(matData.NAzimStep).x_desc;
@@ -201,11 +201,7 @@ end
 %% Find the indices for, state triplets in the rotating frame
 %  (note that we avoid the "first time derivative" states)
 if matData.ndof2 > 0
-    if (checkEDstates)
-        [matData.RotTripletIndicesStates2, matData.n_RotTripletStates2] = findBladeTriplets_EDstate(x_rotFrame(1:matData.ndof2),matData.DescStates(1:matData.ndof2) );
-    else 
-        [matData.RotTripletIndicesStates2, matData.n_RotTripletStates2] = findBladeTriplets(        x_rotFrame(1:matData.ndof2),matData.DescStates(1:matData.ndof2) );
-    end 
+   [matData.RotTripletIndicesStates2, matData.n_RotTripletStates2] = findBladeTriplets( x_rotFrame(1:matData.ndof2),matData.DescStates(1:matData.ndof2) );
 else
     matData.RotTripletIndicesStates2 = [];
     matData.n_RotTripletStates2 = 0;
@@ -240,11 +236,10 @@ end
 %% Reorder state matrices so that all the second-order module's displacements
 %  are first, followed by all the modules' velocities, followed by all of 
 %  the first-order states.
-function [StateOrderingIndx, checkEDstates] = getStateOrderingIndx(matData)
+function [StateOrderingIndx] = getStateOrderingIndx(matData)
 
     StateOrderingIndx = (1:matData.NumStates)';
     lastModName = '';
-    checkEDstates = true;
     lastModOrd  = 0;
     mod_nDOFs   = 0;    % number of DOFs in each module
     sum_nDOFs2  = 0;    % running total of second-order DOFs
@@ -255,13 +250,6 @@ function [StateOrderingIndx, checkEDstates] = getStateOrderingIndx(matData)
     for i=1:matData.NumStates
         
         modName = strtok(matData.DescStates{i}); % name of the module whose states we are looking at
-
-        % ED has the blade number in the state description twice, so we
-        % have to check the strings differently. We'll check here if a  
-        % different module is used for the blade DOFs:
-        if strncmpi(modName,'BD',2) || strncmpi(modName,'MBD',3)
-            checkEDstates = false;
-        end
 
         if ~strcmp(lastModName,modName)
             
