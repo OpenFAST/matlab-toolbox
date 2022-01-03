@@ -5,15 +5,26 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
 
     NTriplets = 0;              % first initialize to zero
     Triplets = [];
-    for i = 1:length(rotFrame)  % loop through inputs/outputs
+    origDesc = Desc;
+    
+    % hack for ElastoDyn state names (remove unnecessary text in parenthesis)
+    for i=1:length(rotFrame)
+        ix = strfind(Desc{i},'(internal DOF index = ');
+        if ~isempty(ix)
+            ix2 = strfind(Desc{i},'))');
+            Desc{i} = [Desc{i}(1:ix-1) Desc{i}(ix2+2:end)];
+        end 
+    end
+    
+    for i = 1:length(rotFrame)  % loop through inputs/outputs/states
         if rotFrame(i)          % this is in the rotating frame
             Tmp = zeros(1,3);
             foundTriplet = false;
-            foundIt = false;
+            foundBladeNumber = false;
             for chk = 1:length(chkStr)
                 BldNoCol = regexp(Desc{i},chkStr{chk},'match');
                 if ~isempty(BldNoCol)
-                    foundIt = true;
+                    foundBladeNumber = true;
 
                         % create another regular expression to find the
                         % exact match on a different blade:
@@ -24,6 +35,7 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
                         %we need to get rid of the special characters that
                         %may exist in Desc{}:
                     checkThisStr = strrep(strrep(strrep(checkThisStr,')','\)'), '(', '\('),'^','\^'); 
+                    FirstStr     = strrep(strrep(strrep(FirstStr,    ')','\)'), '(', '\('),'^','\^'); 
                     
                     k = str2double(BldNoCol{1}(end));
                     Tmp(k) = i;
@@ -32,11 +44,11 @@ function [Triplets, NTriplets] = findBladeTriplets(rotFrame,Desc )
             end
 
                 % find the other match values
-            if foundIt 
+            if foundBladeNumber 
                 for j = (i+1):length(rotFrame)           % loop through all remaining control inputs
                     if rotFrame(j)                       % this is in the rotating frame
                         BldNoCol = regexp(Desc{j},checkThisStr,'match'); % match all but the blade number
-                        if ~isempty(BldNoCol)                      
+                        if ~isempty(BldNoCol)
                             Num = regexp(Desc{j},FirstStr,'match'); % match all but the blade number
                             k = str2double(Num{1}(end));
                             Tmp(k) = j;                             % save the indices for the remaining blades
