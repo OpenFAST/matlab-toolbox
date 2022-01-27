@@ -250,8 +250,9 @@ function [StateOrderingIndx] = getStateOrderingIndx(matData)
     for i=1:matData.NumStates
         
         modName = strtok(matData.DescStates{i}); % name of the module whose states we are looking at
+        ModOrd  = matData.StateDerivOrder(i);
 
-        if ~strcmp(lastModName,modName)
+        if ~strcmp(lastModName,modName) || lastModOrd ~= ModOrd
             
             % this is the start of a new set of DOFs, so we'll set the
             % indices for the last matrix
@@ -267,7 +268,7 @@ function [StateOrderingIndx] = getStateOrderingIndx(matData)
                 sum_nDOFs1 = sum_nDOFs1 + mod_nDOFs;
             end
             
-            % reset for a new module
+            % reset for a new module (or new 1st-order states in the same module)
             mod_nDOFs = 0;
             
             indx_start = i; % start of this module
