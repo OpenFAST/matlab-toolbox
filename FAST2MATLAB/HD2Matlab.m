@@ -96,7 +96,9 @@ while true %loop until discovering Outlist or end of file, than break
     end   
     
     if ~isempty(strfind(upper(line),upper('ADDITIONAL STIFFNESS')))
-          [DataOut.AddF0, DataOut.AddCLin, DataOut.AddBLin, DataOut.AddBQuad] = ParseHDAddMatrices(fid);
+          NBodyMod=GetFASTPar(DataOut,'NBodyMod');
+          NBody=GetFASTPar(DataOut,'NBody');
+          [DataOut.AddF0, DataOut.AddCLin, DataOut.AddBLin, DataOut.AddBQuad] = ParseHDAddMatrices(fid, NBodyMod, NBody);
           continue;
     end
        
@@ -229,31 +231,39 @@ function [OutList OutListComments] = ParseFASTOutList( fid )
 end %end function
 %%
 
-function [AddF0, AddCLin, AddBLin, AddBQuad] = ParseHDAddMatrices(fid)
+function [AddF0, AddCLin, AddBLin, AddBQuad] = ParseHDAddMatrices(fid, NBodyMod, NBody)
 
-   AddF0    = zeros(6,1);
-   AddCLin  = zeros(6,6);
-   AddBLin  = zeros(6,6);
-   AddBQuad = zeros(6,6);
+    if NBodyMod > 1
+        nr_in = 6;
+        nc_in = NBody;
+    else
+        nr_in = 6*NBody;
+        nc_in = 1;
+    end
+
+   AddF0    = zeros(nr_in,nc_in);
+   AddCLin  = zeros(nr_in,6*NBody);
+   AddBLin  = zeros(nr_in,6*NBody);
+   AddBQuad = zeros(nr_in,6*NBody);
    
       % read the AddF0:
-    for i=1:6
+    for i=1:nr_in
       line = fgetl(fid); 
-      AddF0(i,:) = sscanf(line,'%f',6); 
+      AddF0(i,:) = sscanf(line,'%f',nc_in); 
     end
 
       % read the AddCLin:
-    for i=1:6
+    for i=1:nr_in
       line = fgetl(fid); 
-      AddCLin(i,:) = sscanf(line,'%f',6); 
+      AddCLin(i,:) = sscanf(line,'%f',6*NBody); 
     end
-    for i=1:6
+    for i=1:nr_in
       line = fgetl(fid); 
-      AddBLin(i,:) = sscanf(line,'%f',6); 
+      AddBLin(i,:) = sscanf(line,'%f',6*NBody); 
     end
-    for i=1:6
+    for i=1:nr_in
       line = fgetl(fid); 
-      AddBQuad(i,:) = sscanf(line,'%f',6); 
+      AddBQuad(i,:) = sscanf(line,'%f',6*NBody); 
     end
 end
 

@@ -409,7 +409,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
         nc = size(TableIn.Table,2); 
     else
                         
-        if ~isempty(strfind(HdrLine,','))
+        if contains(HdrLine,',')
             TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
         else
             TmpHdr = textscan(HdrLine,'%s');

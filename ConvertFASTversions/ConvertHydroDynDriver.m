@@ -36,6 +36,7 @@ function ConvertHydroDynDriver(oldDriverName, newDir, templateDir)
     if (err)
         SeaStateInputFile = 'SeaState.dat';
         nD = length(P.Label);
+        nD = nD + 1;
         P.Label{nD} = 'SeaStateInputFile';
         P.Val{nD}   = SeaStateInputFile;
 

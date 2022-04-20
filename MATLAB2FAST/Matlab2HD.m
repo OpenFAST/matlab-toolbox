@@ -84,7 +84,7 @@ while true
         end
     end
     
-    if ~isempty(strfind(upper(line),upper('OUTPUT CHANNELS'))) 
+    if contains(upper(line),upper('OUTPUT CHANNELS')) 
         ContainsOutList = true;
         fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
         break;
@@ -125,6 +125,8 @@ while true
               fprintf(fidOUT, '%4i', HDPar.JOutLst ); 
               filler = repmat(' ',1,max(1,17-(4*length(HDPar.JOutLst))));
               fprintf(fidOUT,'%s%s',filler,remain);
+              lastValue = value;
+              lastLabel = label;
               continue;
             end
 
@@ -204,8 +206,7 @@ while true
                 disp( 'WARNING: the member-based hydrodynamic coefficients table not found in the HD data structure.' );
                 printTable = true;
               else
-                 frmt = [' %4i' repmat(' %13.2f', 1, 20) ];
-                 % '%11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f';
+                 frmt = [' %4i' repmat(' %13.2f', 1, 24) ];
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.MemberProp, newline, frmt);
                 for k = 1:lastValue
                     fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
@@ -236,21 +237,30 @@ while true
               end
            end
         else
+            
             line = ParseValue(HDPar.Val, HDPar.Label, value, label, line, TemplateFile);
             
-
         end
     else % isComment || length(label) == 0
         if isComment
-           if (~isempty(strfind(upper(line),upper('ADDITIONAL STIFFNESS'))))
-            fprintf(fidOUT,'%s',line);  
-            WriteHDAddMatrices( fidIN, fidOUT, HDPar.AddF0, HDPar.AddCLin, HDPar.AddBLin, HDPar.AddBQuad, newline);
-            for i = 1:20
-               line    = fgets(fidIN); 
-            end
-           end
-            printTable = false;     % we aren't reading a table (if we were, we reached the end) 
-           
+            if (contains(upper(line),upper('ADDITIONAL STIFFNESS')))
+                fprintf(fidOUT,'%s',line);                  
+                NBodyMod=GetFASTPar(HDPar,'NBodyMod');
+                NBody=GetFASTPar(HDPar,'NBody');
+                WriteHDAddMatrices( fidIN, fidOUT, HDPar.AddF0, HDPar.AddCLin, HDPar.AddBLin, HDPar.AddBQuad, newline,NBodyMod,NBody);
+
+                if NBodyMod_template > 1
+                    nr_in = 6;
+                else
+                    nr_in = 6*NBody_template;
+                end
+
+                for i = 1:(4*nr_in) % hopefully this works for both older and newer version of HD (if NBody > 1, this might be an issue)
+                   line    = fgets(fidIN);
+                end
+                continue;
+            end           
+            printTable = false;     % we aren't reading a table (if we were, we reached the end)            
         else
             if ~printTable
                 continue;           % don't print this line without a label
@@ -261,6 +271,13 @@ while true
     lastLabel = label;
     %write this line into the output file
     fprintf(fidOUT,'%s',line);
+
+    if (strcmpi(lastLabel, 'NBodyMod'))
+        NBodyMod_template = lastValue;
+    elseif (strcmpi(lastLabel, 'NBody'))
+        NBody_template = lastValue;
+    end
+        
 end
 
 if ContainsOutList
@@ -271,12 +288,11 @@ if ContainsOutList
         for io = 1:length(HDPar.OutList)
             fprintf(fidOUT,'%s',[OutListChar(io,:) spaces HDPar.OutListComments{io} newline]);
         end
-        fprintf(fidOUT,'END of output channels and end of file. (the word "END" must appear in the first 3 columns of this line)');
-        fprintf(fidOUT,newline);
-    
     else
         disp( 'WARNING: OutList was not found in the HD data structure. The OutList field will be empty.' );        
     end
+    fprintf(fidOUT,'END of output channels and end of file. (the word "END" must appear in the first 3 columns of this line)');
+    fprintf(fidOUT,newline);
     
     
     %fprintf(fidOUT,newline);
@@ -327,46 +343,50 @@ function line = ParseValue(HDParVal, HDParLabel, value, label, line, TemplateFil
             end
 end
 
-function WriteHDAddMatrices( fidIN, fidOUT, AddF0, AddCLin, AddBLin, AddBQuad, newline)
+function WriteHDAddMatrices( fidIN, fidOUT, AddF0, AddCLin, AddBLin, AddBQuad, newline, NBodyMod, NBody)
 
     
       % now we'll write the AddF0:
    % If NBodyMod = 1 then vecMultiplier = NBody and nWAMITObj = 1
    % Else                 vecMultiplier = 1     and nWAMITObj = NBody
-   nWAMITObj = 1;
-   ColIndx = 1:nWAMITObj;
-    
-   fprintf(fidOUT, '%14.0f', AddF0(1,ColIndx) );  %write all of the columns
+
+    if NBodyMod > 1
+        nr_in = 6;
+%         nc_in = NBody;
+    else
+        nr_in = 6*NBody;
+%         nc_in = 1;
+    end
+       
+   fprintf(fidOUT, '%14.0f', AddF0(1,:) );  %write all of the columns
    fprintf(fidOUT, '   AddF0    - Additional preload (N, N-m)  [If NBodyMod=1, one size 6*NBody x 1 vector; if NBodyMod>1, NBody size 6 x 1 vectors]');
    fprintf(fidOUT, newline);
-   for i=2:6    
-      fprintf(fidOUT, '%14.0f', AddF0(i,ColIndx) );
+   for i=2:nr_in    
+      fprintf(fidOUT, '%14.0f', AddF0(i,:) );
       fprintf(fidOUT, newline);
    end
    
-   ColIndx = 1:6;
-   
-   fprintf(fidOUT, '%14.0f', AddCLin(1,ColIndx) );  %write all of the columns
+   fprintf(fidOUT, '%14.0f', AddCLin(1,:) );  %write all of the columns
    fprintf(fidOUT, '   AddCLin  - Additional linear stiffness (N/m, N/rad, N-m/m, N-m/rad)  [If NBodyMod=1, one size 6*NBody x 6*NBody matrix; if NBodyMod>1, NBody size 6 x 6 matrices]');  
    fprintf(fidOUT, newline);
-   for i=2:6    
-      fprintf(fidOUT, '%14.0f', AddCLin(i,ColIndx) );
+   for i=2:nr_in    
+      fprintf(fidOUT, '%14.0f', AddCLin(i,:) );
       fprintf(fidOUT, newline);
    end
    
-   fprintf(fidOUT, '%14.0f', AddBLin(1,ColIndx) );  %write all of the columns
+   fprintf(fidOUT, '%14.0f', AddBLin(1,:) );  %write all of the columns
    fprintf(fidOUT, '   AddBLin  - Additional linear damping(N/(m/s), N/(rad/s), N-m/(m/s), N-m/(rad/s))  [If NBodyMod=1, one size 6*NBody x 6*NBody matrix; if NBodyMod>1, NBody size 6 x 6 matrices]');    
    fprintf(fidOUT, newline);
-   for i=2:6    
-      fprintf(fidOUT, '%14.0f', AddBLin(i,ColIndx) );
+   for i=2:nr_in    
+      fprintf(fidOUT, '%14.0f', AddBLin(i,:) );
       fprintf(fidOUT, newline);
    end
    
-   fprintf(fidOUT, '%14.0f', AddBQuad(1,ColIndx) );  %write all of the columns
+   fprintf(fidOUT, '%14.0f', AddBQuad(1,:) );  %write all of the columns
    fprintf(fidOUT, '   AddBQuad - Additional quadratic drag(N/(m/s)^2, N/(rad/s)^2, N-m(m/s)^2, N-m/(rad/s)^2)  [If NBodyMod=1, one size 6*NBody x 6*NBody matrix; if NBodyMod>1, NBody size 6 x 6 matrices]');    
    fprintf(fidOUT, newline);
-   for i=2:6    
-      fprintf(fidOUT, '%14.0f', AddBQuad(i,ColIndx) );
+   for i=2:nr_in    
+      fprintf(fidOUT, '%14.0f', AddBQuad(i,:) );
       fprintf(fidOUT, newline);
    end
 

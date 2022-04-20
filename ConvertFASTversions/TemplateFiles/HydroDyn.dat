@@ -31,7 +31,7 @@ False            Echo           - Echo the input file data (flag)
             12   SumQTF         - Full summation -frequency 2nd-order forces computed with full QTF          {0: None; [10, 11, or 12]: WAMIT file to use}
 ---------------------- PLATFORM ADDITIONAL STIFFNESS AND DAMPING  -------------- [unused with PotMod=0 or 2]
              0   AddF0    - Additional preload (N, N-m) [If NBodyMod=1, one size 6*NBody x 1 vector; if NBodyMod>1, NBody size 6 x 1 vectors]
-             0
+             0              
              0
              0
              0
@@ -49,7 +49,7 @@ False            Echo           - Echo the input file data (flag)
              0             0             0             0             0             0
              0             0             0             0             0             0
              0             0             0             0             0             0   AddBQuad - Additional quadratic drag(N/(m/s)^2, N/(rad/s)^2, N-m(m/s)^2, N-m/(rad/s)^2) [If NBodyMod=1, one size 6*NBody x 6*NBody matrix; if NBodyMod>1, NBody size 6 x 6 matrices]
-             0             0             0             0             0             0
+             0             0             0             0             0             0                                        
              0             0             0             0             0             0
              0             0             0             0             0             0
              0             0             0             0             0             0
@@ -150,7 +150,7 @@ MemberID   NOutLoc    NodeLocs [NOutLoc < 10; node locations are normalized dist
   12        1           0.0
 ---------------------- JOINT OUTPUT LIST ---------------------------------------
              2   NJOutputs      - Number of joint outputs [Must be < 10]
-   3, 20           JOutLst        - List of JointIDs which are to be output (-)[unused if NJOutputs=0]
+   3, 20         JOutLst        - List of JointIDs which are to be output (-)[unused if NJOutputs=0]
 ---------------------- OUTPUT --------------------------------------------------
 True             HDSum          - Output a summary file [flag]
 False            OutAll         - Output all user-specified member and joint loads (only at each member end, not interior locations) [flag]

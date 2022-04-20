@@ -6,7 +6,7 @@ Description line that will be printed in the output file and written to the scre
        1            WakeMod            - Type of wake/induction model (switch) {0=none, 1=BEMT, 2=DBEMT, 3=OLAF} [WakeMod cannot be 2 or 3 when linearizing]
        1            AFAeroMod          - Type of blade airfoil aerodynamics model (switch) {1=steady model, 2=Beddoes-Leishman unsteady model} [AFAeroMod must be 1 when linearizing]
        0            TwrPotent          - Type tower influence on wind based on potential flow around the tower (switch) {0=none, 1=baseline potential flow, 2=potential flow with Bak correction}
-   False            TwrShadow          - Calculate tower influence on wind based on downstream tower shadow? (flag)
+       0            TwrShadow          - Calculate tower influence on wind based on downstream tower shadow? (switch) {0=none, 1=Powles model, 2=Eames model}
    False            TwrAero            - Calculate tower aerodynamic loads? (flag)
    False            FrozenWake         - Assume frozen wake during linearization? (flag) [used only when WakeMod=1 and when linearizing]
     True            CavitCheck         - Perform cavitation check? (flag) [AFAeroMod must be 1 when CavitCheck=true]
@@ -14,11 +14,10 @@ Description line that will be printed in the output file and written to the scre
 "unused"            AA_InputFile       - AeroAcoustics input file [used only when CompAA=true]
 ======  Environmental Conditions  ===================================================================
        1.246        AirDens            - Air density (kg/m^3)
-       1.4639e-5    KinVisc            - Kinematic air viscosity (m^2/s)
-     333.3          SpdSound           - Speed of sound (m/s)
+       1.4639e-5    KinVisc            - Kinematic viscosity of working fluid (m^2/s)
+     333.3          SpdSound           - Speed of sound in working fluid (m/s)
   103500            Patm               - Atmospheric pressure (Pa) [used only when CavitCheck=True]
-    1700            Pvap               - Vapour pressure of fluid (Pa) [used only when CavitCheck=True]
-       0.1          FluidDepth         - Water depth above mid-hub height (m) [used only when CavitCheck=True]
+    1700            Pvap               - Vapour pressure of working fluid (Pa) [used only when CavitCheck=True]
 ======  Blade-Element/Momentum Theory Options  ====================================================== [unused when WakeMod=0 or 3]
       1             SkewMod            - Type of skewed-wake correction model (switch) {1=uncoupled, 2=Pitt/Peters, 3=coupled} [unused when WakeMod=0 or 3]
  default            SkewModFactor      - Constant used in Pitt/Peters skewed wake model {or "default" is 15/32*pi} (-) [used only when SkewMod=2; unused when WakeMod=0 or 3]
@@ -51,15 +50,15 @@ Description line that will be printed in the output file and written to the scre
 "AeroDyn_Blade.dat" ADBlFile(1)        - Name of file containing distributed aerodynamic properties for Blade #1 (-)
 "AeroDyn_Blade.dat" ADBlFile(2)        - Name of file containing distributed aerodynamic properties for Blade #2 (-) [unused if NumBl < 2]
 "AeroDyn_Blade.dat" ADBlFile(3)        - Name of file containing distributed aerodynamic properties for Blade #3 (-) [unused if NumBl < 3]
-======  Tower Influence and Aerodynamics ============================================================= [used only when TwrPotent/=0, TwrShadow=True, or TwrAero=True]
-     5               NumTwrNds         - Number of tower nodes used in the analysis  (-) [used only when TwrPotent/=0, TwrShadow=True, or TwrAero=True]
-TwrElev        TwrDiam        TwrCd
-(m)              (m)           (-)
- 0.0            6.0            0.0
-20.0            5.5            0.0
-40.0            5.0            0.0
-60.0            4.5            0.0
-80.0            4.0            0.0
+======  Tower Influence and Aerodynamics ============================================================= [used only when TwrPotent/=0, TwrShadow/=0, or TwrAero=True]
+     5               NumTwrNds         - Number of tower nodes used in the analysis  (-) [used only when TwrPotent/=0, TwrShadow/=0, or TwrAero=True]
+TwrElev        TwrDiam        TwrCd          TwrTI 
+(m)              (m)           (-)            (-)   ! TwrTI used only when TwrShadow=2
+ 0.0            6.0            0.0            0.1
+20.0            5.5            0.0            0.1
+40.0            5.0            0.0            0.1
+60.0            4.5            0.0            0.1
+80.0            4.0            0.0            0.1  
 ======  Outputs  ====================================================================================
  True              SumPrint            - Generate a summary file listing input options and interpolated properties to "<rootname>.AD.sum"?  (flag)
     4              NBlOuts             - Number of blade node outputs [0 - 9] (-)

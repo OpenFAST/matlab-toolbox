@@ -37,9 +37,10 @@ if nargin < 3
     ADtemplate   = 'AeroDyn15_Primary.dat';
     BDtemplate   = 'BeamDyn_Primary.inp';
     EDtemplate   = 'ElastoDyn_Primary.dat';
-    SrvDtemplate = 'SrvD_Primary_v1.05.x.dat';
+    SrvDtemplate = 'SrvD_Primary.dat';
     FASTtemplate = 'OpenFAST.fst';
     HDtemplate   = 'HydroDyn.dat';
+    SEAtemplate  = 'seaState.dat';
     IfWtemplate  = 'InflowWind.dat';
 else
     ADtemplate   = 'AeroDyn15.dat';
@@ -48,6 +49,7 @@ else
     SrvDtemplate = 'ServoDyn.dat';
     FASTtemplate = 'enFAST.fst';
     HDtemplate   = 'HydroDyn.dat';
+    SEAtemplate  = 'seaState.dat';
     IfWtemplate  = 'InflowWind.dat';
 end
 %%
@@ -77,6 +79,11 @@ end
         %Primary FAST file
     inputfile = [oldDir filesep baseFileName];
     FP = FAST2Matlab(inputfile,2); %FP are Fast Parameters, specify 2 lines of header (FAST 8)
+    OutFileFmt = GetFASTPar(FP,'OutFileFmt');
+    if (OutFileFmt==0)
+        OutFileFmt = 4; %don't print both uncompressed .outb and .txt files
+        FP = SetFASTPar(FP,'OutFileFmt',OutFileFmt);
+    end
     
 %%  %----------------------------------------------------------------------
     % Get AD Data and write new AD15 file:
@@ -109,9 +116,25 @@ end
     CompHydro = GetFASTPar(FP,'CompHydro');
     if CompHydro == 1
         [HDPar, newHDName] = GetFASTPar_Subfile(FP, 'HydroFile', oldDir, newDir, true);
+        [SeaP,  newSeaName, err] = GetFASTPar_Subfile(FP, 'SeaStFile', oldDir, newDir, true);
+        if (err)
+            SeaStateInputFile = '"SeaState.dat"';
+            FP = SetFASTPar(FP, 'SeaStFile', SeaStateInputFile);
+            newSeaName = RebaseFile( SeaStateInputFile, newDir ); % new path + name
+        end
 
-        template   = [templateDir filesep HDtemplate];  %template for primary file
+        FP = SetFASTPar(FP,'CompSeaSt', 1);
+
+        % convert to new format:
+        [HDPar, SeaP] = newInputs_HD(HDPar, SeaP);
+
+
+        % write new module and driver files:
+        template   = [templateDir filesep HDtemplate];  %template for hd file
         Matlab2HD(HDPar, template, newHDName, 2); %contains 2 header lines
+
+        template   = [templateDir filesep SEAtemplate];  %template for seaState file
+        Matlab2HD(SeaP, template, newSeaName, 2); %contains 2 header lines
     end    
     
     
