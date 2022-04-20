@@ -127,6 +127,7 @@ while true
               fprintf(fidOUT,'%s%s',filler,remain);
               continue;
             end
+
         elseif strcmpi(value,'"JointID"') %we've reached the member joints table (and we think it's a string value so it's in quotes)
             if ~isfield(HDPar,'Joints')
                 disp( 'WARNING: the member joints table not found in the HD data structure.' );
@@ -144,6 +145,9 @@ while true
             else
                 frmt = ' %4i %14.5f %14.5f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.MemberSectionProp, newline, frmt);
+                for k = 1:lastValue % NPropSets
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end                 
                 continue; %let's continue reading the template file            
             end 
             
@@ -154,6 +158,9 @@ while true
             else
                 frmt = repmat( '%11.2f ', 1, 10 );
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.SmplProp, newline, frmt);
+                for k = 1:1 %only 1 line here
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end  
                 continue; %let's continue reading the template file            
             end
         
@@ -165,6 +172,9 @@ while true
             else
                 frmt = '%8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.DpthProp, newline, frmt);
+                for k = 1:lastValue
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end
                 continue; %let's continue reading the template file            
             end
             
@@ -175,6 +185,9 @@ while true
             else
                 frmt = ' %6.2f %9.3f %7.0f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.MGProp, newline, frmt);
+                for k = 1:lastValue
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end
                 continue; %let's continue reading the template file            
             end
         elseif strcmpi(value,'"FillNumM"') %we've reached the fill group table (and we think it's a string value so it's in quotes)
@@ -194,6 +207,9 @@ while true
                  frmt = [' %4i' repmat(' %13.2f', 1, 20) ];
                  % '%11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f %11.2f %10.2f %11.2f %12.2f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.MemberProp, newline, frmt);
+                for k = 1:lastValue
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end
                 continue; %let's continue reading the template file            
               end
            elseif strcmpi(lastLabel, 'NMembers') %we've reached the member table
@@ -202,6 +218,9 @@ while true
                 printTable = true;
               else
                 WriteMembersTable(line, fidIN, fidOUT, HDPar.Members, newline);
+                for k = 1:lastValue
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end
                 continue; %let's continue reading the template file            
               end
            elseif strcmpi(lastLabel, 'NMOutputs') %we've reached the member output list table
@@ -210,6 +229,9 @@ while true
                 printTable = true;
               else
                 WriteMemberOutputTable(line, fidIN, fidOUT, HDPar.MemberOuts, newline);
+                for k = 1:lastValue
+                    fgets(fidIN); %skip the table content from the template file, i.e. prevent it from being written in the new file
+                end
                 continue; %let's continue reading the template file            
               end
            end
@@ -307,16 +329,25 @@ end
 
 function WriteHDAddMatrices( fidIN, fidOUT, AddF0, AddCLin, AddBLin, AddBQuad, newline)
 
-   ColIndx = 1:6;
     
       % now we'll write the AddF0:
+   % If NBodyMod = 1 then vecMultiplier = NBody and nWAMITObj = 1
+   % Else                 vecMultiplier = 1     and nWAMITObj = NBody
+   nWAMITObj = 1;
+   ColIndx = 1:nWAMITObj;
     
    fprintf(fidOUT, '%14.0f', AddF0(1,ColIndx) );  %write all of the columns
-   fprintf(fidOUT, '   AddF0    - Additional preload (N, N-m)');
+   fprintf(fidOUT, '   AddF0    - Additional preload (N, N-m)  [If NBodyMod=1, one size 6*NBody x 1 vector; if NBodyMod>1, NBody size 6 x 1 vectors]');
    fprintf(fidOUT, newline);
+   for i=2:6    
+      fprintf(fidOUT, '%14.0f', AddF0(i,ColIndx) );
+      fprintf(fidOUT, newline);
+   end
+   
+   ColIndx = 1:6;
    
    fprintf(fidOUT, '%14.0f', AddCLin(1,ColIndx) );  %write all of the columns
-   fprintf(fidOUT, '   AddCLin  - Additional linear stiffness (N/m, N/rad, N-m/m, N-m/rad)');  
+   fprintf(fidOUT, '   AddCLin  - Additional linear stiffness (N/m, N/rad, N-m/m, N-m/rad)  [If NBodyMod=1, one size 6*NBody x 6*NBody matrix; if NBodyMod>1, NBody size 6 x 6 matrices]');  
    fprintf(fidOUT, newline);
    for i=2:6    
       fprintf(fidOUT, '%14.0f', AddCLin(i,ColIndx) );
@@ -324,7 +355,7 @@ function WriteHDAddMatrices( fidIN, fidOUT, AddF0, AddCLin, AddBLin, AddBQuad, n
    end
    
    fprintf(fidOUT, '%14.0f', AddBLin(1,ColIndx) );  %write all of the columns
-   fprintf(fidOUT, '   AddBLin  - Additional linear damping(N/(m/s), N/(rad/s), N-m/(m/s), N-m/(rad/s))');    
+   fprintf(fidOUT, '   AddBLin  - Additional linear damping(N/(m/s), N/(rad/s), N-m/(m/s), N-m/(rad/s))  [If NBodyMod=1, one size 6*NBody x 6*NBody matrix; if NBodyMod>1, NBody size 6 x 6 matrices]');    
    fprintf(fidOUT, newline);
    for i=2:6    
       fprintf(fidOUT, '%14.0f', AddBLin(i,ColIndx) );
@@ -332,7 +363,7 @@ function WriteHDAddMatrices( fidIN, fidOUT, AddF0, AddCLin, AddBLin, AddBQuad, n
    end
    
    fprintf(fidOUT, '%14.0f', AddBQuad(1,ColIndx) );  %write all of the columns
-   fprintf(fidOUT, '   AddBQuad - Additional quadratic drag(N/(m/s)^2, N/(rad/s)^2, N-m(m/s)^2, N-m/(rad/s)^2)');    
+   fprintf(fidOUT, '   AddBQuad - Additional quadratic drag(N/(m/s)^2, N/(rad/s)^2, N-m(m/s)^2, N-m/(rad/s)^2)  [If NBodyMod=1, one size 6*NBody x 6*NBody matrix; if NBodyMod>1, NBody size 6 x 6 matrices]');    
    fprintf(fidOUT, newline);
    for i=2:6    
       fprintf(fidOUT, '%14.0f', AddBQuad(i,ColIndx) );

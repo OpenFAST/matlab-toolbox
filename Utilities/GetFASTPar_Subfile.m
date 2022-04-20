@@ -1,10 +1,17 @@
-function [p, newSubfileName] = GetFASTPar_Subfile(FP, VarName, oldDir, newDir, readHD)
+function [p, newSubfileName,err1] = GetFASTPar_Subfile(FP, VarName, oldDir, newDir, readHD)
 
    if nargin < 5
        readHD = false;
    end
         % get name of the file specified relative to the FP file:
-    SubfileName = GetFASTPar(FP,VarName);
+    [SubfileName, err1] = GetFASTPar(FP,VarName);
+
+    if (err1)
+        p=[];
+        newSubfileName = [];
+        disp(['Warning: variable ' VarName ' not found']);
+        return;
+    end
 
         % see if we need to make a new directory for the new AD root
     if nargin > 3

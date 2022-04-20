@@ -231,14 +231,17 @@ end %end function
 
 function [AddF0, AddCLin, AddBLin, AddBQuad] = ParseHDAddMatrices(fid)
 
-   AddF0    = zeros(1,6);
+   AddF0    = zeros(6,1);
    AddCLin  = zeros(6,6);
    AddBLin  = zeros(6,6);
    AddBQuad = zeros(6,6);
    
       % read the AddF0:
-    line = fgetl(fid); 
-    AddF0(1,:) = sscanf(line,'%f',6); 
+    for i=1:6
+      line = fgetl(fid); 
+      AddF0(i,:) = sscanf(line,'%f',6); 
+    end
+
       % read the AddCLin:
     for i=1:6
       line = fgetl(fid); 
