@@ -43,6 +43,14 @@ switch ModuleName
         ModName = 'AD';
     case 'BeamDyn'
         ModName = 'BD';
+    case 'HydroDyn'
+        ModName = 'HydroDyn';
+    case 'Morison'
+        ModName = 'Morison';
+    case 'SeaState'
+        ModName = 'SeaSt';
+    case 'FAST.Farm'
+        ModName = 'Farm';
     otherwise
         error( 'Invalid module name.');        
 end

@@ -58,6 +58,8 @@ printTable = false; %assume we'll get the tables from the FastPar data structure
 printTableComments = 0;
 NextMatrix = '';
 isInteger = false;
+iOutList = 1;
+
 
 %loop through the template up until OUTLIST, OUTPUTS (for MoorDyn files) or end of file
 while true
@@ -80,23 +82,41 @@ while true
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
         [value2, ~, ~, nextindex] = sscanf(line,'%s', 1); 
-        if strcmpi(value2,'OutList') || strcmpi(value2,'OUTPUTS')
-            ContainsOutList = true;
-            fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
-            break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
-        else
-            % try the second
-            [value2] = sscanf(line(nextindex+1:end),'%s', 1); 
-            if strcmpi(value2,'OutList') || strcmpi(value2,'OUTPUTS')
-                ContainsOutList = true;
-                fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
-                break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
+        [value3] = sscanf(line(nextindex+1:end),'%s', 1); 
+        
+        if strcmpi(value2,'OutList') || strcmpi(value2,'OUTPUTS') || strcmpi(value2,'OutListAD') ||strcmpi(value3,'OutList') || strcmpi(value3,'OUTPUTS') || strcmpi(value3,'OutListAD')
+            fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break
+
+            if isfield(FastPar,'OutList') && length(FastPar.OutList) >= iOutList
+                OutListChar = char(FastPar.OutList{iOutList});  %this will line up the comments nicer
+                spaces      = repmat(' ',1,max(1,26-size(OutListChar,2)));
+                %Now add the Outlist
+                for io = 1:length(FastPar.OutList{iOutList})
+                    fprintf(fidOUT,'%s',[OutListChar(io,:) spaces FastPar.OutListComments{iOutList}{io} newline]);
+                end
+            else
+                disp( 'WARNING: OutList was not found in the FAST data structure. The OutList field will be empty.' );        
             end
-        end            
+
+            while ~startsWith(line,"END") && ~isnumeric(line)
+                line = fgets(fidIN); %get the next line from the template, including newline character
+            end
+
+            if isnumeric(line)
+                fprintf(fidOUT,'END of input file (the word "END" must appear in the first 3 columns of this last OutList line)'); 
+                fprintf(fidOUT,newline); 
+            else
+                fprintf(fidOUT,line);
+            end
+            iOutList = iOutList + 1;
+
+
+            continue; %let's continue reading the template file           
+        end
+          
     end      
     
-    
-    
+   
     [value, label, isComment, ~, ~] = ParseFASTInputLine(line);
     
             
@@ -327,8 +347,6 @@ if ContainsOutList
     end
 
         %Now add the close of file
-    fprintf(fidOUT,'END of input file (the word "END" must appear in the first 3 columns of this last OutList line)');
-    fprintf(fidOUT,newline);
     fprintf(fidOUT,'---------------------------------------------------------------------------------------');
     fprintf(fidOUT,newline);
 end
