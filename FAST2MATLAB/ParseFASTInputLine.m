@@ -44,6 +44,10 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
         descr = value;
         fieldType = 'Comment';
     else
+
+        % removing trailing comments from line
+        line = strtok(line,'!#');  % remove comments
+
         isComment = false;
 
         % Get the Value, number or string
