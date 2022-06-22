@@ -18,6 +18,18 @@ function [HDP, SSP] = newInputs_HD(HDPar, SEAPar)
     
  % v3 Specification
     
+ if isfield(HDP,'AxCoefs')
+     nc = length(HDP.AxCoefs.Headers);
+     if ~any(strcmpi(HDP.AxCoefs.Headers,'AxFDMod'))
+         HDP.AxCoefs.Headers{nc+1} = 'AxFDMod';
+         HDP.AxCoefs.Headers{nc+2} = 'AxVnCOff';
+         HDP.AxCoefs.Headers{nc+3} = 'AxFDLoFSc';
+
+         HDP.AxCoefs.Table(:,nc+1) = 0;   %AxFDMod
+         HDP.AxCoefs.Table(:,nc+2) = 0.0; %AxVnCOff
+         HDP.AxCoefs.Table(:,nc+3) = 1.0; %AxFDLoFSc      
+     end
+ end
 
     %----------------------------------------------------------------------
     % Sort output channels:

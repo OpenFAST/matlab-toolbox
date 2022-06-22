@@ -115,7 +115,7 @@ while true
                 disp(  ['WARNING: heave coefficients table not found in the HD data structure.'] );
                 printTable = true;
             else
-                frmt = ' %4i %8.2f %8.2f %8.2f';
+                frmt = ' %4i %8.2f %8.2f %8.2f %6i    %8.2f   %8.2f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.AxCoefs, newline, frmt);
                 continue; %let's continue reading the template file            
             end
