@@ -45,6 +45,8 @@ switch ModuleName
         ModName = 'BD';
     case 'HydroDyn'
         ModName = 'HydroDyn';
+    case 'SubDyn'
+        ModName = 'SD';
     case 'Morison'
         ModName = 'Morison';
     case 'SeaState'
@@ -192,57 +194,90 @@ fprintf( fout, '%s\n', ...
 ''   );
 
 
+maxContLines = 254; % must be less than 511 (Intel has 511 max; f95 standard is 255)
+nlines = ceil(nr/numPerR); % number of lines
+nGroup = max(1,ceil(nlines / maxContLines)); % number of groups
+groupSize = ceil(nr/nGroup); % channels per group
+
+if (nGroup > 1)
+    fprintf( fout, '%s%s%s%s%s\n', ...
+         '   CHARACTER(',StrNameM, ')  :: ValidParamAry(', num2str(nr),')' );
+    fprintf( fout, '%s%s%s\n', ...
+         '   INTEGER(IntKi)  :: ParamIndxAry(', num2str(nr),')' );
+    fprintf( fout, '%s%s%s%s%s\n', ...
+         '   CHARACTER(',StrNameM, ')  :: ParamUnitsAry(', num2str(nr),')' );
+end
 
 
-fprintf( fout, '%s%s%s%s%s\n', ...
- '   CHARACTER(',StrNameM, '), PARAMETER  :: ValidParamAry(', num2str(nr), ') =  (/  &   ! This lists the names of the allowed parameters, which must be sorted alphabetically' );                                 
-%  '   CHARACTER(',StrNameM, '), PARAMETER  :: ValidParamAry(', num2str(nr), ') =  (/ character(ChanLen) :: &   ! This lists the names of the allowed parameters, which must be sorted alphabetically' );                                 
-
-for iRow = 1:numPerR:nr
-    fprintf( fout, '%s', '                               ' );  %the indent for each line
-    lastRow = min(iRow+numPerR-1,nr);
-    ContLine = true;
-    for iNum = iRow:lastRow
-        fprintf( fout, ['"%' num2str(CLen_Var) 's"'], SORTedNames(iNum,:) );
-        if iNum < nr
-            fprintf( fout, '%s', ',' );
-        else
-            fprintf( fout, '%s\n', '/)'); %end of array
-            ContLine = false;
-        end
-    end
+for iGroup = 1:nGroup
+    iStart = (iGroup-1)*groupSize+1;
+    iEnd = min(nr, iGroup*groupSize);
     
-    if ContLine
-        fprintf( fout, '%s\n', ' &');
-    end
+    if (nGroup == 1)
+        fprintf( fout, '%s%s%s%s%s\n', ...
+        '   CHARACTER(',StrNameM, '), PARAMETER  :: ValidParamAry(', num2str(nr), ') =  (/  &   ! This lists the names of the allowed parameters, which must be sorted alphabetically' );                                 
+    else
+        fprintf( fout, '%s%s%s%s%s\n', ...
+         '   ValidParamAry(', num2str(iStart), ':',num2str(iEnd),') =  (/  &   ! This lists the names of the allowed parameters, which must be sorted alphabetically' );                                 
+    %  '   CHARACTER(',StrNameM, '), PARAMETER  :: ValidParamAry(', num2str(nr), ') =  (/ character(ChanLen) :: &   ! This lists the names of the allowed parameters, which must be sorted alphabetically' );                                 
+    end 
 
-end %iRow
+    for iRow = iStart:numPerR:iEnd
+        fprintf( fout, '%s', '                               ' );  %the indent for each line
+        lastRow = min(iRow+numPerR-1,iEnd);
+        ContLine = true;
+        for iNum = iRow:lastRow
+            fprintf( fout, ['"%' num2str(CLen_Var) 's"'], SORTedNames(iNum,:) );
+            if iNum < iEnd
+                fprintf( fout, '%s', ',' );
+            else
+                fprintf( fout, '%s\n', '/)'); %end of array
+                ContLine = false;
+            end
+        end
+
+        if ContLine
+            fprintf( fout, '%s\n', ' &');
+        end
+
+    end %iRow
+end %iGroup
 
 %% The list of parameter names corresponding to the entries in ValidParamAry
 Sorted_OutInd = ValidInputStr_VarName(IX);
 
-fprintf( fout, '%s%s%s\n', ...
- '   INTEGER(IntKi), PARAMETER :: ParamIndxAry(', num2str(nr), ') =  (/ &                            ! This lists the index into AllOuts(:) of the allowed parameters ValidParamAry(:)' );                                 
+for iGroup = 1:nGroup
+    iStart = (iGroup-1)*groupSize+1;
+    iEnd = min(nr, iGroup*groupSize);
+    
+    if (nGroup == 1)
+        fprintf( fout, '%s%s%s\n', ...
+     '   INTEGER(IntKi), PARAMETER :: ParamIndxAry(', num2str(nr), ') =  (/ &                            ! This lists the index into AllOuts(:) of the allowed parameters ValidParamAry(:)' );                                 
+    else
+        fprintf( fout, '%s%s%s%s%s\n', ...
+     '   ParamIndxAry(', num2str(iStart), ':',num2str(iEnd),') =  (/ &                            ! This lists the index into AllOuts(:) of the allowed parameters ValidParamAry(:)' );                                 
+    end 
 
-for iRow = 1:numPerR:nr
-    fprintf( fout, '%s', '                               ' );  %the indent for each line
-    lastRow = min(iRow+numPerR-1,nr);
-    ContLine = true;
-    for iNum = iRow:lastRow
-        fprintf( fout, [' %' num2str(CLen_Var+length(PrefixStr2)) 's '], [PrefixStr2 Sorted_OutInd{iNum}] );
-        if iNum < nr
-            fprintf( fout, '%s', ',' );
-        else
-            fprintf( fout, '%s\n', '/)'); %end of array
-            ContLine = false;
+    for iRow = iStart:numPerR:iEnd
+        fprintf( fout, '%s', '                               ' );  %the indent for each line
+        lastRow = min(iRow+numPerR-1,iEnd);
+        ContLine = true;
+        for iNum = iRow:lastRow
+            fprintf( fout, [' %' num2str(CLen_Var+length(PrefixStr2)) 's '], [PrefixStr2 Sorted_OutInd{iNum}] );
+            if iNum < iEnd
+                fprintf( fout, '%s', ',' );
+            else
+                fprintf( fout, '%s\n', '/)'); %end of array
+                ContLine = false;
+            end
         end
-    end
-    
-    if ContLine
-        fprintf( fout, '%s\n', ' &');
-    end
-    
-end %iRow
+
+        if ContLine
+            fprintf( fout, '%s\n', ' &');
+        end
+
+    end %iRow
+end %iGroup
 
 %% The units corresponding to the entries in ValidParamAry
 
@@ -250,30 +285,38 @@ end %iRow
 % but i think it will be easier to implement using this array corresponding
 % to ValidParamAry(:) entries
 
-
-fprintf( fout, '%s%s%s%s%s\n', ...
- '   CHARACTER(',StrName, '), PARAMETER :: ParamUnitsAry(', num2str(nr), ') =  (/  &  ! This lists the units corresponding to the allowed parameters' );                                 
-%  '   CHARACTER(',StrName, '), PARAMETER :: ParamUnitsAry(', num2str(nr), ') =  (/ character(ChanLen) :: &  ! This lists the units corresponding to the allowed parameters' );                                 
-
-for iRow = 1:numPerR:nr
-    fprintf( fout, '%s', '                               ' );  %the indent for each line
-    lastRow = min(iRow+numPerR-1,nr);
-    ContLine = true;
-    for iNum = iRow:lastRow
-        fprintf( fout, ['"%' num2str(CLen_Unit) 's"'], Sorted_Units(iNum,:) );
-        if iNum < nr
-            fprintf( fout, '%s', ',' );
-        else
-            fprintf( fout, '%s\n', '/)'); %end of array
-            ContLine = false;
+for iGroup = 1:nGroup
+    iStart = (iGroup-1)*groupSize+1;
+    iEnd = min(nr, iGroup*groupSize);
+    
+    if (nGroup == 1)
+        fprintf( fout, '%s%s%s%s%s\n', ...
+         '   CHARACTER(',StrName, '), PARAMETER :: ParamUnitsAry(', num2str(nr), ') =  (/ character(ChanLen) :: &  ! This lists the units corresponding to the allowed parameters' );                                 
+    else
+        fprintf( fout, '%s%s%s%s%s\n', ...
+         '   ParamUnitsAry(', num2str(iStart), ':',num2str(iEnd),') =  (/  &  ! This lists the units corresponding to the allowed parameters' );                                 
+    end
+    
+    for iRow = iStart:numPerR:iEnd
+        fprintf( fout, '%s', '                               ' );  %the indent for each line
+        lastRow = min(iRow+numPerR-1,iEnd);
+        ContLine = true;
+        for iNum = iRow:lastRow
+            fprintf( fout, ['"%' num2str(CLen_Unit) 's"'], Sorted_Units(iNum,:) );
+            if iNum < iEnd
+                fprintf( fout, '%s', ',' );
+            else
+                fprintf( fout, '%s\n', '/)'); %end of array
+                ContLine = false;
+            end
         end
-    end
-    
-    if ContLine
-        fprintf( fout, '%s\n', ' &');
-    end
-    
-end %iRow
+
+        if ContLine
+            fprintf( fout, '%s\n', ' &');
+        end
+
+    end %iRow
+end %iGroup
 
 %% add the subroutine initializations
 fprintf( fout, '%s\n', ...
