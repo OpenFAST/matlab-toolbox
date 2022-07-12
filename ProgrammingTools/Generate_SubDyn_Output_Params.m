@@ -20,132 +20,87 @@ fprintf(out,'%s\n','');
 fprintf(out,'%s\n','   !  Time: ');
 fprintf(out,'%s\n','   INTEGER, PARAMETER             :: Time      =     0');
 fprintf(out,'%s\n','');
-fprintf(out,'%s\n','   ! Member Forces:');
-fprintf(out,'%s\n','');
 
 outIdx = 0;
 allOutNames = cell(0,0);
 
-channels = {'FKxe','FKye','FKze','FMxe','FMye','FMze',...
+AllChannels{1}.Category = 'Member Forces';
+AllChannels{1}.channels = {'FKxe','FKye','FKze','FMxe','FMye','FMze',...
     'MKxe','MKye','MKze','MMxe','MMye','MMze'};
-for channelNo = 1:length(channels)
-    channel = channels{channelNo};
-    for member = 1:maxNumMember
-        for node = 1:maxNumNode
+AllChannels{1}.units = {'(N)','(N)','(N)','(N)','(N)','(N)','(N)',...
+    '(N*m)','(N*m)','(N*m)','(N*m)','(N*m)','(N*m)'};
+AllChannels{1}.SubCatIdx = [1,1,1,2,2,2,1,1,1,2,2,2];
+AllChannels{1}.SubCatNames = {'MNfmKe','MNfmMe'};
+AllChannels{1}.MemberNumber = true;
+
+AllChannels{2}.Category = 'Displacements';
+AllChannels{2}.channels = {'TDxss','TDyss','TDzss','RDxe','RDye','RDze'};
+AllChannels{2}.units = {'(m)','(m)','(m)','(rad)','(rad)','(rad)'};
+AllChannels{2}.SubCatIdx = [1,1,1,2,2,2];
+AllChannels{2}.SubCatNames = {'MNTDss','MNRDe'};
+AllChannels{2}.MemberNumber = true;
+
+AllChannels{3}.Category = 'Accelerations';
+AllChannels{3}.channels = {'TAxe','TAye','TAze','RAxe','RAye','RAze'};
+AllChannels{3}.units = {'(m/s^2)','(m/s^2)','(m/s^2)','(rad/s^2)','(rad/s^2)','(rad/s^2)'};
+AllChannels{3}.SubCatIdx = [1,1,1,1,1,1];
+AllChannels{3}.SubCatNames = {'MNTRAe'};
+AllChannels{3}.MemberNumber = true;
+
+AllChannels{4}.Category = 'Reactions';
+Prefix = transpose(repmat({'React';'Intf'},1,6));
+AllChannels{4}.channels = strcat( reshape(Prefix,1,[]),repmat({'FXss','FYss','FZss','MXss','MYss','MZss'},1,2));
+AllChannels{4}.units = repmat({'(N)','(N)','(N)','(N*m)','(N*m)','(N*m)'},1,2);
+AllChannels{4}.MemberNumber = false;
+
+AllChannels{5}.Category = 'Interface Deflections';
+AllChannels{5}.channels = strcat('Intf',{'TDXss','TDYss','TDZss','RDXss','RDYss','RDZss'});
+AllChannels{5}.units = {'(m)','(m)','(m)','(rad)','(rad)','(rad)'};
+AllChannels{5}.MemberNumber = false;
+
+AllChannels{6}.Category = 'Interface Accelerations';
+AllChannels{6}.channels = strcat('Intf',{'TAXss','TAYss','TAZss','RAXss','RAYss','RAZss'});
+AllChannels{6}.units = {'(m/s^2)','(m/s^2)','(m/s^2)','(rad/s^2)','(rad/s^2)','(rad/s^2)'};
+AllChannels{6}.MemberNumber = false;
+
+AllChannels{7}.Category = 'Modal Parameters';
+ModeNums = num2str((1:maxNumMode)','%02.0f');
+Prefix = transpose(repmat({'SSqm';'SSqmd';'SSqmdd'},1,maxNumMode));
+AllChannels{7}.channels = strcat(reshape(Prefix,[],1), repmat(ModeNums,3,1));
+AllChannels{7}.units = reshape( transpose(repmat({'(-)';'(1/s)';'(1/s^2)'},1,maxNumMode)), [], 1);
+AllChannels{7}.MemberNumber = false;
+
+
+for iCategory = 1:length(AllChannels)
+    fprintf(out,'%s\n','');
+    fprintf(out,'%s%s%s\n', '   ! ', AllChannels{iCategory}.Category, ':');
+    fprintf(out,'%s\n','');
+
+    for channelNo = 1:length( AllChannels{iCategory}.channels )
+        channel = AllChannels{iCategory}.channels{channelNo};
+
+        if AllChannels{iCategory}.MemberNumber
+            for member = 1:maxNumMember
+                for node = 1:maxNumNode
+                    outIdx = outIdx + 1;
+                    outName = pad(['M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel],10);
+                    allOutNames = [allOutNames {outName}];
+                    line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
+                    fprintf(out,'%s\n',line);
+                end %node
+            end %member
+        else
             outIdx = outIdx + 1;
-            outName = pad(['M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel],10);
+            outName = pad(channel,10);
             allOutNames = [allOutNames {outName}];
             line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-            fprintf(out,'%s\n',line);
+            fprintf(out,'%s\n',line);         
         end
-    end
-end
 
-fprintf(out,'%s\n',''); fprintf(out,'%s\n','');
-fprintf(out,'%s\n','   ! Displacements:'); fprintf(out,'%s\n','');
+    end %channelNo
+end %iCategory
 
-channels = {'TDxss','TDyss','TDzss','RDxe','RDye','RDze'};
-for channelNo = 1:length(channels)
-    channel = channels{channelNo};
-    for member = 1:maxNumMember
-        for node = 1:maxNumNode
-            outIdx = outIdx + 1;
-            outName = pad(['M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel],10);
-            allOutNames = [allOutNames {outName}];
-            line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-            fprintf(out,'%s\n',line);
-        end
-    end
-end
-
-fprintf(out,'%s\n',''); fprintf(out,'%s\n','');
-fprintf(out,'%s\n','   ! Accelerations:'); fprintf(out,'%s\n','');
-
-channels = {'TAxe','TAye','TAze','RAxe','RAye','RAze'};
-for channelNo = 1:length(channels)
-    channel = channels{channelNo};
-    for member = 1:maxNumMember
-        for node = 1:maxNumNode
-            outIdx = outIdx + 1;
-            outName = pad(['M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel],10);
-            allOutNames = [allOutNames {outName}];
-            line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-            fprintf(out,'%s\n',line);
-        end
-    end
-end
-
-fprintf(out,'%s\n',''); fprintf(out,'%s\n','');
-fprintf(out,'%s\n','   ! Reactions:'); fprintf(out,'%s\n','');
-
-channels = {'FXss','FYss','FZss','MXss','MYss','MZss'};
-for channelNo = 1:length(channels)
-    channel = channels{channelNo};
-    outIdx = outIdx + 1;
-    outName = pad(['React' channel],11);
-    allOutNames = [allOutNames {outName}];
-    line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-    fprintf(out,'%s\n',line);
-end
-for channelNo = 1:length(channels)
-    channel = channels{channelNo};
-    outIdx = outIdx + 1;
-    outName = pad(['Intf' channel],11);
-    allOutNames = [allOutNames {outName}];
-    line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-    fprintf(out,'%s\n',line);
-end
-
-fprintf(out,'%s\n',''); fprintf(out,'%s\n','');
-fprintf(out,'%s\n','   ! Interface Deflections:'); fprintf(out,'%s\n','');
-
-channels = {'TDXss','TDYss','TDZss','RDXss','RDYss','RDZss'};
-for channelNo = 1:length(channels)
-    channel = channels{channelNo};
-    outIdx = outIdx + 1;
-    outName = pad(['Intf' channel],10);
-    allOutNames = [allOutNames {outName}];
-    line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-    fprintf(out,'%s\n',line);
-end
-
-fprintf(out,'%s\n',''); fprintf(out,'%s\n','');
-fprintf(out,'%s\n','   ! Interface Accelerations:'); fprintf(out,'%s\n','');
-
-channels = {'TAXss','TAYss','TAZss','RAXss','RAYss','RAZss'};
-for channelNo = 1:length(channels)
-    channel = channels{channelNo};
-    outIdx = outIdx + 1;
-    outName = pad(['Intf' channel],10);
-    allOutNames = [allOutNames {outName}];
-    line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-    fprintf(out,'%s\n',line);
-end
-
-fprintf(out,'%s\n',''); fprintf(out,'%s\n','');
-fprintf(out,'%s\n','   ! Modal Parameters:'); fprintf(out,'%s\n','');
-
-for modeNo = 1:maxNumMode
-    outIdx = outIdx + 1;
-    outName = pad(['SSqm' pad(num2str(modeNo),2,'left','0')],10);
-    allOutNames = [allOutNames {outName}];
-    line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-    fprintf(out,'%s\n',line);
-end
-for modeNo = 1:maxNumMode
-    outIdx = outIdx + 1;
-    outName = pad(['SSqmd' pad(num2str(modeNo),2,'left','0')],10);
-    allOutNames = [allOutNames {outName}];
-    line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-    fprintf(out,'%s\n',line);
-end
-for modeNo = 1:maxNumMode
-    outIdx = outIdx + 1;
-    outName = pad(['SSqmdd' pad(num2str(modeNo),2,'left','0')],10);
-    allOutNames = [allOutNames {outName}];
-    line = ['   INTEGER(IntKi), PARAMETER      :: ' outName '= ' pad(num2str(outIdx),5,'left')];
-    fprintf(out,'%s\n',line);
-end
+MaxOutPts = outIdx;
 
 fprintf(out,'%s\n',''); fprintf(out,'%s\n','');
 fprintf(out,'%s\n','   ! The maximum number of output channels which can be output by the code.');
@@ -154,140 +109,52 @@ fprintf(out,'%s\n','');
 fprintf(out,'%s\n','   ! End of code generated by Matlab script');
 fprintf(out,'%s\n','');
 
-channels = {'FKxe','FKye','FKze','MKxe','MKye','MKze'};
-fprintf(out,'%s',['   INTEGER, PARAMETER             :: MNfmKe(6,' num2str(maxNumNode) ',' num2str(maxNumMember) ') = reshape((/']);
-for member = 1:maxNumMember
-    for node = 1:maxNumNode
-        if member == 1 && node == 1
-            line = '';
-        else
-            line = '                                                                ';
-        end
-        for channelNo = 1:length(channels)
-            channel = channels{channelNo};
-            line = [line 'M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel ','];
-        end
-        
-        if member == maxNumMember && node == maxNumNode
-            line = [line(1:end-1) '/),(/6,' num2str(maxNumNode) ',' num2str(maxNumMember) '/))'];
-        else
-            line = [line ' & '];
-        end
-        fprintf(out,'%s\n',line);
-    end
-end
 
-fprintf(out,'%s\n','   '); fprintf(out,'%s\n','  '); fprintf(out,'%s\n','   ');
-channels = {'FMxe','FMye','FMze','MMxe','MMye','MMze'};
-fprintf(out,'%s',['   INTEGER, PARAMETER             :: MNfmMe(6,' num2str(maxNumNode) ',' num2str(maxNumMember) ') = reshape((/']);
-for member = 1:maxNumMember
-    for node = 1:maxNumNode
-        if member == 1 && node == 1
-            line = '';
-        else
-            line = '                                                                ';
-        end
-        for channelNo = 1:length(channels)
-            channel = channels{channelNo};
-            line = [line 'M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel ','];
-        end
-        
-        if member == maxNumMember && node == maxNumNode
-            line = [line(1:end-1) '/),(/6,' num2str(maxNumNode) ',' num2str(maxNumMember) '/))'];
-        else
-            line = [line ' &'];
-        end
-        fprintf(out,'%s\n',line);
-    end
-end
+for iCategory = 1:length(AllChannels)
+    if AllChannels{iCategory}.MemberNumber
+    
+        for iSubCat = 1:length( AllChannels{iCategory}.SubCatNames )
+            channelsIdx = AllChannels{iCategory}.SubCatIdx == iSubCat;
+            channels = reshape( AllChannels{iCategory}.channels(channelsIdx), 1, [] );
 
-fprintf(out,'%s\n','                                                                  ');
-channels = {'TDxss','TDyss','TDzss'};
-fprintf(out,'%s',['   INTEGER, PARAMETER             :: MNTDss(3,' num2str(maxNumNode) ',' num2str(maxNumMember) ') = reshape((/']);
-for member = 1:maxNumMember
-    for node = 1:maxNumNode
-        if member == 1 && node == 1
-            line = '';
-        else
-            line = '                                                                ';
-        end
-        for channelNo = 1:length(channels)
-            channel = channels{channelNo};
-            line = [line 'M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel ','];
-        end
-        
-        if member == maxNumMember && node == maxNumNode
-            line = [line(1:end-1) '/), (/3,' num2str(maxNumNode) ',' num2str(maxNumMember) '/))'];
-        else
-            line = [line ' &'];
-        end
-        fprintf(out,'%s\n',line);
-    end
-end
 
-fprintf(out,'%s\n','');
-channels = {'RDxe','RDye','RDze'};
-fprintf(out,'%s',['   INTEGER, PARAMETER             :: MNRDe (3,' num2str(maxNumNode) ',' num2str(maxNumMember) ') = reshape((/']);
-for member = 1:maxNumMember
-    for node = 1:maxNumNode
-        if member == 1 && node == 1
-            line = '';
-        else
-            line = '                                                                ';
-        end
-        for channelNo = 1:length(channels)
-            channel = channels{channelNo};
-            line = [line 'M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel ','];
-        end
-        
-        if member == maxNumMember && node == maxNumNode
-            line = [line(1:end-1) '/), (/3,' num2str(maxNumNode) ',' num2str(maxNumMember) '/))'];
-        else
-            line = [line ' &'];
-        end
-        fprintf(out,'%s\n',line);
-    end
-end
+    
+            fprintf(out,'%s',['   INTEGER, PARAMETER             :: ' AllChannels{iSubCat}.SubCatNames '(', num2str(length(channels)), ',' num2str(maxNumNode) ',' num2str(maxNumMember) ') = reshape((/']);
+            indent = '';
+            for member = 1:maxNumMember
+                for node = 1:maxNumNode
+                    for channelNo = 1:length(channels)
+                        channel = channels{channelNo};
+                        line = [indent 'M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel ','];
+                    end
+                    
+                    if member == maxNumMember && node == maxNumNode
+                        line = [line(1:end-1) '/),(/' num2str(length(channels)) ',' num2str(maxNumNode) ',' num2str(maxNumMember) '/))'];
+                    else
+                        line = [line ' & '];
+                    end
+                    fprintf(out,'%s\n',line);
+            
+                    indent = '                                                                ';
+                end
+            end
 
-fprintf(out,'%s\n','                                                              '); fprintf(out,'%s\n','   ');
-channels = {'TAxe','TAye','TAze','RAxe','RAye','RAze'};
-fprintf(out,'%s',['   INTEGER, PARAMETER             :: MNTRAe(6,' num2str(maxNumNode) ',' num2str(maxNumMember) ') = reshape((/']);
-for member = 1:maxNumMember
-    for node = 1:maxNumNode
-        if member == 1 && node == 1
-            line = '';
-        else
-            line = '                                                                ';
-        end
-        for channelNo = 1:length(channels)
-            channel = channels{channelNo};
-            line = [line 'M' pad(num2str(member),2,'left','0') 'N' num2str(node) channel ','];
-        end
+            fprintf(out,'%s\n','   '); fprintf(out,'%s\n','  '); fprintf(out,'%s\n','   ');
+        end %iSubCat
+
+    end %if memberNumber
+end %iCategory
         
-        if member == maxNumMember && node == maxNumNode
-            line = [line(1:end-1) '/), (/6,' num2str(maxNumNode) ',' num2str(maxNumMember) '/))'];
-        else
-            line = [line '  &'];
-        end
-        fprintf(out,'%s\n',line);
-    end
-end
 
 fprintf(out,'%s\n','');
 fprintf(out,'%s\n','      INTEGER, PARAMETER             :: ReactSS(6)   =  (/ReactFXss, ReactFYss, ReactFZss, &');
 fprintf(out,'%s\n','                                                          ReactMXss, ReactMYss, ReactMZss/)');
-% fprintf(out,'%s\n','');
 fprintf(out,'%s\n','      INTEGER, PARAMETER             :: IntfSS(6)    =  (/IntfFXss,  IntfFYss,  IntfFZss , &');
 fprintf(out,'%s\n','                                                          IntfMXss,  IntfMYss,  IntfMZss/)');
-% fprintf(out,'%s\n','');
-% fprintf(out,'%s\n','');
 fprintf(out,'%s\n','      INTEGER, PARAMETER             :: IntfTRss(6)  =  (/IntfTDXss, IntfTDYss, IntfTDZss, &');
 fprintf(out,'%s\n','                                                          IntfRDXss, IntfRDYss, IntfRDZss/)');
-% fprintf(out,'%s\n','');
 fprintf(out,'%s\n','      INTEGER, PARAMETER             :: IntfTRAss(6) =  (/IntfTAXss, IntfTAYss, IntfTAZss, &');
 fprintf(out,'%s\n','                                                          IntfRAXss, IntfRAYss, IntfRAZss/)');
-% fprintf(out,'%s\n',''); fprintf(out,'%s\n','   '); fprintf(out,'%s\n','   ');
-% fprintf(out,'%s\n','   '); fprintf(out,'%s\n','  '); fprintf(out,'%s\n','');
 fprintf(out,'%s\n',' ');
 
 allOutNamesSorted = sort(allOutNames);

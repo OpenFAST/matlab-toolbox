@@ -14,28 +14,17 @@ function [Category, VarName, InvalidCriteria, ValidInputStr, ValidInputStr_VarNa
 %                           ValidInputStr_VarName)
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[~, ~, raw] = xlsread( XLS_file, OutListSheet );
+opts = detectImportOptions(XLS_file, 'Sheet', OutListSheet, 'VariableNamingRule','modify');
+
+t = readtable(XLS_file,opts);
 
 % create variables from the column headings: Category, InputNUM, OutInd,
 % SORTName, UniqueVals, InvalidCriteria, Units
-for iCol = 1:size(raw,2)
-   
-    if ischar(raw{1,iCol})
-        if strcmpi(raw{1,iCol},'Name')
-            VarName = raw(2:end,iCol);
-        elseif strfind( raw{1,iCol}, 'Other Name' )
-            InputStr = raw(2:end,iCol);
-        elseif strfind( raw{1,iCol}, 'Units' )
-            Units = raw(2:end,iCol);
-        elseif strfind( raw{1,iCol}, 'Invalid Channel Criteria' )
-            InvalidCriteria = raw(2:end,iCol);
-        elseif strfind( raw{1,iCol}, 'Category' )
-            Category = raw(2:end,iCol);
-        end
-    end
-    
-end
-%Category = raw{:,1};
+VarName  = t.Name;
+InputStr = t.OtherName_s_;
+Units    = t.Units;
+InvalidCriteria = t.InvalidChannelCriteria;
+Category = t.Category;
 
 
 %%
@@ -45,7 +34,7 @@ ValidInputStr_Units = cell(1,1);
 nr = 0;
 
 for i=1:length(VarName)
-    if ischar(VarName{i})
+    if ischar(VarName{i}) && ~isempty(VarName{i})
         nr = nr + 1;
         ValidInputStr{        nr,1} = VarName{i};
         ValidInputStr_VarName{nr,1} = VarName{i};
