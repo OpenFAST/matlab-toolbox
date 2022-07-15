@@ -106,6 +106,10 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
                     elseif strcmpi(testVal(1),'"')
                         [testVal, position] = textscan(line,'%q',1);  %look for a string in quotes
                         nextindex = position + 1;
+                    elseif strcmpi(testVal(1),'#!=')
+                        % this indicates the rest of the line is a comment
+                        descr = strtrim(line(nextindex:end));
+                        nextindex = length(line)+1;
                     else
                         IsLabel = true;
                         label = testVal;

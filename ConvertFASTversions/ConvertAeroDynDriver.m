@@ -32,7 +32,7 @@ function ConvertAeroDynDriver(oldDriverName, newDir, templateDir)
     
       % parameters from old AD and its driver:
     P = FAST2Matlab(oldDriverName,2); %P are driver parameters, specify 2 lines of header
-    [ModPar, newModName] = GetFASTPar_Subfile(P, 'AD_InputFile', oldDir, newDir);
+    [ModPar, newModName] = GetFASTPar_Subfile(P, 'AeroFile', oldDir, newDir);
     
         % convert to new format:
     [ModPar] = newInputs_AD_v15_04(ModPar);
