@@ -58,6 +58,8 @@ printTable = false; %assume we'll get the tables from the FastPar data structure
 printTableComments = 0;
 NextMatrix = '';
 isInteger = false;
+iOutList = 1;
+
 
 %loop through the template up until OUTLIST, OUTPUTS (for MoorDyn files) or end of file
 while true
@@ -80,24 +82,43 @@ while true
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
         [value2, ~, ~, nextindex] = sscanf(line,'%s', 1); 
-        if strcmpi(value2,'OutList') || strcmpi(value2,'OUTPUTS')
-            ContainsOutList = true;
-            fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
-            break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
-        else
-            % try the second
-            [value2] = sscanf(line(nextindex+1:end),'%s', 1); 
-            if strcmpi(value2,'OutList') || strcmpi(value2,'OUTPUTS')
-                ContainsOutList = true;
-                fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
-                break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
+        [value3] = sscanf(line(nextindex+1:end),'%s', 1); 
+        
+        if strcmpi(value2,'OutList') || strcmpi(value2,'OUTPUTS') || strcmpi(value2,'OutListAD') ||strcmpi(value3,'OutList') || strcmpi(value3,'OUTPUTS') || strcmpi(value3,'OutListAD')
+            fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break
+
+            if isfield(FastPar,'OutList') && length(FastPar.OutList) >= iOutList
+                OutListChar = char(FastPar.OutList{iOutList});  %this will line up the comments nicer
+                spaces      = repmat(' ',1,max(1,26-size(OutListChar,2)));
+                %Now add the Outlist
+                for io = 1:length(FastPar.OutList{iOutList})
+                    fprintf(fidOUT,'%s',[OutListChar(io,:) spaces FastPar.OutListComments{iOutList}{io} newline]);
+                end
+            else
+                disp( 'WARNING: OutList was not found in the FAST data structure. The OutList field will be empty.' );        
             end
-        end            
+
+            while ~startsWith(line,"END") && ~isnumeric(line)
+                line = fgets(fidIN); %get the next line from the template, including newline character
+            end
+
+            if isnumeric(line)
+                fprintf(fidOUT,'END of input file (the word "END" must appear in the first 3 columns of this last OutList line)'); 
+                fprintf(fidOUT,newline); 
+            else
+                fprintf(fidOUT,line);
+            end
+            iOutList = iOutList + 1;
+
+
+            continue; %let's continue reading the template file           
+        end
+          
     end      
     
-    
-    
+   
     [value, label, isComment, ~, ~] = ParseFASTInputLine(line);
+    
             
     if ~printTable && ~isComment && ~isempty(label)        
         
@@ -326,8 +347,6 @@ if ContainsOutList
     end
 
         %Now add the close of file
-    fprintf(fidOUT,'END of input file (the word "END" must appear in the first 3 columns of this last OutList line)');
-    fprintf(fidOUT,newline);
     fprintf(fidOUT,'---------------------------------------------------------------------------------------');
     fprintf(fidOUT,newline);
 end
@@ -349,20 +368,9 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
 
         % The template label matches a label in FastPar
         %  so let's use the old value.
-        indx2 = find(indx,1,'first');       
-        val2Write = FastPar.Val{indx2}; 
+        indx2 = find(indx,1,'first');
 
-            % print the old value at the start of the line,
-            % using an appropriate format
-        if isnumeric(val2Write) && ~isempty(val2Write)
-            writeVal= getNumericVal2Write( val2Write, '%11G' );
-            if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
-                writeVal=getNumericVal2Write( val2Write, '%15G' );
-            end
-        else
-            writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
-        end
-
+        writeVal = getWriteVal( FastPar.Val{indx2} );     
 
         idx = strfind( line, label ); %let's just take the line starting where the label is first listed            
         line = [writeVal '   ' line(idx(1):end)];            
@@ -385,6 +393,31 @@ function [writeVal] = getNumericVal2Write( val2Write, fmt )
     return;
 end
 
+function [writeVal] = getWriteVal( val2Write )
+
+        % print the old value at the start of the line,
+        % using an appropriate format
+    if isnumeric(val2Write)
+        if all( int32(val2Write)==val2Write )
+            % this is an exact integer, so we'll use a different format
+            fmt  = '%11.0f';
+            fmt1 = '%15.0f';
+        else
+            fmt  = '%11G';
+            fmt1 = '%15G';
+        end
+        writeVal= getNumericVal2Write( val2Write, fmt );
+        if isscalar(writeVal) && any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
+            writeVal=getNumericVal2Write( val2Write, fmt1 );
+            disp(writeVal)
+            disp(str2num(writeVal))
+        end
+    else
+        writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
+    end
+
+end
+
 function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines, IntegerCols )
 
     % we've read the line of the template table that includes the header 
@@ -394,7 +427,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
         nc = size(TableIn.Table,2); 
     else
                         
-        if ~isempty(strfind(HdrLine,','))
+        if contains(HdrLine,',')
             TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
         else
             TmpHdr = textscan(HdrLine,'%s');
@@ -497,18 +530,10 @@ end
 
 function WriteFASTFileList( line, fidIN, fidOUT, List, label, newline )
 
-    val2Write = List{1};
         % print the old value at the start of the line,
         % using an appropriate format
-    if isnumeric(val2Write)
-        writeVal = getNumericVal2Write( val2Write, '%11G' );
-        if any( str2num(writeVal) ~= val2Write ) %we're losing precision here!!!
-            writeVal=getNumericVal2Write( val2Write, '%15G' );
-        end
+    writeVal = getWriteVal( List{1} );     
 
-    else
-        writeVal = [val2Write repmat(' ',1,max(1,11-length(val2Write)))];
-    end
 
     idx = strfind( line, label ); %let's just take the line starting where the label is first listed            
     line = [writeVal '   ' line(idx(1):end)];    
