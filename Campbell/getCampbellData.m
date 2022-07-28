@@ -24,6 +24,7 @@ if ~exist('WindSpeed','var'); WindSpeed=NaN(1,length(FastFiles)); end
 %% --- Running MBC on all cases
 nOP = length(FastFiles);
 CampbellData = cell(nOP,1);
+kOP = 0;
 for iOP = 1:nOP
     fst = FastFiles{iOP} ;
     % -- Reading data from fst file
@@ -41,6 +42,9 @@ for iOP = 1:nOP
 
     % --- Finding *.lin files 
     [fdir, fbase,~] = fileparts(fst);
+    if isempty(fdir)
+        fdir='.';
+    end
     fullbase = strrep(strrep([fdir '/'  fbase], '//','/'),'\','/');
     pattern    = sprintf('%s.*.lin',fullbase);
     fprintf('Lin. files: %s ',pattern);
@@ -51,17 +55,19 @@ for iOP = 1:nOP
         FileNames{iT}=sprintf('%s.%d.lin',fullbase,iT);
         if exist(FileNames{iT}, 'file')~=2
             nPerPeriod=iT-1;
-            disp(['warning::' sprintf('Linearization data %d missing for base %s',iT, fbase)]);
+            disp(['warning::' sprintf('Linearization data %d missing for base %s.',iT, fbase)]);
             break
         end
     end
     fprintf('(%d)\n',nPerPeriod);
     if nPerPeriod<=0
-        disp(['warning::' sprintf('No linearization data for base %s',fbase)]);
-        continue
+        disp(['warning::' sprintf('No linearization data for base %s.  Skipping operating point.',fbase)]);
+        continue % We loop to next operating point
     end
     FileNames=FileNames(1:nPerPeriod);
 
+    % Increment counter on operating points
+    kOP=kOP+1;
     % --- Find checkpoints files *.chkp
     chkpFile = [fullbase '.ModeShapeVTK.chkp'];
     if exist(chkpFile, 'file')
@@ -72,15 +78,18 @@ for iOP = 1:nOP
     end
 
     % --- Performing MBC on existing lin files
+    % When visualization is active, will write the mode information into a ".postmbc" file for OpenFAST rerun
     if length(ModesVizName)>0
         [mbc_data, ~, ~] = fx_mbc3( FileNames, ModesVizName );
     else
         [mbc_data, ~, ~] = fx_mbc3( FileNames );
     end
-    [CampbellData{iOP}] = campbell_diagram_data(mbc_data, BladeLen, TowerLen);
-    CampbellData{iOP}.WindSpeed  = WindSpeed(iOP) ;
-    CampbellData{iOP}.CompAero  = CompAero; 
+    [CampbellData{kOP}] = campbell_diagram_data(mbc_data, BladeLen, TowerLen);
+    CampbellData{kOP}.WindSpeed  = WindSpeed(iOP) ;
+    CampbellData{kOP}.CompAero  = CompAero; 
 end
+
+CampbellData=CampbellData(1:kOP);
 
 
 %% Sort

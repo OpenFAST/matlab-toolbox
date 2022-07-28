@@ -20,6 +20,7 @@ function OP = readOperatingPoints(filename, delim)
     %    Column that contains strings will be stored as cell arrays
     %    Column `Filename` can be provided, with a list of "fst" files (without folder)
     %            for custom filenaming (not recommended)
+    %    Column `Fullpath` can be provided, with a list of fulll path to "fst" files
     % 
     % INPUTS
     %  - filename: CSV filename (string)
@@ -46,27 +47,30 @@ function OP = readOperatingPoints(filename, delim)
     % Perform some field name replacements for standardization
     OP=struct();
     for iField = 1:length(fieldnames_in)
-        fieldname = strtrim(lower(fieldnames_in{iField}));
-        if any(strcmp({'wind','windspeed','ws'},fieldname))
-            OP.WindSpeed = st0.(fieldnames_in{iField});
+        fieldname = fieldnames_in{iField};
+        fieldname_clean = strtrim(lower(fieldname));
+        if any(strcmp({'wind','windspeed','ws'},fieldname_clean))
+            OP.WindSpeed = st0.(fieldname);
 
-        elseif any(strcmp({'rotorspeed','rotspeed','rpm','omega'},fieldname))
-            OP.RotorSpeed = st0.(fieldnames_in{iField});
+        elseif any(strcmp({'rotorspeed','rotspeed','rpm','omega'},fieldname_clean))
+            OP.RotorSpeed = st0.(fieldname);
 
-        elseif any(strcmp({'generatortorque','gentrq','gentorque'},fieldname))
-            OP.GeneratorTorque = st0.(fieldnames_in{iField});
+        elseif any(strcmp({'generatortorque','gentrq','gentorque'},fieldname_clean))
+            OP.GeneratorTorque = st0.(fieldname);
 
-        elseif any(strcmp({'pitchangle','pitch','bldpitch'},fieldname))
-            OP.PitchAngle = st0.(fieldnames_in{iField});
+        elseif any(strcmp({'pitchangle','pitch','bldpitch'},fieldname_clean))
+            OP.PitchAngle = st0.(fieldname);
 
-        elseif any(strcmp({'filename','file'},fieldname))
-            OP.Filename = st0.(fieldnames_in{iField});
+        elseif any(strcmp({'filename','file','filenames'},fieldname_clean))
+            OP.Filename = st0.(fieldname);
 
-        elseif any(strcmp({'ttdspfa','ttdispfa','towertopdispfa'},fieldname))
-            OP.TowerTopDispFA = st0.(fieldnames_in{iField});
+        elseif any(strcmp({'fullpath','fullpaths','path','paths','filepath','filepaths'},fieldname_clean))
+            OP.Filename = st0.(fieldname);
 
+        elseif any(strcmp({'ttdspfa','ttdispfa','towertopdispfa'},fieldname_clean))
+            OP.TowerTopDispFA = st0.(fieldname);
         else
-            OP.(fieldnames_in{iField}) = st0.(fieldnames_in{iField});
+            OP.(fieldname) = st0.(fieldname);
         end
     end
     if ~isfield(OP,'WindSpeed')

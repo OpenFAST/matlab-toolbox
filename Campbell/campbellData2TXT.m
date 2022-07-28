@@ -21,13 +21,15 @@ MDamp = zeros(nModesMax,nOP);
 MDesc = cell( nModesMax,nOP) ;
 for iOP = 1:nOP
     CD=CampbellData{iOP};
-    nModesKeep=min([length(CD.Modes), nModesMax]);
-    for i = 1:nModesKeep
-        DescCat = ShortModeDescr(CD,i);
-        %fprintf('%8.3f ; %7.4f ; %s\n',CD.NaturalFreq_Hz(i),CD.DampingRatio(i),DescCat(1:min(120,length(DescCat))));
-        MFreq(i,iOP)=CD.NaturalFreq_Hz(i);
-        MDamp(i,iOP)=CD.DampingRatio(i);
-        MDesc{i,iOP}=DescCat;
+    if ~isempty(CampbellData{iOP})
+        nModesKeep=min([length(CD.Modes), nModesMax]);
+        for i = 1:nModesKeep
+            DescCat = ShortModeDescr(CD,i);
+            %fprintf('%8.3f ; %7.4f ; %s\n',CD.NaturalFreq_Hz(i),CD.DampingRatio(i),DescCat(1:min(120,length(DescCat))));
+            MFreq(i,iOP)=CD.NaturalFreq_Hz(i);
+            MDamp(i,iOP)=CD.DampingRatio(i);
+            MDesc{i,iOP}=DescCat;
+        end
     end
 end
 
