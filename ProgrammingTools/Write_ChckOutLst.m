@@ -387,7 +387,7 @@ end %iGroup
 
 if nGroup > 1
     fprintf( fout, '%s%s%s%s%s\n', ...
-            '   CHARACTER(',StrNameM, '), PARAMETER  :: ParamUnitsAry(', num2str(nr), ') =  (/  &   ! This lists the units corresponding to the allowed parameters' );                                 
+            '   CHARACTER(',StrName, '), PARAMETER  :: ParamUnitsAry(', num2str(nr), ') =  (/  &   ! This lists the units corresponding to the allowed parameters' );                                 
     fprintf( fout, '%s', '                ParamUnitsAry1' );
     for iGroup = 2:nGroup
         fprintf(fout, ', ParamUnitsAry%s', num2str(iGroup));
