@@ -73,6 +73,12 @@ else
         fclose(fid);
         Channels = dlmread(FileName,delim,HeaderRows,0);
         nCols = size(Channels, 2);
+
+        ChanName = strcat('Channel',num2str((1:size(Channels,2))));
+        ChanUnit = cell(size(Channels,2),1);
+        for i=1:length(ChanUnit)
+            ChanUnit{i} = '(-)';
+        end
     else
         for i = 1:HeaderRows
             line = fgetl(fid);
