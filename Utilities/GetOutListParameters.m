@@ -1,4 +1,4 @@
-function [Category, VarName, InvalidCriteria, ValidInputStr, ValidInputStr_VarName, ValidInputStr_Units ] = getOutListParameters( XLS_file, OutListSheet )
+function [Category, VarName, InvalidCriteria, ValidInputStr, ValidInputStr_VarName, ValidInputStr_Units ] = GetOutListParameters( XLS_file, OutListSheet )
 % Inputs:
 %   XLS_file              - Excel file containing the OutListParameters
 %   OutListSheet          - name of worksheet to read in XLS_file 
@@ -14,17 +14,27 @@ function [Category, VarName, InvalidCriteria, ValidInputStr, ValidInputStr_VarNa
 %                           ValidInputStr_VarName)
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-opts = detectImportOptions(XLS_file, 'Sheet', OutListSheet, 'VariableNamingRule','modify');
+if (exist ("OCTAVE_VERSION", "builtin") > 0)
+    pkg load io  % for xlswrite
+    [num,txt] = xlsread(XLS_file, OutListSheet);
+    %Category	Name	Other_Name(s)	Description	Convention	Units	Invalid Channel Criteria
+    VarName         = txt(2:end,2);
+    InputStr        = txt(2:end,3);
+    Units           = txt(2:end,6);
+    InvalidCriteria = txt(2:end,7);
+    Category        = txt(2:end,1);
+else
+    opts = detectImportOptions(XLS_file, 'Sheet', OutListSheet, 'VariableNamingRule','modify');
+    t = readtable(XLS_file,opts);
+    % create variables from the column headings: Category, InputNUM, OutInd,
+    % SORTName, UniqueVals, InvalidCriteria, Units
+    VarName  = t.Name;
+    InputStr = t.OtherName_s_;
+    Units    = t.Units;
+    InvalidCriteria = t.InvalidChannelCriteria;
+    Category = t.Category;
+end
 
-t = readtable(XLS_file,opts);
-
-% create variables from the column headings: Category, InputNUM, OutInd,
-% SORTName, UniqueVals, InvalidCriteria, Units
-VarName  = t.Name;
-InputStr = t.OtherName_s_;
-Units    = t.Units;
-InvalidCriteria = t.InvalidChannelCriteria;
-Category = t.Category;
 
 
 %%
