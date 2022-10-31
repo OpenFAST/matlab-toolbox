@@ -37,15 +37,15 @@ if len(sys.argv)==4:
 modeNumbers=None # will automatically be detected
 wireFrameWidth = 5
 # modeNumbers=[5]
-Center        = [0,0,5]   # TODO
-MaxDim        = 10        # TODO
+Center        = [0,0,50]   # TODO
+MaxDim        = 100        # TODO
 MeshSupported  = ['Blade{:d}Surface'.format(i) for i in range(3)]
 MeshSupported += ['BD_BldMotion{:d}'.format(i) for i in range(3)]
 MeshSupported += ['HubSurface', 'NacelleSurface', 'TowerSurface']
 #MeshSupported += ['ED_Hub', 'ED_Nacelle', 'ED_TowerLn2Mesh_motion']
 wireFrameMesh =['BD_BldMotion1','BD_BldMotion2','BD_BldMotion3']
 wireFrameMesh +=['ED_Hub','ED_Nacelle','ED_TowerLn2Mesh_motion']
-nBack         = 38.0
+nBack         = 6.0
 print('OutputDir       : {}'.format(OutputDir))
 
 
@@ -61,7 +61,7 @@ def extractModeNumbers(rootPath):
     files = glob.glob(pattern)
     if len(files)==0:
         raise Exception('No file found with pattern: ',pattern)
-    filesNoRoot=[f[len(absrootMode):] for f in files]
+    filesNoRoot=[f[len(absrootMode):] for f in files if f.find('DebugError')<0]
     modeNumbers=np.sort(np.unique(np.array([f.split('.')[0] for f in filesNoRoot]).astype(int)))
     return modeNumbers
 
@@ -88,7 +88,7 @@ def extractModeInfo(rootPath, iMode):
     #     continue # Should be an exception really...
 
     # --- Detect Suffix. If VTKLinTim=2, Suffix='LinTime1.', else Suffix=''
-    filesNoRoot=[f[len(absrootMode):] for f in files]
+    filesNoRoot=[f[len(absrootMode):] for f in files if f.find('DebugError')<0]
     Suffix=''
     if filesNoRoot[0].startswith('LinTime1'):
         Suffix='.LinTime1' # TODO consider what to do if we have more lintimes
