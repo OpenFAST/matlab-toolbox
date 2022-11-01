@@ -426,18 +426,28 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
         % this assumes we are using TurbSim profiles file
         nc = size(TableIn.Table,2); 
     else
-                        
-        if contains(HdrLine,',')
-            TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
+                       
+        while startsWith(HdrLine, '!') % remove comment characters at beginning of line
+            HdrLine = HdrLine(2:end);
+        end
+        indx = strfind(HdrLine,'!'); % remove comments at end of header
+        if ~isempty(indx)
+            lastIndx = indx(1)-1;
         else
-            TmpHdr = textscan(HdrLine,'%s');
+            lastIndx = length(HdrLine);
         end
+
+        if lastIndx > 1 && contains(HdrLine(1:lastIndx),',')
+            % these will be assumed to be comma delimited:
+            TmpHdr  = textscan(HdrLine(1:lastIndx),'%s', 'Delimiter',',');
+        else
+            TmpHdr  = textscan(HdrLine(1:lastIndx),'%s');
+        end
+
         TemplateHeaders = TmpHdr{1};
-        if (strcmp(TemplateHeaders{1},'!'))
-            TemplateHeaders = TemplateHeaders(2:end);
-        end
         nc = length(TemplateHeaders);
     end
+
     
     fprintf(fidOUT,'%s',HdrLine);           % print the new headers
 
@@ -490,8 +500,9 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
 
             else
                 if i==nc
-                    disp( [ TemplateHeaders{i} ' column not found in FAST table. Last column will be missing.'] );                
-                    nc = nc-1;
+                    disp( [ TemplateHeaders{i} ' column not found in FAST table. Last column(s) will be missing.'] );                
+                    nc = i-1;
+                    break
                 else
                     error( [ TemplateHeaders{i} ' column not found in FAST table. Cannot write the table.'] );
                 end

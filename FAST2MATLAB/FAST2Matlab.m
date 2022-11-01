@@ -294,17 +294,24 @@ function [FullTable] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
     
         % we've read the line of the table that includes the header 
         % let's parse it now, getting the number of columns as well:
-        if ~isempty(strfind(line,','))
-            % these will be assumed to be comma delimited:
-            TmpHdr  = textscan(line,'%s', 'Delimiter',',');
+        while startsWith(line, '!') % remove comment characters at beginning of line
+            line = line(2:end);
+        end
+        indx = strfind(line,'!'); % remove comments at end of header
+        if ~isempty(indx)
+            lastIndx = indx(1)-1;
         else
-            TmpHdr  = textscan(line,'%s');
+            lastIndx = length(line);
+        end
+
+        if lastIndx > 1 && contains(line(1:lastIndx),',')
+            % these will be assumed to be comma delimited:
+            TmpHdr  = textscan(line(1:lastIndx),'%s', 'Delimiter',',');
+        else
+            TmpHdr  = textscan(line(1:lastIndx),'%s');
         end
 
         Headers = TmpHdr{1};
-        if strcmp( Headers{1}, '!' )
-            Headers = Headers(2:end);
-        end
         nc = length(Headers);
     end
     
