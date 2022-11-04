@@ -231,9 +231,9 @@ if isfield(MBC,'A')
     
     %% save eigenvectors (doing inverse of MBC3) for VTK visualization in FAST
     if nargout > 3 || nargin > 1
-        [VTK] = GetDataForVTKViz(MBC, matData, nb, EigenVects_save);
+        [VTK] = formatModesForViz(MBC, matData, nb, EigenVects_save);
         if nargin > 1
-            WriteDataForVTKViz(VTK, ModeVizFileName)
+            writeModesForViz(VTK, ModeVizFileName)
         end        
     end
     
@@ -299,7 +299,7 @@ function [new_seq, nRotTriplets, nb] = get_new_seq(rot_triplet,ntot)
 end
 
 %% ------------------------------------------------------------------------
-function [VTK] = GetDataForVTKViz(MBC, matData, nb, EigenVects_save)
+function [VTK] = formatModesForViz(MBC, matData, nb, EigenVects_save)
 
     %% Get data required for VTK visualization:
     % % % MBC.eigSol.EigenVects_save(:,SortedFreqIndx)       
@@ -356,13 +356,21 @@ return;
 end
 
 %% ------------------------------------------------------------------------
-function WriteDataForVTKViz(VTK, ModeVizFileName)
+function writeModesForViz(VTK, ModeVizFileName, nModesOut, nDigits)
     % write binary file that will be read by OpenFAST to export modes to VTK
+
+    % Default arguments
+    if ~exist('nModesOut','var'); nModesOut = -1; end
+    if ~exist('nDigits',  'var'); nDigits   = -1; end
+
 
     fileFmt = 'float64'; %8-byte real numbers
 
     [nStates, nModes, nLinTimes] = size(VTK.x_eig_magnitude);
-    nModes, nStates,nLinTimes
+%     if nModesOut==-1
+%         nModesOut=nModes;
+%     end
+    nModesOut = nModes
 
     %------- HACK
     %VTK.NaturalFreq_Hz =  VTK.NaturalFreq_Hz *0 +1;
@@ -376,11 +384,14 @@ function WriteDataForVTKViz(VTK, ModeVizFileName)
     %end
     %nModes=1
     % --- Reduce differences python/Matlab by rounding
-    %VTK.NaturalFreq_Hz =  round(VTK.NaturalFreq_Hz *1000)/1000;
-    %VTK.DampingRatio   =  round(VTK.DampingRatio   *1000)/1000;
-    %VTK.DampedFreq_Hz  =  round(VTK.DampedFreq_Hz  *1000)/1000;
-    %VTK.x_eig_magnitude = round(VTK.x_eig_magnitude*1000)/1000;
-    %VTK.x_eig_phase     = round(VTK.x_eig_phase    *1000)/1000;
+%     if nDigits>0
+%         res = 10^nDigits;
+%         VTK.NaturalFreq_Hz =  round(VTK.NaturalFreq_Hz * res)/res;
+%         VTK.DampingRatio   =  round(VTK.DampingRatio   * res)/res;
+%         VTK.DampedFreq_Hz  =  round(VTK.DampedFreq_Hz  * res)/res;
+%         VTK.x_eig_magnitude = round(VTK.x_eig_magnitude* res)/res;
+%         VTK.x_eig_phase     = round(VTK.x_eig_phase    * res)/res;
+%     end
 
     % --- Write to disk
     fid = fopen(ModeVizFileName,'w');
@@ -388,7 +399,7 @@ function WriteDataForVTKViz(VTK, ModeVizFileName)
         error(['Invalid file: ' ModeVizFileName])
     end
     fwrite(fid, 1,        'int32' ); % write a file identifier in case we ever change this format
-    fwrite(fid, nModes,   'int32' ); % number of modes (for easier file reading)
+    fwrite(fid, nModesOut,'int32' ); % number of modes (for easier file reading)
     fwrite(fid, nStates,  'int32' ); % number of states (for easier file reading)
     fwrite(fid, nLinTimes,'int32' ); % number of azimuths (i.e., LinTimes) (for easier file reading)
     % Freq and damping (not used in the FAST visualization algorithm)
@@ -396,7 +407,7 @@ function WriteDataForVTKViz(VTK, ModeVizFileName)
     fwrite(fid, VTK.DampingRatio,   fileFmt);
     fwrite(fid, VTK.DampedFreq_Hz,  fileFmt);
     % Writing data mode by mode
-    for iMode = 1:nModes
+    for iMode = 1:nModesOut
         fwrite(fid, VTK.x_eig_magnitude(:,iMode,:), fileFmt);
         fwrite(fid, VTK.x_eig_phase(    :,iMode,:), fileFmt);
     end
