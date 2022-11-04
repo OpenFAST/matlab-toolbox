@@ -98,7 +98,7 @@ while true
                 disp( 'WARNING: OutList was not found in the FAST data structure. The OutList field will be empty.' );        
             end
 
-            while ~startsWith(line,"END") && ~isnumeric(line)
+            while ~startsWithString(line,"END") && ~isnumeric(line)
                 line = fgets(fidIN); %get the next line from the template, including newline character
             end
 

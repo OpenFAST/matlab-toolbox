@@ -58,8 +58,8 @@ new_seq_states = [new_seq_dof2;  new_seq_dof2+matData.ndof2;  new_seq_dof1+matDa
      % first-order NonRotating q1, first-order Rotating q1
 nb = max(nb,nb2);     
 if (nb==0)    
-    disp(['*** fx_mbc3: no states were found, so assuming turbine has 3 blades. ***'] )
-    nb = 3;
+    disp(['*** fx_mbc3: no states were found. Setting number of blades to 0. Skipping MBC3 ***'] )
+    nb = 0;
 end
 
 if nb == 3
@@ -231,9 +231,9 @@ if isfield(MBC,'A')
     
     %% save eigenvectors (doing inverse of MBC3) for VTK visualization in FAST
     if nargout > 3 || nargin > 1
-        [VTK] = GetDataForVTK(MBC, matData, nb, EigenVects_save);
+        [VTK] = formatModesForViz(MBC, matData, nb, EigenVects_save);
         if nargin > 1
-            WriteDataForVTK(VTK, ModeVizFileName)
+            writeModesForViz(VTK, ModeVizFileName)
         end        
     end
     
@@ -299,10 +299,12 @@ function [new_seq, nRotTriplets, nb] = get_new_seq(rot_triplet,ntot)
 end
 
 %% ------------------------------------------------------------------------
-function [VTK] = GetDataForVTK(MBC, matData, nb, EigenVects_save)
+function [VTK] = formatModesForViz(MBC, matData, nb, EigenVects_save)
 
     %% Get data required for VTK visualization:
     % % % MBC.eigSol.EigenVects_save(:,SortedFreqIndx)       
+    nAzimuth          = length(matData.Azimuth)
+    [nStates, nModes] = size(EigenVects_save)
 
     [~, SortedFreqIndx] = sort(MBC.eigSol.NaturalFreqs_Hz);    
     
@@ -310,74 +312,108 @@ function [VTK] = GetDataForVTK(MBC, matData, nb, EigenVects_save)
     VTK.NaturalFreq_Hz = MBC.eigSol.NaturalFreqs_Hz(  SortedFreqIndx);
     VTK.DampedFreq_Hz  = MBC.eigSol.DampedFreqs_Hz(   SortedFreqIndx);
     VTK.DampingRatio   = MBC.eigSol.DampRatios(       SortedFreqIndx);
-        x_eig          =            EigenVects_save(:,SortedFreqIndx);
-    VTK.x_eig          = repmat( x_eig, 1, 1, length(matData.Azimuth) );
-                   
+        x_eig          =            EigenVects_save(:,SortedFreqIndx); % nStates x nModes
+    % Adopt a convention such that the real part of the first state is positive (arbitrary)
+    S = sign(real(x_eig(1,:)));
+    x_eig = S .* x_eig;
+    VTK.x_eig          = repmat( x_eig, 1, 1, nAzimuth);
 
     if (MBC.performedTransformation)
         % inverse MBC3 (Eq. 4, to move from collective, sine, cosine back to blade 1, blade 2, blade 3):
         dof1_offset = MBC.ndof2*2;
 
-        for iaz=1:length(matData.Azimuth)
-            % compute MBC3 transformation matrices
+        for iaz=1:nAzimuth
+            % MBC3 transformation matrices
             az = matData.Azimuth(iaz)*pi/180.0 + 2*pi/nb* (0:(nb-1)) ; % Eq. 1, azimuth in radians
             tt = [ones(3,1), cos(az(:)), sin(az(:))];                % Eq. 9, t_tilde
-
-            for i2 = 1:size(matData.RotTripletIndicesStates2,1)
-                    %q2:
-                VTK.x_eig(matData.RotTripletIndicesStates2(i2,:),:,iaz) = tt * x_eig(matData.RotTripletIndicesStates2(i2,:),:);
-                    %q2_dot:
-                VTK.x_eig(matData.RotTripletIndicesStates2(i2,:)+MBC.ndof2,:,iaz) = tt * x_eig(matData.RotTripletIndicesStates2(i2,:)+MBC.ndof2,:);
+            % MBC on second order states
+            I3_2nd = matData.RotTripletIndicesStates2
+            for i2 = 1:size(I3_2nd,1)
+                i3x    = I3_2nd(i2,:);
+                i3xdot = I3_2nd(i2,:)+MBC.ndof2;
+                VTK.x_eig(i3x   , :, iaz) = tt * x_eig(i3x   ,:);
+                VTK.x_eig(i3xdot, :, iaz) = tt * x_eig(i3xdot,:);
             end
-
-            for i1 = 1:length(matData.RotTripletIndicesStates1)
-                    %q1:
-                VTK.x_eig(matData.RotTripletIndicesStates1(i1,:)+dof1_offset,:,iaz) = tt * x_eig(matData.RotTripletIndicesStates1(i1,:)+dof1_offset,:);
+            % MBC on first order states
+            I3_1st = matData.RotTripletIndicesStates1
+            for i1 = 1:length(I3_1st)
+                i3x = I3_1st(i1,:)+dof1_offset
+                %q1:
+                VTK.x_eig(i3x,:,iaz) = tt * x_eig(i3x, :);
             end
 
         end
     end
     % put this in order states are stored in FAST
-    VTK.x_desc = MBC.DescStates(matData.StateOrderingIndx);
-    VTK.x_eig = VTK.x_eig(matData.StateOrderingIndx,:,:);
+    I = matData.StateOrderingIndx;
+    VTK.x_desc = MBC.DescStates(I);          % nStates
+    VTK.x_eig = VTK.x_eig(I,:,:);            % nStates x nModes x nAzimuth
+    VTK.x_eig_magnitude = abs(  VTK.x_eig);  % nStates x nModes x nAzimuth
+    VTK.x_eig_phase     = angle(VTK.x_eig);  % nStates x nModes x nAzimuth
     
-    VTK.x_eig_magnitude = abs(  VTK.x_eig);
-    VTK.x_eig_phase     = angle(VTK.x_eig);
 
-    
 return;
 end
 
 %% ------------------------------------------------------------------------
-function WriteDataForVTK(VTK, ModeVizFileName)
+function writeModesForViz(VTK, ModeVizFileName, nModesOut, nDigits)
+    % write binary file that will be read by OpenFAST to export modes to VTK
+
+    % Default arguments
+    if ~exist('nModesOut','var'); nModesOut = -1; end
+    if ~exist('nDigits',  'var'); nDigits   = -1; end
+
 
     fileFmt = 'float64'; %8-byte real numbers
 
+    [nStates, nModes, nLinTimes] = size(VTK.x_eig_magnitude);
+%     if nModesOut==-1
+%         nModesOut=nModes;
+%     end
+    nModesOut = nModes
+
+    %------- HACK
+    %VTK.NaturalFreq_Hz =  VTK.NaturalFreq_Hz *0 +1;
+    %VTK.DampingRatio   =  VTK.DampingRatio   *0 +2;
+    %VTK.DampedFreq_Hz  =  VTK.DampedFreq_Hz  *0 +3;
+    %for iMode = 1:nModes
+    %    VTK.x_eig_magnitude(:,iMode,:) = iMode;
+    %    VTK.x_eig_phase(    :,iMode,:) = iMode;
+    %    VTK.x_eig_magnitude(3,iMode,:) = 12;
+    %    VTK.x_eig_phase(    5,iMode,:) = 11;
+    %end
+    %nModes=1
+    % --- Reduce differences python/Matlab by rounding
+%     if nDigits>0
+%         res = 10^nDigits;
+%         VTK.NaturalFreq_Hz =  round(VTK.NaturalFreq_Hz * res)/res;
+%         VTK.DampingRatio   =  round(VTK.DampingRatio   * res)/res;
+%         VTK.DampedFreq_Hz  =  round(VTK.DampedFreq_Hz  * res)/res;
+%         VTK.x_eig_magnitude = round(VTK.x_eig_magnitude* res)/res;
+%         VTK.x_eig_phase     = round(VTK.x_eig_phase    * res)/res;
+%     end
+
+    % --- Write to disk
     fid = fopen(ModeVizFileName,'w');
     if fid < 1
         error(['Invalid file: ' ModeVizFileName])
     end
-    [nStates, nModes, NLinTimes] = size(VTK.x_eig_magnitude);
-   
     fwrite(fid, 1,        'int32' ); % write a file identifier in case we ever change this format
-    fwrite(fid, nModes,   'int32' ); % number of modes (for easier file reading)
+    fwrite(fid, nModesOut,'int32' ); % number of modes (for easier file reading)
     fwrite(fid, nStates,  'int32' ); % number of states (for easier file reading)
-    fwrite(fid, NLinTimes,'int32' ); % number of azimuths (i.e., LinTimes) (for easier file reading)
-
-    % these are output, but not used in the FAST visualization algorithm
+    fwrite(fid, nLinTimes,'int32' ); % number of azimuths (i.e., LinTimes) (for easier file reading)
+    % Freq and damping (not used in the FAST visualization algorithm)
     fwrite(fid, VTK.NaturalFreq_Hz, fileFmt);
     fwrite(fid, VTK.DampingRatio,   fileFmt);
-    
     fwrite(fid, VTK.DampedFreq_Hz,  fileFmt);
-   
-        % I am going to reorder these variables by mode (so if reading sequentially, 
-        % we don't have to read every mode)
-        
-    for iMode = 1:nModes
+    % Writing data mode by mode
+    for iMode = 1:nModesOut
         fwrite(fid, VTK.x_eig_magnitude(:,iMode,:), fileFmt);
         fwrite(fid, VTK.x_eig_phase(    :,iMode,:), fileFmt);
     end
     fclose(fid);
+
+    fprintf('Written:    %s\n',ModeVizFileName);
    
 return;
 end
