@@ -12,19 +12,16 @@ clear all
 
 % --- Parameters
 % ModuleName = input('Enter the module for which the output module will be generated (ElastoDyn, ServoDyn, etc.): ','s');
-%addpath(genpath('C:/Work/FAST/matlab-toolbox/'))
+
 ModuleName = 'AeroDyn'; % e.g. ElastoDyn, ServoDyn, AeroDyn, FAST_Farm
+
 OFDir    = 'C:/Work/openfast/'; % Directory containing OpenFAST repository (to find Excel file, and output FORTRAN files)
 addErrChk = false;
 maxContLines = 254; % maximum number of continuation lines: must be less than 511 (Intel has 511 max; f95 standard is 255)
 
 % --- Derived parameters
 XLS_file = [OFDir 'docs/OtherSupporting/OutListParameters.xlsx'];
-if isequal(ModuleName,'FAST_Farm')
-    OutDir   = [OFDir 'glue-codes/fast-farm/src/'];
-else
-    OutDir   = [OFDir 'modules/' lower(ModuleName) '/src/'];
-end
+OutDir   = [OFDir 'modules/' lower(ModuleName) '/src/']; % assumed output directory (can be overwritten in FAST.Farm case, below)
 OutListSheet = ModuleName;
 
 if containString(ModuleName,'_Nodes')
@@ -62,8 +59,9 @@ switch ModuleName
         ModName = 'Morison';
     case 'SeaState'
         ModName = 'SeaSt';
-    case 'FAST_Farm'
+    case {'FAST_Farm', 'FAST.Farm'}
         ModName = 'Farm';
+        OutDir   = [OFDir 'glue-codes/fast-farm/src/'];
     otherwise
         error( 'Invalid module name.');        
 end
