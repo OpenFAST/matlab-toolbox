@@ -67,7 +67,7 @@ end
 
 
 DataOut.Label{1} = '';
-readJOut = false;
+% readJOut = false;
 
 while true %loop until discovering Outlist or end of file, than break
     
@@ -78,31 +78,31 @@ while true %loop until discovering Outlist or end of file, than break
     end
     
         % Check to see if the value is PLATFORM OUTPUTS  deprecated at v2.00.03
-    if ~isempty(strfind(upper(line),upper('PLATFORM OUTPUTS'))) 
-        [DataOut.PtfmOutList DataOut.PtfmOutListComments] = ParseFASTOutList(fid);
+    if containString(upper(line),'PLATFORM OUTPUTS') 
+        [DataOut.PtfmOutList, DataOut.PtfmOutListComments] = ParseFASTOutList(fid);
         continue; % break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end   
     
         % Check to see if the value is MESH-BASED OUTPUTS  deprecated at v2.00.03
-    if ~isempty(strfind(upper(line),upper('MESH-BASED OUTPUTS'))) 
-        [DataOut.MeshOutList DataOut.MeshOutListComments] = ParseFASTOutList(fid);
+    if containString(upper(line),'MESH-BASED OUTPUTS') 
+        [DataOut.MeshOutList, DataOut.MeshOutListComments] = ParseFASTOutList(fid);
         continue; % break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end     
     
         % v2.00.03.  Check to see if the value is OUTPUT CHANNNELS
-    if ~isempty(strfind(upper(line),upper('OUTPUT CHANNELS'))) 
-        [DataOut.OutList DataOut.OutListComments] = ParseFASTOutList(fid);
+    if containString(upper(line),'OUTPUT CHANNELS') 
+        [DataOut.OutList, DataOut.OutListComments] = ParseFASTOutList(fid);
         continue; % break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end   
     
-    if ~isempty(strfind(upper(line),upper('ADDITIONAL STIFFNESS')))
+    if containString(upper(line),'ADDITIONAL STIFFNESS')
           NBodyMod=GetFASTPar(DataOut,'NBodyMod');
           NBody=GetFASTPar(DataOut,'NBody');
           [DataOut.AddF0, DataOut.AddCLin, DataOut.AddBLin, DataOut.AddBQuad] = ParseHDAddMatrices(fid, NBodyMod, NBody);
           continue;
     end
        
-    [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line );    
+    [value, label, isComment] = ParseFASTInputLine( line );    
     
     if isComment      
        
@@ -150,18 +150,6 @@ while true %loop until discovering Outlist or end of file, than break
             NFillGroups = GetFASTPar(DataOut,'NFillGroups');        
             [DataOut.FillGroups] = ParseFillGroups(line, fid, NFillGroups);
             continue; %let's continue reading the file
-        elseif strcmpi(DataOut.Label(end), 'NJOutputs') && ~readJOut  %we've reached the joint outputs table (and we think it's a string value so it's in quotes)
-            NJOutputs = GetFASTPar(DataOut,'NJOutputs'); 
-            if strcmpi(label,'HDSum')
-               DataOut.Label{count,1} = label;
-               DataOut.Val{count,1}   = value;
-               count = count + 1;
-               DataOut.JOutLst = 0;
-            else
-               DataOut.JOutLst = ParseJointOutputs(line,  NJOutputs);
-            end
-            readJOut = true;
-            continue; %let's continue reading the file
         elseif strcmpi(value,'"MGDpth"') %we've reached the marine growth table (and we think it's a string value so it's in quotes)
             NMGDepths = GetFASTPar(DataOut,'NMGDepths');        
             [DataOut.MGProp] = ParseFASTTable(line, fid, NMGDepths);
@@ -170,15 +158,6 @@ while true %loop until discovering Outlist or end of file, than break
             DataOut.Label{count,1} = label;
             DataOut.Val{count,1}   = value;
             count = count + 1;
-                %NWaveElev
-%             if strcmpi(label,'NWaveElev') %we've reached the heave coefficients table (and we think it's a string value so it's in quotes)
-%                line = fgetl(fid);
-%                DataOut.WaveElevxi = zeros(1,value);
-%                DataOut.WaveElevyi = zeros(1,value);
-%                DataOut.WaveElevxi(:) =sscanf(line,'%f',value);
-%                line = fgetl(fid);
-%                DataOut.WaveElevyi(:) =sscanf(line,'%f',value);
-%             end
         end
         
         
@@ -191,7 +170,7 @@ fclose(fid); %close file
 return
 end %end function
 %%
-function [OutList OutListComments] = ParseFASTOutList( fid )
+function [OutList, OutListComments] = ParseFASTOutList( fid )
 
     %Now loop and read in the OutList
     
@@ -311,7 +290,7 @@ function [FullTable] = ParseFillGroups( line, fid, InpSt )
     line  = strtok(line,'[');  % treat everything after a '[' char as a comment
     TmpHdr  = textscan(line,'%s');
     Headers = TmpHdr{1};
-    nc = length(Headers);
+%     nc = length(Headers);
 
       % read the units line:
     fgetl(fid); 
@@ -350,18 +329,6 @@ end
 
 
 
-function [Table] = ParseJointOutputs( line, InpSt )
-
-    
-      % now initialize Table and read its values from the file:
-    Table = zeros( 1, InpSt );     
-    
-    Table(:)  = sscanf(line,'%i',InpSt); 
-   
-   
-    
-end
-
 function [FullTable] = ParseMemberOutputs( line, fid, InpSt )
 
       % we've read the line of the table that includes the header 
@@ -369,7 +336,7 @@ function [FullTable] = ParseMemberOutputs( line, fid, InpSt )
     line  = strtok(line,'[');  % treat everything after a '[' char as a comment
     TmpHdr  = textscan(line,'%s');
     Headers = TmpHdr{1};
-    nc = length(Headers);
+%     nc = length(Headers);
 
       % read the units line:
     fgetl(fid); 

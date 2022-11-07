@@ -93,22 +93,7 @@ while true
     
     
     [value, label, isComment, ~, ~] = ParseFASTInputLine(line);
-    if ~isComment && length(label) > 0        
-%         if strcmpi(label,'"NWaveElev"') %we've reached wave elevations table (and we think it's a string value so it's in quotes)            
-%             if ~isfield(HDPar,'WaveElevxi')
-%                 disp(  ['WARNING: wave elevations not found in the HD data structure.'] );
-%                 printTable = true;
-%             else
-%                 lastValue = value;
-%                 lastLabel = label;
-%                 %write this line into the output file
-%                 fprintf(fidOUT,'%s',line); 
-%                 line = fgets(fidIN); %get the next line from the template
-%                 line = fgets(fidIN); %get the next line from the template
-%     
-%                 continue; %let's continue reading the template file            
-%             end
-        
+    if ~isComment && ~isempty(label)          
         
         if strcmpi(value,'"AxCoefID"') %we've reached the heave coefficients table (and we think it's a string value so it's in quotes)            
             if ~isfield(HDPar,'AxCoefs')
@@ -118,16 +103,6 @@ while true
                 frmt = ' %4i %8.2f %8.2f %8.2f %6i    %8.2f   %8.2f';
                 WriteFASTTable(line, fidIN, fidOUT, HDPar.AxCoefs, newline, frmt);
                 continue; %let's continue reading the template file            
-            end
-        elseif  strcmpi(lastLabel,'NJOutputs')  %we've reached the Joint Output list
-            if length(HDPar.JOutLst) > 0
-              [shrtLine, remain]  = strtok(line,'J');
-              fprintf(fidOUT, '%4i', HDPar.JOutLst ); 
-              filler = repmat(' ',1,max(1,17-(4*length(HDPar.JOutLst))));
-              fprintf(fidOUT,'%s%s',filler,remain);
-              lastValue = value;
-              lastLabel = label;
-              continue;
             end
 
         elseif strcmpi(value,'"JointID"') %we've reached the member joints table (and we think it's a string value so it's in quotes)

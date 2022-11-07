@@ -77,7 +77,7 @@ while true
         HaveNewLineChar = true;
     end
     
-    if containstring(upper(line),upper('OutList')) || (containstring(upper(line),upper('OUTPUTS')) && isfield(FastPar,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
+    if containString(upper(line),'OUTLIST') || (containString(upper(line),'OUTPUTS') && isfield(FastPar,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
@@ -426,18 +426,28 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
         % this assumes we are using TurbSim profiles file
         nc = size(TableIn.Table,2); 
     else
-                        
-        if contains(HdrLine,',')
-            TmpHdr = textscan(HdrLine,'%s','Delimiter',','); %comma-delimited headers
+                       
+        while startsWithString(HdrLine, '!') % remove comment characters at beginning of line
+            HdrLine = HdrLine(2:end);
+        end
+        indx = strfind(HdrLine,'!'); % remove comments at end of header
+        if ~isempty(indx)
+            lastIndx = indx(1)-1;
         else
-            TmpHdr = textscan(HdrLine,'%s');
+            lastIndx = length(HdrLine);
         end
+
+        if lastIndx > 1 && containString(HdrLine(1:lastIndx),',')
+            % these will be assumed to be comma delimited:
+            TmpHdr  = textscan(HdrLine(1:lastIndx),'%s', 'Delimiter',',');
+        else
+            TmpHdr  = textscan(HdrLine(1:lastIndx),'%s');
+        end
+
         TemplateHeaders = TmpHdr{1};
-        if (strcmp(TemplateHeaders{1},'!'))
-            TemplateHeaders = TemplateHeaders(2:end);
-        end
         nc = length(TemplateHeaders);
     end
+
     
     fprintf(fidOUT,'%s',HdrLine);           % print the new headers
 
@@ -490,8 +500,9 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
 
             else
                 if i==nc
-                    disp( [ TemplateHeaders{i} ' column not found in FAST table. Last column will be missing.'] );                
-                    nc = nc-1;
+                    disp( [ TemplateHeaders{i} ' column not found in FAST table. Last column(s) will be missing.'] );                
+                    nc = i-1;
+                    break
                 else
                     error( [ TemplateHeaders{i} ' column not found in FAST table. Cannot write the table.'] );
                 end
@@ -597,13 +608,4 @@ function [newline] = getNewlineChar(line)
     end
     
     return;
-end
-
-function b=containstring(str, pattern)
-    % function contains not available in Octave..
-    if (exist ("OCTAVE_VERSION", "builtin") > 0)
-        b=~isempty(strfind(str,pattern));
-    else
-        b=contains(str,pattern);
-    end
 end

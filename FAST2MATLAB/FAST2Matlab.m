@@ -103,21 +103,20 @@ while true %loop until discovering Outlist or end of file, than break
     
         % Check to see if the value is Outlist or OUTPUTS (for MoorDyn)
 
-    %if ~isempty(strfind(upper(line),upper('OutList'))) 
-    if ~isempty(strfind( upper(line), upper('OutList') )) || (containString(upper(line),upper('OUTPUTS')) && isfield(DataOut,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
+    if containString( upper(line), 'OUTLIST' ) || (containString(upper(line),'OUTPUTS') && isfield(DataOut,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
         [value2, ~, ~, nextindex] = sscanf(line,'%s', 1); 
         [value3] = sscanf(line(nextindex+1:end),'%s', 1); 
         if strcmpi(value2,'OutList') || strcmpi(value2,'OUTPUTS') || strcmpi(value2,'OutListAD') || strcmpi(value3,'OutList') || strcmpi(value3,'OUTPUTS') || strcmpi(value3,'OutListAD')
-            [DataOut.OutList{iOutList} DataOut.OutListComments{iOutList}] = ParseFASTOutList(fid);
+            [DataOut.OutList{iOutList}, DataOut.OutListComments{iOutList}] = ParseFASTOutList(fid);
             iOutList = iOutList + 1;
         end            
     end      
 
         
-    [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line );    
+    [value, label, isComment] = ParseFASTInputLine( line );    
     
 
     if ~isComment
@@ -242,7 +241,7 @@ fclose(fid); %close file
 return
 end %end function
 %%
-function [OutList OutListComments] = ParseFASTOutList( fid )
+function [OutList, OutListComments] = ParseFASTOutList( fid )
 
     %Now loop and read in the OutList
     
@@ -294,17 +293,24 @@ function [FullTable] = ParseFASTNumTable( line, fid, InpSt, NumUnitsLines )
     
         % we've read the line of the table that includes the header 
         % let's parse it now, getting the number of columns as well:
-        if ~isempty(strfind(line,','))
-            % these will be assumed to be comma delimited:
-            TmpHdr  = textscan(line,'%s', 'Delimiter',',');
+        while startsWithString(line, '!') % remove comment characters at beginning of line
+            line = line(2:end);
+        end
+        indx = strfind(line,'!'); % remove comments at end of header
+        if ~isempty(indx)
+            lastIndx = indx(1)-1;
         else
-            TmpHdr  = textscan(line,'%s');
+            lastIndx = length(line);
+        end
+
+        if lastIndx > 1 && containString(line(1:lastIndx),',')
+            % these will be assumed to be comma delimited:
+            TmpHdr  = textscan(line(1:lastIndx),'%s', 'Delimiter',',');
+        else
+            TmpHdr  = textscan(line(1:lastIndx),'%s');
         end
 
         Headers = TmpHdr{1};
-        if strcmp( Headers{1}, '!' )
-            Headers = Headers(2:end);
-        end
         nc = length(Headers);
     end
     

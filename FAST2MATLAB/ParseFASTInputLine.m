@@ -64,6 +64,14 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
                 if ~isempty(testVal{1}{1}) && strcmp(testVal{1}{1}(1),'@')
                     value = testVal{1}{1};
                 else
+                    if (endsWith(testVal{1}{1},',')) % work around for a weird quirk with the read '%q' format
+                        testVal{1}{1} = testVal{1}{1}(1:end-1);
+                        indx = strfind(line,',');
+                        position = indx(1);
+                    end
+                    if (endsWith(testVal{1}{1},'"'))
+                        testVal{1}{1} = testVal{1}{1}(1:end-1);
+                    end
                     value = ['"' testVal{1}{1} '"']; %add quotes back around the string
                 end
                 fieldType = 'Character';            
@@ -94,7 +102,7 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
                 if cnt == 1
                     if any( strcmpi(testVal,trueFalseValues) )
                         %this is a logical input
-                    elseif strcmpi(testVal(1),',') 
+                    elseif strcmpi(testVal(1),',')
                         % commas are an indication that this parameter is a list
                         if strcmpi(fieldType, 'Numeric') 
                             line = line(2:end);
@@ -102,10 +110,32 @@ function [value, label, isComment, descr, fieldType] = ParseFASTInputLine( line 
                             if cnt == 1
                                 value = [value testVal];
                             end
+                        elseif strcmpi(fieldType, 'Character')
+                            line = line(2:end);
+                            [testVal, cnt, ~, nextindex] = sscanf(line,'%s',1);
+                            if cnt == 1
+                                if strcmpi(testVal(1),'"')
+                                    [testVal, position] = textscan(line,'%q',1);  %look for a string in quotes
+                                    nextindex = position + 1;
+                                end                             
+                                value = [value ', "' testVal{1}{1} '"'];
+                            end
                         end
                     elseif strcmpi(testVal(1),'"')
                         [testVal, position] = textscan(line,'%q',1);  %look for a string in quotes
-                        nextindex = position + 1;
+
+                        if (endsWith(testVal{1}{1},',')) % work around for a weird quirk with the read '%q' format
+                            testVal{1}{1} = testVal{1}{1}(1:end-1)
+                            indx = strfind(line,',')
+                            nextindex = indx(1)+1;                           
+                        else
+                            nextindex = position + 1;
+                        end
+                        if (endsWith(testVal{1}{1},'"'))
+                            testVal{1}{1} = testVal{1}{1}(1:end-1);
+                        end
+
+                        value = [value ', "' testVal{1}{1} '"']; % possibly part of a list, so we'll keep it (with quotes around it)
                     elseif strcmpi(testVal(1),'#!=')
                         % this indicates the rest of the line is a comment
                         descr = strtrim(line(nextindex:end));
