@@ -26,16 +26,16 @@ function [p, newSubfileName,err1] = GetFASTPar_Subfile(FP, VarName, oldDir, newD
     if ~exist(SubfileName,'file')
         error('File not found: %s', SubfileName)
     end
-    try
-        if readHD
-            p = HD2Matlab(SubfileName,2); % get parameter data (2 header lines)
-        else
-            p = FAST2Matlab(SubfileName,2); % get parameter data (2 header lines)
-        end 
-    catch
-        disp(['Warning: cannot open ' SubfileName ' for reading']);
-        p.Label = [];
-    end
+    %try % removing try/catch to highlight cases where reader fail
+    if readHD
+        p = HD2Matlab(SubfileName,2); % get parameter data (2 header lines)
+    else
+        p = FAST2Matlab(SubfileName,2); % get parameter data (2 header lines)
+    end 
+    %catch
+    %    disp(['Warning: an error occured while reading: ' SubfileName]);
+    %    p.Label = [];
+    %end
 
     if nargin <= 3
         newSubfileName = SubfileName;

@@ -81,7 +81,7 @@ while true %loop until discovering Outlist or end of file, than break
      
     
         % v2.00.03.  Check to see if the value is OUTPUT CHANNNELS
-    if ~isempty(strfind(upper(line),upper('SSOutList'))) 
+    if ~isempty(strfind(upper(line),upper('OutList'))) 
         [DataOut.OutList DataOut.OutListComments] = ParseFASTOutList(fid);
         continue; % break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end   
@@ -94,19 +94,30 @@ while true %loop until discovering Outlist or end of file, than break
        
     elseif ~isComment
         
+        if strcmpi(label,'GuyanDampSize')
+            % First store variable
+            DataOut.Label{count,1} = label;
+            DataOut.Val{count,1}   = value;
+            count = count + 1;
+            % Then store Guyan Damping matrix
+            [DataOut.GuyanDampMat, ~] = ParseFASTTable( '', fid, value, false, false, value);
         
-        if strcmpi(value,'"JointID"') %we've reached the member joints table (and we think it's a string value so it's in quotes)
+        elseif strcmpi(value,'"JointID"') %we've reached the member joints table (and we think it's a string value so it's in quotes)
             NJoints = GetFASTPar(DataOut,'NJoints');        
             [DataOut.Joints, DataOut.JointsHdr] = ParseFASTTable(line, fid, NJoints);
             continue; %let's continue reading the file
+
         elseif strcmpi(value,'"RJointID"') %we've reached the base reaction joints table (and we think it's a string value so it's in quotes)
             NReact = GetFASTPar(DataOut,'NReact');        
-            [DataOut.ReactionJoints, DataOut.ReactionJointsHdr] = ParseFASTTable(line, fid, NReact);
+            fmt='%d %d %d %d %d %d %d %s';
+            [DataOut.ReactionJoints, DataOut.ReactionJointsHdr] = ParseFASTTable(line, fid, NReact, true, true, -1, fmt=fmt);
             continue; %let's continue reading the file
+
         elseif strcmpi(value,'"IJointID"') %we've reached the interface joints table (and we think it's a string value so it's in quotes)
             NInterf = GetFASTPar(DataOut,'NInterf');        
             [DataOut.InterfaceJoints, DataOut.InterfaceJointsHdr] = ParseFASTTable(line, fid, NInterf);
             continue; %let's continue reading the file
+
         elseif strcmpi(value,'"MemberID"') 
             if strcmpi(DataOut.Label(end), 'NMembers') %we've reached the member table 
                NMembers = GetFASTPar(DataOut,'NMembers');        
@@ -117,6 +128,7 @@ while true %loop until discovering Outlist or end of file, than break
                [DataOut.MemberOuts, DataOut.MemberOutsHdr] = ParseMemberOutputs(line, fid, NMOutputs);
                continue; %let's continue reading the file
             end    
+
         elseif strcmpi(value,'"PropSetID"') %we've reached the member cross-section properties table (and we think it's a string value so it's in quotes)
             if strcmpi(DataOut.Label(end), 'NPropSets') %we've reached the member table 
                NPropSets = GetFASTPar(DataOut,'NPropSets');        
@@ -126,11 +138,19 @@ while true %loop until discovering Outlist or end of file, than break
                NXPropSets = GetFASTPar(DataOut,'NXPropSets');        
                [DataOut.MemberSection2Prop, DataOut.MemberSection2PropHdr] = ParseFASTTable(line, fid, NXPropSets);
                continue; %let's continue reading the file          
+            elseif strcmpi(DataOut.Label(end), 'NCablePropSets') % Cable Prop table
+               NCable = GetFASTPar(DataOut,'NCablePropSets');        
+               [DataOut.CableProp, DataOut.CablePropHdr] = ParseFASTTable(line, fid, NCable);
+            elseif strcmpi(DataOut.Label(end), 'NRigidPropSets') % Rigid Prop table
+               NRigid = GetFASTPar(DataOut,'NRigidPropSets');        
+               [DataOut.RigidProp, DataOut.RigidPropHdr] = ParseFASTTable(line, fid, NRigid);
             end
+
         elseif strcmpi(value,'"COSMID"') %we've reached the cosine matrices table (and we think it's a string value so it's in quotes)
             NCOSMs = GetFASTPar(DataOut,'NCOSMs');        
             [DataOut.CosMat, DataOut.CosMatHdr] = ParseFASTTable(line, fid, NCOSMs);
             continue; %let's continue reading the file  
+
         elseif strcmpi(value,'"CMJointID"') %we've reached the joint additional concentrated masses table (and we think it's a string value so it's in quotes)
             NCmass = GetFASTPar(DataOut,'NCmass');        
             [DataOut.JntConcMassProp, DataOut.JntConcMassPropHdr] = ParseFASTTable(line, fid, NCmass);
@@ -201,33 +221,64 @@ end %end function
 %%
 
 
-function [Table, Headers] = ParseFASTTable( line, fid, InpSt  )
+function [Table, Headers] = ParseFASTTable( line, fid, InpSt, hasHeader, hasUnit, nc, fmt)
+    % Parse a Table
+    % - InpSt: number of lines expected
+    % - nc   : number of columns expected (inferred from header if hasHeader
+    % - nc   : number of columns expected (inferred from header if hasHeader
+    %
+    % Default arguments
+    if ~exist('hasHeader', 'var'); hasHeader=true; end
+    if ~exist('hasUnit',   'var'); hasUnit=true; end
+    if ~exist('nc', 'var'); nc=-1; end
+    if ~exist('fmt','var'); fmt=''; end
 
-    % we've read the line of the table that includes the header 
-    % let's parse it now, getting the number of columns as well:
-    line  = strtok(line,'[');  % treat everything after a '[' char as a comment
-    TmpHdr  = textscan(line,'%s');
-    Headers = TmpHdr{1};
-    nc = length(Headers);
 
-    % read the units line:
-    fgetl(fid); 
+    if hasHeader
+        % we've read the line of the table that includes the header 
+        % let's parse it now, getting the number of columns as well:
+        line  = strtok(line,'!#[');  % treat everything after a '[' char as a comment
+        TmpHdr  = textscan(line,'%s');
+        Headers = TmpHdr{1};
+        if nc<0
+            nc = length(Headers);
+        end
+    else
+        Headers={};
+    end
+    if nc<0
+        error('Provide number of columns when headers are missing')
+    end
+
+    if hasUnit
+        % read the units line:
+        fgetl(fid); 
+    end
         
     % now initialize Table and read its values from the file:
-    Table = zeros(InpSt, nc);   %this is the size table we'll read
+    if isempty(fmt)
+        Table = zeros(InpSt, nc);   %this is the size table we'll read
+    else
+        Table = cell(InpSt, nc);   %this is the size table we'll read
+    end
     i = 0;                      % this the line of the table we're reading    
     while i < InpSt
         
         line = fgetl(fid);
+        line = strtok(line,'!#');  % remove comments
         if isnumeric(line)      % we reached the end prematurely
             break
         end        
 
         i = i + 1;
-        [tmp, count] = sscanf(line,'%f',nc); 
-        Table(i,1:count) = tmp; 
-            
-
+        if isempty(fmt)
+            [tmp, count] = sscanf(line,'%f',nc); 
+            Table(i,1:count) = tmp; 
+        else
+            A=textscan(line, [fmt ' %*s'], 1);
+            S=[A{:}];
+            Table(i,:) = S; 
+        end
     end
     
 end %end function
@@ -251,6 +302,7 @@ function [Table, Headers] = ParseMemberOutputs( line, fid, InpSt )
     while i < InpSt
         
         line = fgetl(fid);
+        line = strtok(line,'!#');  % remove comments
         if isnumeric(line)      % we reached the end prematurely
             break
         end        

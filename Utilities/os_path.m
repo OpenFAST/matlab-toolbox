@@ -200,6 +200,9 @@ methods(Static=true);
     function d=dirname(p)
         % Return the directory name of pathname path. This is the first element of the pair returned by passing path to the function split().
         [d]=fileparts(p);
+        if isequal(d,'.') || isequal(d,'')
+            d='./';
+        end
     end
 
 

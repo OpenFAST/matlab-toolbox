@@ -98,7 +98,7 @@ while true
                 disp( 'WARNING: OutList was not found in the FAST data structure. The OutList field will be empty.' );        
             end
 
-            while ~startsWith(line,"END") && ~isnumeric(line)
+            while ~startsWithString(line,"END") && ~isnumeric(line)
                 line = fgets(fidIN); %get the next line from the template, including newline character
             end
 
@@ -362,7 +362,7 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
     if any( indx )
 
         if sum(indx) > 1 % we found more than one....
-            vals2Write = FastPar.Val{indx};
+%             vals2Write = FastPar.Val{indx};
             disp( ['WARNING: multiple occurrences of ' label ' in the FAST data structure.'] );
         end
 
@@ -527,7 +527,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
                 end
                 fprintf(fidOUT, fmt, TableIn.Table{i,j} );
             end
-            fprintf(fidOUT, TableIn.Comments{i}); % print any comments that may exist for this line
+            fprintf(fidOUT, '%s', TableIn.Comments{i}); % print any comments that may exist for this line
             fprintf(fidOUT, newline);
         end        
     else        

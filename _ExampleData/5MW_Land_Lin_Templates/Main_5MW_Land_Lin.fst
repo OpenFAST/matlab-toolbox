@@ -25,7 +25,7 @@ False          Echo            - Echo input data to <RootName>.ech (flag)
 "unused"    BDBldFile(3)    - Name of file containing BeamDyn input parameters for blade 3 (quoted string)
 "NRELOffshrBsline5MW_InflowWind_Steady8mps.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
 "NRELOffshrBsline5MW_Onshore_AeroDyn15.dat"    AeroFile        - Name of file containing aerodynamic input parameters (quoted string)
-"unused"     ServoFile       - Name of file containing control and electrical-drive input parameters (quoted string)
+"NRELOffshrBsline5MW_Onshore_ServoDyn.dat"    ServoFile       - Name of file containing control and electrical-drive input parameters (quoted string)
 "unused"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
 "unused"      SubFile         - Name of file containing sub-structural input parameters (quoted string)
 "unused"      MooringFile     - Name of file containing mooring system input parameters (quoted string)
@@ -41,8 +41,14 @@ True          TabDelim        - Use tab delimiters in text tabular output file? 
 "ES10.3E2"    OutFmt          - Format used for text tabular output, excluding the time channel.  Resulting field should be 10 characters. (quoted string)
 ---------------------- LINEARIZATION -------------------------------------------
 False         Linearize       - Linearization analysis (flag)
-          2   NLinTimes       - Number of times to linearize (-) [>=1] [unused if Linearize=False]
-         30,         60    LinTimes        - List of times at which to linearize (s) [1 to NLinTimes] [unused if Linearize=False]
+False         CalcSteady    - Calculate a steady-state periodic operating point before linearization (-) (switch)
+2             TrimCase - Controller parameter to be trimmed {1:yaw; 2:torque; 3:pitch} [used only when CalcSteady=True]
+0.0001        TrimTol - Tolerance for the rotational speed convergence [>eps] [used only when CalcSteady=True]
+0.001         TrimGain - Proportional gain for the rotational speed error (rad/(rad/s) or Nm/(rad/s)) [>0] [used only when CalcSteady=True]
+0.0           Twr_Kdmp - Damping factor for the tower (N/(m/s)) [>=0] [used only when CalcSteady=True]
+0.0           Bld_Kdmp - Damping factor for the blade (N/(m/s)) [>=0] [used only when CalcSteady=True]
+1             NLinTimes     - Number of times to linearize (-) [>=1] [unused if Linearize=False]
+100 LinTimes - List of times at which to linearize (s) [1 to NLinTimes] [unused if Linearize=False]
           0   LinInputs       - Inputs included in linearization (switch) {0=none; 1=standard; 2=all module inputs (debug)} [unused if Linearize=False]
           0   LinOutputs      - Outputs included in linearization (switch) {0=none; 1=from OutList(s); 2=all module outputs (debug)} [unused if Linearize=False]
 False         LinOutJac       - Include full Jacobians in linearization output (for debug) (flag) [unused if Linearize=False; used only if LinInputs=LinOutputs=2]

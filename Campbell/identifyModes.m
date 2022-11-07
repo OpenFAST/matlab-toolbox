@@ -100,7 +100,6 @@ for i=1:nRuns
             end
             tryNumber = tryNumber + 1;
         end        
-        
     end
 end
 

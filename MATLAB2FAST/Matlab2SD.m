@@ -23,9 +23,13 @@ end
 % we're going to get the appropriate newline character(s) from the template file
 
 HaveNewLineChar = false;
-% newline = '\r'; %mac
-% newline = '\n'; %linux
-% newline = '\r\n'; %windows
+% Set default values in case HdrLines=0
+if ispc()
+    newline = '\r\n'; %windows
+else
+    % newline = '\r'; %mac
+    newline = '\n'; %linux
+end
 ContainsOutList = false;
 
 
@@ -44,6 +48,7 @@ for hi = 1:HdrLines
     
         % get the line feed characters(s) here: CHAR(13)=CR(\r) CHAR(10)=LF(\n)
         % so our file has consistant line endings
+
     if ~HaveNewLineChar
         HaveNewLineChar = true;
         indx = min( strfind(line,char(13)), strfind(line,char(10)) );
@@ -84,7 +89,7 @@ while true
         end
     end
     
-    if ~isempty(strfind(upper(line),upper('SSOutList'))) 
+    if ~isempty(strfind(upper(line),upper('OutList'))) 
         ContainsOutList = true;
         fprintf(fidOUT,'%s',line); %if we've found OutList, write the line and break 
         break;
@@ -93,27 +98,54 @@ while true
     
     
     [value, label, isComment, ~, ~] = ParseFASTInputLine(line);
+%     disp('>>>>>')
+%     disp(line)
+%     disp(isComment)
+%     disp(label)
+%     disp(value)
     if ~isComment && length(label) > 0        
+
+        if strcmpi(label,'GuyanDampSize') 
+            % First write this line
+            line = ParseValue(SDPar.Val, SDPar.Label, value, label, line, TemplateFile);
+            fprintf(fidOUT,'%s',line);
+            % Then write the GuyanDampMat
+            for i =1:value
+                fprintf(fidOUT,'%f ',SDPar.GuyanDampMat(i,:));
+                fprintf(fidOUT,newline);
+            end
+            continue
         
-        
-        if strcmpi(value,'"JointID"') %we've reached the member joints table (and we think it's a string value so it's in quotes)
+        elseif strcmpi(value,'"JointID"') %we've reached the member joints table (and we think it's a string value so it's in quotes)
+            
             if ~isfield(SDPar,'Joints')
                 disp( 'WARNING: the member joints table not found in the SD data structure.' );
                 printTable = true;
             else
-                frmt = '%4i %20.5f %22.5f %22.5f';
+
+                if size(SDPar.Joints,2)==4
+                    frmt = '%4i %20.5f %22.5f %22.5f';
+                elseif size(SDPar.Joints,2)==9
+                    frmt = '%4i %20.5f %22.5f %22.5f %4i %20.5f %20.5f %20.5f %20.5f';
+                else
+                    error('Unsupported size for joint table')
+                end
                 WriteFASTTable(line, fidIN, fidOUT, SDPar.Joints, SDPar.JointsHdr, newline, frmt);
+
+
                 continue; %let's continue reading the template file            
             end
+
         elseif strcmpi(value,'"RJointID"') %we've reached the base reactions table (and we think it's a string value so it's in quotes)
             if ~isfield(SDPar,'ReactionJoints')
                 disp( 'WARNING: the base reaction joints table not found in the SD data structure.' );
                 printTable = true;
             else
-                frmt = '%4i %11i %11i %11i %11i %11i %11i';
+                frmt = '%4i %11i %11i %11i %11i %11i %11i %s';
                 WriteFASTTable(line, fidIN, fidOUT, SDPar.ReactionJoints, SDPar.ReactionJointsHdr, newline, frmt);
                 continue; %let's continue reading the template file            
             end  
+
         elseif strcmpi(value,'"IJointID"') %we've reached the base reactions table (and we think it's a string value so it's in quotes)
             if ~isfield(SDPar,'InterfaceJoints')
                 disp( 'WARNING: the interface joints table not found in the SD data structure.' );
@@ -123,23 +155,25 @@ while true
                 WriteFASTTable(line, fidIN, fidOUT, SDPar.InterfaceJoints, SDPar.InterfaceJointsHdr, newline, frmt);
                 continue; %let's continue reading the template file            
             end  
+
         elseif strcmpi(value,'"MemberID"')
+
            if strcmpi(lastLabel, 'NMembers') %we've reached the member table
-              if ~isfield(SDPar,'Members')
-                disp( 'WARNING: the members table not found in the SD data structure.' );
-                printTable = true;
-              else
-                WriteMembersTable(line, fidIN, fidOUT, SDPar.Members, SDPar.MembersHdr, newline);
-                continue; %let's continue reading the template file            
-              end
+               if ~isfield(SDPar,'Members')
+                   disp( 'WARNING: the members table not found in the SD data structure.' );
+                   printTable = true;
+               else
+                   WriteMembersTable(line, fidIN, fidOUT, SDPar.Members, SDPar.MembersHdr, newline);
+                   continue; %let's continue reading the template file            
+               end
            elseif strcmpi(lastLabel, 'NMOutputs') %we've reached the member output list table
-              if ~isfield(SDPar,'MemberOuts')
-                disp( 'WARNING: the members output list table not found in the SD data structure.' );
-                printTable = true;
-              else
-                WriteMemberOutputTable(line, fidIN, fidOUT, SDPar.MemberOuts, SDPar.MemberOutsHdr, newline);
-                continue; %let's continue reading the template file            
-              end
+               if ~isfield(SDPar,'MemberOuts')
+                   disp( 'WARNING: the members output list table not found in the SD data structure.' );
+                   printTable = true;
+               else
+                   WriteMemberOutputTable(line, fidIN, fidOUT, SDPar.MemberOuts, SDPar.MemberOutsHdr, newline);
+                   continue; %let's continue reading the template file            
+               end
            end    
         elseif strcmpi(value,'"PropSetID"') %we've reached the member cross-section properties table (and we think it's a string value so it's in quotes)
             if strcmpi(lastLabel, 'NPropSets') %we've reached the first x-section property table
@@ -160,6 +194,25 @@ while true
                     WriteFASTTable(line, fidIN, fidOUT, SDPar.MemberSection2Prop, SDPar.MemberSection2PropHdr, newline, frmt);
                     continue; %let's continue reading the template file            
                 end 
+            elseif strcmpi(lastLabel, 'NCablePropSets') % Cable Prop table
+                if ~isfield(SDPar,'CableProp')
+                    disp( 'WARNING: the cable properties table not found in the SD data structure.' );
+                    printTable=true;
+                else
+                    frmt = '%4i %14.5f %14.5f %14.5f';
+                    WriteFASTTable(line, fidIN, fidOUT, SDPar.CableProp, SDPar.CablePropHdr, newline, frmt);
+                    continue; %let's continue reading the template file            
+                end
+
+            elseif strcmpi(lastLabel, 'NRigidPropSets') % Rigid Prop table
+                if ~isfield(SDPar,'RigidProp')
+                    disp( 'WARNING: the cable properties table not found in the SD data structure.' );
+                    printTable=true;
+                else
+                    frmt = '%4i %14.5f %14.5f %14.5f';
+                    WriteFASTTable(line, fidIN, fidOUT, SDPar.RigidProp, SDPar.RigidPropHdr, newline, frmt);
+                    continue; %let's continue reading the template file            
+                end
             end
         elseif strcmpi(value,'"COSMID"') %we've reached the Member cosine matrices table (and we think it's a string value so it's in quotes)
             if ~isfield(SDPar,'CosMat')
@@ -171,18 +224,23 @@ while true
                 continue; %let's continue reading the template file            
             end  
          elseif strcmpi(value,'"CMJointID"') %we've reached the joint additional concentrated masses  table (and we think it's a string value so it's in quotes)
+
             if ~isfield(SDPar,'JntConcMassProp')
                 disp( 'WARNING: the joint additional concentrated masses table not found in the SD data structure.' );
                 printTable = true;
             else
-                frmt = '%4i %19.5e %14.5e %16.5e %16.5e';
+                if size(SDPar.JntConcMassProp, 2) ==5
+                    frmt = '%4i %19.5e %14.5e %16.5e %16.5e';
+                elseif size(SDPar.JntConcMassProp, 2)==11
+                    frmt = '%4i %19.5e %14.5e %16.5e %16.5e %16.5e %16.5e %16.5e %16.5e %16.5e %16.5e';
+                else
+                    error('Wrong number of columns for Concentrated mass')
+                end
                 WriteFASTTable(line, fidIN, fidOUT, SDPar.JntConcMassProp, SDPar.JntConcMassPropHdr, newline, frmt);
                 continue; %let's continue reading the template file            
             end  
         else
             line = ParseValue(SDPar.Val, SDPar.Label, value, label, line, TemplateFile);
-            
-
         end
     else % isComment || length(label) == 0
         if isComment
@@ -207,7 +265,8 @@ if ContainsOutList
         spaces      = repmat(' ',1,max(1,26-size(OutListChar,2)));
         %Now add the Outlist
         for io = 1:length(SDPar.OutList)
-            fprintf(fidOUT,'%s',[OutListChar(io,:) spaces SDPar.OutListComments{io} newline]);
+            fprintf(fidOUT,'%s',[OutListChar(io,:) spaces SDPar.OutListComments{io}]);
+            fprintf(fidOUT,newline);
         end
         fprintf(fidOUT,'END of output channels and end of file. (the word "END" must appear in the first 3 columns of this line)');
         fprintf(fidOUT,newline);
@@ -215,11 +274,6 @@ if ContainsOutList
     else
         disp( 'WARNING: OutList was not found in the SD data structure. The OutList field will be empty.' );        
     end
-    
-    
-    %fprintf(fidOUT,newline);
-    %fprintf(fidOUT,'---------------------------------------------------------------------------------------');
-    %fprintf(fidOUT,newline);
 end
 
 fclose(fidIN);
@@ -272,7 +326,7 @@ function WriteMembersTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
-    [shrtLine, remain]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
+    [shrtLine, remain]  = strtok(HdrLine,'!#[');  % treat everything after a '[' char as a comment
     TmpHdr = textscan(shrtLine,'%s');
     TemplateHeaders = TmpHdr{1};
     nc = length(TemplateHeaders);
@@ -299,12 +353,18 @@ function WriteMembersTable( HdrLine, fidIN, fidOUT, Table, Headers, newline )
     
     
     % now we'll write the table:
-   
-    for i=1:size(Table,1) 
-        
-        fprintf(fidOUT, '%4i %11i %11i %12i %13i ', Table(i,1:5) );
-       
-        fprintf(fidOUT, newline);
+    if size(Table,2)==5
+        for i=1:size(Table,1) 
+            fprintf(fidOUT, '%4i %11i %11i %12i %13i ', Table(i,1:5) );
+            fprintf(fidOUT, newline);
+        end
+    elseif size(Table,2)==6 || size(Table,2)==7
+        for i=1:size(Table,1) 
+            fprintf(fidOUT, '%4i %11i %11i %12i %13i %13i', Table(i,1:6) );
+            fprintf(fidOUT, newline);
+        end
+    else
+        error('Number of columns for member table not supported')
     end
               
 end
@@ -313,7 +373,7 @@ function WriteMemberOutputTable( HdrLine, fidIN, fidOUT, Table, Headers, newline
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
-    [shrtLine, remain]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
+    [shrtLine, remain]  = strtok(HdrLine,'!#[');  % treat everything after a '[' char as a comment
     TmpHdr = textscan(shrtLine,'%s');
     TemplateHeaders = TmpHdr{1};
     nc = length(TemplateHeaders);
@@ -352,10 +412,12 @@ function WriteMemberOutputTable( HdrLine, fidIN, fidOUT, Table, Headers, newline
 end
 
 function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, frmt )
+    % Default arguments
+    if ~exist('frmt', 'var'); frmt = '%14.5E'; end
 
     % we've read the line of the template table that includes the header 
     % let's parse it now:
-    [shrtLine, remain]  = strtok(HdrLine,'[');  % treat everything after a '[' char as a comment
+    [shrtLine, remain]  = strtok(HdrLine,'!#[');  % treat everything after a '[' char as a comment
     TmpHdr = textscan(shrtLine,'%s');
     TemplateHeaders = TmpHdr{1};
     nc = length(TemplateHeaders);
@@ -380,15 +442,17 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, Table, Headers, newline, frmt )
         end                
     end
     
-    if nargin < 7 
-       frmt = '%14.5E';
-    end
-    
     % now we'll write the table:
-    for i=1:size(Table,1) 
-        
-        fprintf(fidOUT, frmt, Table(i,ColIndx) );  %write all of the columns
-        fprintf(fidOUT, newline);
+    if iscell(Table)
+        for i=1:size(Table,1) 
+            fprintf(fidOUT, frmt, Table{i,ColIndx} );  %write all of the columns
+            fprintf(fidOUT, newline);
+        end
+    else
+        for i=1:size(Table,1) 
+            fprintf(fidOUT, frmt, Table(i,ColIndx) );  %write all of the columns
+            fprintf(fidOUT, newline);
+        end
     end
               
 end

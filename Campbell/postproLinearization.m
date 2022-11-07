@@ -1,4 +1,4 @@
-function [ModesData, outputFiles] = postproLinearization(folder, OP_file_or_struct, outputFormat, prefix)
+function [ModesData, outputFiles] = postproLinearization(folder, OP_file_or_struct, outputFormat, prefix, suffix)
 % Postprocess a set of linearization outputs, where the operating points are defined in a file. 
 %
 %
@@ -30,6 +30,7 @@ function [ModesData, outputFiles] = postproLinearization(folder, OP_file_or_stru
 disp('--------------- START of MATLAB function postproLinearization -------------')
 if ~exist('outputFormat','var'); outputFormat='csv'; end
 if ~exist('prefix','var'); prefix=''; end
+if ~exist('suffix','var'); suffix=''; end
 
 % % % TODO remove me
 if ~exist('folder','var');
@@ -59,23 +60,33 @@ if isfield(OP,'WindSpeed')
 else
     CampbellData = getCampbellData(FastFiles);
 end
-campbellData2TXT([outbase '_Summary.txt'],CampbellData)
-fprintf('Written:    %s\n',[outbase '_Summary.txt']);
+
+%% Write summary file
+if ~isequal(lower(outputFormat),'none')
+    summaryFile=[outbase '_Summary' suffix '.txt'];
+    campbellData2TXT(summaryFile, CampbellData)
+    fprintf('Written:    %s\n', summaryFile);
+end
 
 %% --- Match mode names / identify modes
 [ModesData] = identifyModes(CampbellData);
 
 %% --- Write tables to csv or Excel
 if isequal(lower(outputFormat),'csv')
-    outputFiles = modesData2CSV(outbase, ModesData);
-    fprintf('Written:    %s\n',[outbase '*.csv']);
-else
+    outputFiles = modesData2CSV(outbase, ModesData, suffix);
+    fprintf('Written:    %s\n',[outbase '*' suffix '.csv']);
+elseif (isequal(lower(outputFormat),'xls') || isequal(lower(outputFormat),'xlsx') )
     XLSname = [outbase '_DataSummary.xlsx'];
     modesData2XLS(XLSname, ModesData);
     outputFiles = {XLSname};
     fprintf('Written:    %s\n',XLSname);
-
+elseif isequal(lower(outputFormat),'none')
+    % Do not write any file
+    %fprintf('Not writing CSV or XLS files\n');
+    outputFiles={};
+else
+    error('Unsupported outputFormat',outputFormat);
 end
 
-% Printing a banner since this might be run in terminal
+% Printing a banner since this might be run in terminal and the output is quite messy
 disp('--------------- END of MATLAB function postproLinearization -------------')

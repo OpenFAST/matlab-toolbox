@@ -21,13 +21,15 @@ MDamp = zeros(nModesMax,nOP);
 MDesc = cell( nModesMax,nOP) ;
 for iOP = 1:nOP
     CD=CampbellData{iOP};
-    nModesKeep=min([length(CD.Modes), nModesMax]);
-    for i = 1:nModesKeep
-        DescCat = ShortModeDescr(CD,i);
-        %fprintf('%8.3f ; %7.4f ; %s\n',CD.NaturalFreq_Hz(i),CD.DampingRatio(i),DescCat(1:min(120,length(DescCat))));
-        MFreq(i,iOP)=CD.NaturalFreq_Hz(i);
-        MDamp(i,iOP)=CD.DampingRatio(i);
-        MDesc{i,iOP}=DescCat;
+    if ~isempty(CampbellData{iOP})
+        nModesKeep=min([length(CD.Modes), nModesMax]);
+        for i = 1:nModesKeep
+            DescCat = ShortModeDescr(CD,i);
+            %fprintf('%8.3f ; %7.4f ; %s\n',CD.NaturalFreq_Hz(i),CD.DampingRatio(i),DescCat(1:min(120,length(DescCat))));
+            MFreq(i,iOP)=CD.NaturalFreq_Hz(i);
+            MDamp(i,iOP)=CD.DampingRatio(i);
+            MDesc{i,iOP}=DescCat;
+        end
     end
 end
 
@@ -67,7 +69,7 @@ function DescCat = ShortModeDescr(CD,i)
     nBD=0;
     for iD=1:length(Desc)
         s=Desc{iD};
-        s=fReplaceModeDescription(s);
+        s=replaceModeDescription(s);
         if Desc{iD}(1:2)=='BD'
             nBD=nBD+1;
         elseif Desc{iD}(1:2)=='ED'
@@ -81,32 +83,4 @@ function DescCat = ShortModeDescr(CD,i)
         DescCat = sprintf('BD%d/%d %s',nBD,sum(CD.Modes{i}.StateHasMaxAtThisMode),DescCat);
     end
 end
-
-function s=fReplaceModeDescription(s)
-    % Perform replacements to shorten mode description
-    s = strrep(s,'First time derivative of'     ,'d/dt of');
-    s = strrep(s,'fore-aft bending mode DOF, m'    ,'FA'     );
-    s = strrep(s,'side-to-side bending mode DOF, m','SS'     );
-    s = strrep(s,'bending-mode DOF of blade '    ,''     );
-    s = strrep(s,' rotational-flexibility DOF, rad','-ROT'   );
-    s = strrep(s,'rotational displacement in ','rot'   );
-    s = strrep(s,'Drivetrain','DT'   );
-    s = strrep(s,'translational displacement in ','trans'   );
-    s = strrep(s,', rad','');
-    s = strrep(s,', m','');
-    s = strrep(s,'finite element node ','N'   );
-    s = strrep(s,'cosine','cos'   );
-    s = strrep(s,'sine','sin'   );
-    s = strrep(s,'collective','coll.');
-    s = strrep(s,'Blade','Bld');
-    s = strrep(s,'rotZ','TORS-R');
-    s = strrep(s,'transX','FLAP-D');
-    s = strrep(s,'transY','EDGE-D');
-    s = strrep(s,'rotX','EDGE-R');
-    s = strrep(s,'rotY','FLAP-R');
-    s = strrep(s,'flapwise','FLAP');
-    s = strrep(s,'edgewise','EDGE');
-    s = strrep(s,',','|');
-end
-
 
