@@ -77,7 +77,7 @@ while true
         HaveNewLineChar = true;
     end
     
-    if containstring(upper(line),upper('OutList')) || (containstring(upper(line),upper('OUTPUTS')) && isfield(FastPar,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
+    if containString(upper(line),'OUTLIST') || (containString(upper(line),'OUTPUTS') && isfield(FastPar,'ConProp')) % The second statement is to detect the outlist of MoorDyn input files (Field ConProp will only exist when processing MoorDyn input files.)
         % 6/23/2016: linearization inputs contain "OutList" in the
         % comments, so we need to make sure this is either the first (value) or
         % second (label) word of the line.
@@ -427,7 +427,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
         nc = size(TableIn.Table,2); 
     else
                        
-        while startsWith(HdrLine, '!') % remove comment characters at beginning of line
+        while startsWithString(HdrLine, '!') % remove comment characters at beginning of line
             HdrLine = HdrLine(2:end);
         end
         indx = strfind(HdrLine,'!'); % remove comments at end of header
@@ -437,7 +437,7 @@ function WriteFASTTable( HdrLine, fidIN, fidOUT, TableIn, newline, NumUnitLines,
             lastIndx = length(HdrLine);
         end
 
-        if lastIndx > 1 && contains(HdrLine(1:lastIndx),',')
+        if lastIndx > 1 && containString(HdrLine(1:lastIndx),',')
             % these will be assumed to be comma delimited:
             TmpHdr  = textscan(HdrLine(1:lastIndx),'%s', 'Delimiter',',');
         else
@@ -608,13 +608,4 @@ function [newline] = getNewlineChar(line)
     end
     
     return;
-end
-
-function b=containstring(str, pattern)
-    % function contains not available in Octave..
-    if (exist ("OCTAVE_VERSION", "builtin") > 0)
-        b=~isempty(strfind(str,pattern));
-    else
-        b=contains(str,pattern);
-    end
 end

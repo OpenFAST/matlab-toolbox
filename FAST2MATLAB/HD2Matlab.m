@@ -78,24 +78,24 @@ while true %loop until discovering Outlist or end of file, than break
     end
     
         % Check to see if the value is PLATFORM OUTPUTS  deprecated at v2.00.03
-    if contains(upper(line),'PLATFORM OUTPUTS') 
+    if containString(upper(line),'PLATFORM OUTPUTS') 
         [DataOut.PtfmOutList, DataOut.PtfmOutListComments] = ParseFASTOutList(fid);
         continue; % break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end   
     
         % Check to see if the value is MESH-BASED OUTPUTS  deprecated at v2.00.03
-    if contains(upper(line),'MESH-BASED OUTPUTS') 
+    if containString(upper(line),'MESH-BASED OUTPUTS') 
         [DataOut.MeshOutList, DataOut.MeshOutListComments] = ParseFASTOutList(fid);
         continue; % break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end     
     
         % v2.00.03.  Check to see if the value is OUTPUT CHANNNELS
-    if contains(upper(line),'OUTPUT CHANNELS') 
+    if containString(upper(line),'OUTPUT CHANNELS') 
         [DataOut.OutList, DataOut.OutListComments] = ParseFASTOutList(fid);
         continue; % break; %bjj: we could continue now if we wanted to assume OutList wasn't the end of the file...
     end   
     
-    if contains(upper(line),'ADDITIONAL STIFFNESS')
+    if containString(upper(line),'ADDITIONAL STIFFNESS')
           NBodyMod=GetFASTPar(DataOut,'NBodyMod');
           NBody=GetFASTPar(DataOut,'NBody');
           [DataOut.AddF0, DataOut.AddCLin, DataOut.AddBLin, DataOut.AddBQuad] = ParseHDAddMatrices(fid, NBodyMod, NBody);
