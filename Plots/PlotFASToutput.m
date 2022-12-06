@@ -108,6 +108,7 @@ for iFile=1:numFiles
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile} ] = ReadFASTtext(FASTfiles{iFile}, delim, HeaderRows, NameLine, UnitsLine );    
     end
     
+    fprintf('   File# %1.0f: size of data = %7.0f x %7.0f\n', iFile, size(data{iFile}))
 end
 
 %% -----------------------------------------------------------
@@ -236,7 +237,7 @@ end
 plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
                     columnTitles{ReferenceFile}([TimeIndex Channels]), ...
                     columnUnits{ReferenceFile}([TimeIndex Channels]), titleText, ...
-                    ShowThisLegend, LineWidthConst, FntSz, figNo, outFileRoot );
+                    ShowThisLegend, LineWidthConst, FntSz, figNo, outFileRoot, ReferenceFile );
 if OnePlot
     if ShowLegend
        legend show
@@ -260,10 +261,17 @@ end
       
 %%
 function [f] = plotTimeSeriesData( outData, FASTfilesDesc, Markers, LineColors, ...
-                RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz, figNo, outFileRoot )
+                RefColumnTitles, RefColumnUnits, titleText, ShowLegend, LineWidthConst, FntSz, figNo, outFileRoot, ReferenceFile )
 
 numCols  = size(outData{1,2},2) ;
 numFiles = size(outData,1);
+
+PlotDiffs = false(numFiles,1);
+for iFile=1:numFiles % check that the time columns are the same if we want to plot differences
+    nDiff = min(size(outData{iFile,1},1), size(outData{ReferenceFile,1},1));
+    PlotDiffs(iFile) = all(outData{iFile,1}(1:nDiff)==outData{ReferenceFile,1}(1:nDiff));
+end
+PlotAnyDiffs=any(PlotDiffs);
 
 % RefColumnTitles= columnTitles{ReferenceFile}(Channels);
 % RefColumnUnits = columnUnits{ReferenceFile}(Channels);
@@ -277,6 +285,9 @@ numFiles = size(outData,1);
             f=figure;
             lStyle = '-';
             for iFile=1:numFiles
+                if PlotAnyDiffs
+                    ax1=subplot(6,1,1:5);
+                end
                 plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
                      ,'LineStyle',lStyle ...
                      ,'Marker',Markers{iFile} ...
@@ -284,13 +295,33 @@ numFiles = size(outData,1);
                      ,'DisplayName',[strrep(FASTfilesDesc{iFile},'\','\\') ' (' strrep(outData{iFile,3}{i},'_','\_') ')' ] ...
                      ,'Color',LineColors{iFile} ...
                      ,'LineWidth',LineWidthConst);
-                hold on;      
+                hold on;    
+                
+                if PlotDiffs(iFile)
+                    ax2=subplot(6,1,6);
+                    nDiff = min(size(outData{iFile,1},1), size(outData{ReferenceFile,1},1));
+                    plot(outData{ReferenceFile,1}(1:nDiff), outData{iFile,2}(1:nDiff,i) - outData{ReferenceFile,2}(1:nDiff,i) ...
+                         ,'LineStyle',lStyle ...
+                         ,'Marker',Markers{iFile} ...
+                         ,'MarkerSize',3 ...
+                         ,'DisplayName',[strrep(FASTfilesDesc{iFile},'\','\\') ' (' strrep(outData{iFile,3}{i},'_','\_') ')' ] ...
+                         ,'Color',LineColors{iFile} );
+                     hold on;
+                     linkaxes([ax1,ax2],'x');
+                     ylabel('Difference relative to reference file')
+                     subplot(6,1,1:5)
+                end % plot these diffs
+                
                 lStyle = ':';
             end
-            ylabel({strrep(RefColumnTitles{i+1},'_','\_')     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines            
+            ylabel({strrep(RefColumnTitles{i+1},'_','\_')     RefColumnUnits{i+1}},'FontSize',FntSz); %cell array = print on two lines  
+                
         else
             f=figNo;
             figure(f);
+            if PlotAnyDiffs
+                subplot(6,1,1:5)
+            end
             for iFile=1:numFiles
                 plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
                      ,'LineStyle','-' ...
@@ -310,6 +341,8 @@ numFiles = size(outData,1);
         if numFiles > 1 && ShowLegend
             legend show %(FASTfilesDesc{:});
         end
+
+        xlim([min(outData{ReferenceFile,1}),max(outData{ReferenceFile,1})])
 % xlim([0,0.008])
 % xlim([0,0.5])
         set(f,'Name',RefColumnTitles{i+1} ...
