@@ -1,0 +1,28 @@
+# vtk DataFile Version 2.0
+Polydata polygons, typical of OLAF Panels outputs. One square made of two triangles
+ASCII
+
+DATASET POLYDATA
+POINTS 4 float
+0.0 -0.5 0.0
+0.0  0.5 0.0
+0.0  0.5 1.0
+0.0 -0.5 1.0
+
+POLYGONS 2 8
+3 0 1 2
+3 0 2 3
+
+CELL_DATA 2
+SCALARS Intensities double
+LOOKUP_TABLE default
+  0.49347106E-001
+  0.59010081E-001
+
+VECTORS F double
+  0.00000000E+000 -0.00000000E+000 -0.41357944E+002
+  0.00000000E+000 -0.00000000E+000 -0.96074734E+001
+SCALARS BodyID int
+LOOKUP_TABLE default
+0
+0

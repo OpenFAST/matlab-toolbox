@@ -1,6 +1,7 @@
 # MATLAB Toolbox for OpenFAST, including MBC3
 A collection of MATLAB tools developed for use with OpenFAST, including
-a MATLAB®-based postprocessor for Multi-Blade Coordinate transformation of 
+readers/writers (input/output), various utilities,
+and a MATLAB®-based postprocessor for Multi-Blade Coordinate transformation of 
 wind turbine state-space models.
 
 ## Download 
@@ -25,7 +26,9 @@ use MATLAB.
 The scripts are organized in the following folders:
 - `Campbell`: contains scripts to produce a Campbell diagram (work in progress, see [here](#campbell-diagram). 
 - `ConvertFASTversions:` scripts to convert input files from different versions of OpenFAST (in particular FAST7 and FAST8, some scripts are not up to date for the latest OpenFAST)
+- `data`: Data used to test the different scripts
 - `FAST2MATLAB` and `MATLAB2FAST`: scripts to read and write FAST input files
+- `io`: input-output scripts. (NOTE: a lot of input output scripts are still in `Utilities`)  (see [examples](io/examples/))
 - `MBC`: scripts to perform the multi-blade coordinate  transformation (see [here](#MBC))
 - `Plots`: plotting scripts
 - `ProgrammingTools`: tools for OpenFAST developers
