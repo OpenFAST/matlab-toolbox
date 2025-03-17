@@ -33,6 +33,9 @@ ConvFact = 1.0; %results in meters and seconds
 str      = {'HUB HEIGHT','CLOCKWISE','UBAR','TI(U','TI(V','TI(W'};  %MUST be in UPPER case
 numVars  = length(str);   
 SummVars = zeros(numVars, 1);
+NeedSummVars  = true(size(SummVars));
+NeedSummVars(2) = false; %clockwise is optional
+SummVars(2)     = -1;    %default to false if we don't find clockwise value...
 
 %% -----------------------------------------
 %  READ THE HEADER OF THE BINARY FILE 
@@ -69,9 +72,9 @@ else %== -99, THE NEWER-STYLE AERODYN WIND FILE
 
     if fc == 4
         nffc     = fread( fid_wnd, 1, 'int32' );              % number of components (should be 3)
-        lat      = fread( fid_wnd, 1, 'float32' );            % latitude (deg)
-        z0       = fread( fid_wnd, 1, 'float32' );            % Roughness length (m)
-        zOffset  = fread( fid_wnd, 1, 'float32' );            % Reference height (m) = Z(1) + GridHeight / 2.0
+        lat      = fread( fid_wnd, 1, 'float32' );            % lat = latitude (deg)
+        z0       = fread( fid_wnd, 1, 'float32' );            % z0 = Roughness length (m)
+        zOffset  = fread( fid_wnd, 1, 'float32' );            % zOffset = Reference height (m) = Z(1) + GridHeight / 2.0
         TI_U     = fread( fid_wnd, 1, 'float32' );            % Turbulence Intensity of u component (%)
         TI_V     = fread( fid_wnd, 1, 'float32' );            % Turbulence Intensity of v component (%)
         TI_W     = fread( fid_wnd, 1, 'float32' );            % Turbulence Intensity of w component (%)
@@ -87,7 +90,7 @@ else %== -99, THE NEWER-STYLE AERODYN WIND FILE
         
         if fc == 8 ... %MANN model 
           || fc == 7 % General Kaimal      
-            HeadRec = fread(fid_wnd,1,'int32');
+                      fread(fid_wnd,1,'int32'); %HeadRec
             nffc    = fread(fid_wnd,1,'int32');  %nffc?
         end
         
@@ -108,20 +111,20 @@ else %== -99, THE NEWER-STYLE AERODYN WIND FILE
     end 
     
     if fc == 7
-        CohDec = fread(fid_wnd,1,'float32');
-        CohLc  = fread(fid_wnd,1,'float32');
+               fread(fid_wnd,1,'float32');               % CohDec
+               fread(fid_wnd,1,'float32');               % CohLc
     elseif fc == 8        % MANN model
-        gamma  = fread(fid_wnd,1,'float32');               % MANN model shear parameter
-        Scale  = fread(fid_wnd,1,'float32');               % MANN model scale length
-                 fread(fid_wnd,4,'float32');
-                 fread(fid_wnd,3,'int32');
-                 fread(fid_wnd,2,'float32');
-                 fread(fid_wnd,3,'int32');
-                 fread(fid_wnd,2,'float32');
+               fread(fid_wnd,1,'float32');               % gamma: MANN model shear parameter
+               fread(fid_wnd,1,'float32');               % Scale: MANN model scale length
+               fread(fid_wnd,4,'float32');
+               fread(fid_wnd,3,'int32');
+               fread(fid_wnd,2,'float32');
+               fread(fid_wnd,3,'int32');
+               fread(fid_wnd,2,'float32');
     end
         
     SummVars(3:6) = [MFFWS, TI_U, TI_V, TI_W];
-    
+    NeedSummVars(3:6) = false;
 end % old or new bladed styles
 
 nt     = max([nt*2,1]);
@@ -132,7 +135,7 @@ dt     = dx/MFFWS;
 %  -----------------------------------------                   
 disp('Reading the summary file....');
 
-indx     = SummVars;
+
 fid_sum  = fopen( [ FileName '.sum' ] );
 
 if ( fid_sum <= 0 )
@@ -142,7 +145,7 @@ if ( fid_sum <= 0 )
     error(['Could not open the summary file: ' FileName '.sum']);
 end
 
-while ( any( indx == 0 ) )  %MFFWS and the TIs should not be zero
+while ( any( NeedSummVars ) )
     line  = fgetl(fid_sum);
     if ~ischar(line) 
         % We reached the end of the file
@@ -161,12 +164,12 @@ while ( any( indx == 0 ) )  %MFFWS and the TIs should not be zero
     lindx = length(line);               %last  index
 
     i = 1;
-    while i <= numVars
-        if indx(i)==0
+    while i <= numVars && ~isempty(line)
+        if NeedSummVars(i)
 
-            k = findstr(line, str{i} );                
+            k = strfind( line, str{i} );                
             if ~isempty(k)              % we found a string we're looking for                
-                indx(i) = k;
+                NeedSummVars(i) = false;
                 k=strfind(line,'%');
                 if ~isempty(k)
                     lindx = max(findx,k-1);
@@ -184,11 +187,11 @@ while ( any( indx == 0 ) )  %MFFWS and the TIs should not be zero
                     break;
                 end %if isempty( str2num(tmp) )
             end % ~isempty(k)
-        end % indx(i)==0
+        end % NeedSummVars(i)
         i = i + 1;
     end %while i
             
-end %while any(indx==0)
+end %while any(NeedSummVars)
    
 % read the rest of the file to get the grid height offset, if it's there
 ZGoffset = 0.0;
@@ -200,10 +203,7 @@ while ( true )
         break;
     end
 
-    line  = upper(line);
-    findx = strfind(line,'HEIGHT OFFSET');
-
-    if ~isempty(findx)
+    if contains(line,'HEIGHT OFFSET','IgnoreCase',true)
         lindx = length(line);        
         findx = strfind(line,'=')+1;
         if isempty(findx)
@@ -222,10 +222,7 @@ while ( true )
         break;
     end
 
-    line  = upper(line);
-    findx = strfind(line,'BLADED LEFT-HAND RULE');
-
-    if ~isempty(findx)
+    if contains(line,'BLADED LEFT-HAND RULE','IgnoreCase',true)
         LHR = true;
         break;
     end            
@@ -267,7 +264,7 @@ end
 
 for it = 1:nt
     
-    [v cnt] = fread( fid_wnd, nv, fileFmt );
+    [v, cnt] = fread( fid_wnd, nv, fileFmt );
     if cnt < nv
         error(['Could not read entire file: at grid record ' num2str( (it-1)*nv+cnt ) ' of ' num2str(nv*nt)]);
     end
