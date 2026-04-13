@@ -108,7 +108,7 @@ for iFile=1:numFiles
         [data{iFile}, columnTitles{iFile}, columnUnits{iFile} ] = ReadFASTtext(FASTfiles{iFile}, delim, HeaderRows, NameLine, UnitsLine );    
     end
     
-    fprintf('   File# %1.0f: size of data = %7.0f x %7.0f\n', iFile, size(data{iFile}))
+    fprintf('   File# %1.0f: size of data = %7.0f x %7.0f\n', iFile, size(data{iFile},1), size(data{iFile},2));
 end
 
 %% -----------------------------------------------------------
