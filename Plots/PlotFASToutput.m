@@ -271,7 +271,8 @@ for iFile=1:numFiles % check that the time columns are the same if we want to pl
     nDiff = min(size(outData{iFile,1},1), size(outData{ReferenceFile,1},1));
     PlotDiffs(iFile) = all(outData{iFile,1}(1:nDiff)==outData{ReferenceFile,1}(1:nDiff));
 end
-PlotAnyDiffs=any(PlotDiffs);
+PlotAnyDiffs=any(PlotDiffs(1:numFiles~=ReferenceFile)) && numFiles > 1;
+PlotDiffs(ReferenceFile) = PlotAnyDiffs; % plot zeros for the reference file differences only if other differences exist
 
 % RefColumnTitles= columnTitles{ReferenceFile}(Channels);
 % RefColumnUnits = columnUnits{ReferenceFile}(Channels);
