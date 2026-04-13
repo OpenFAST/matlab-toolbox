@@ -319,9 +319,6 @@ PlotAnyDiffs=any(PlotDiffs);
         else
             f=figNo;
             figure(f);
-            if PlotAnyDiffs
-                subplot(6,1,1:5)
-            end
             for iFile=1:numFiles
                 plot(outData{iFile,1}, outData{iFile,2}(:,i) ...
                      ,'LineStyle','-' ...
