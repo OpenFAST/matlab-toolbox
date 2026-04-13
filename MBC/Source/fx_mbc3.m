@@ -111,56 +111,22 @@ if nb == 3
         tt3 = [zeros(3,1), -cos_col, -sin_col];     % Eq. 16 b, t_tilde_3
 
         %---
-        T1 = eye(n_FixFrameStates2);                % Eq. 11 for second-order states only
-        for ii = 1:matData.n_RotTripletStates2
-            T1 = blkdiag(T1, tt);
-        end
-
-        T1v = eye(n_FixFrameStates2);               % inverse of T1
-        for ii = 1:matData.n_RotTripletStates2
-            T1v = blkdiag(T1v, ttv);
-        end
-
-        T2 = zeros(n_FixFrameStates2);              % Eq. 14  for second-order states only
-        for ii = 1:matData.n_RotTripletStates2
-            T2 = blkdiag(T2, tt2);
-        end
+        T1  = blkdiag(  eye(n_FixFrameStates2), kron(eye(matData.n_RotTripletStates2), tt )); % Eq. 11 for second-order states only
+        T1v = blkdiag(  eye(n_FixFrameStates2), kron(eye(matData.n_RotTripletStates2), ttv)); % inverse of T1
+        T2  = blkdiag(zeros(n_FixFrameStates2), kron(eye(matData.n_RotTripletStates2), tt2)); % Eq. 14  for second-order states only
 
         %---    
-        T1q = eye(n_FixFrameStates1);               % Eq. 11 for first-order states (eq. 8 in MBC3 Update document)
-        for ii = 1:matData.n_RotTripletStates1
-            T1q = blkdiag(T1q, tt);
-        end
-
-        T1qv = eye(n_FixFrameStates1);              % inverse of T1q
-        for ii = 1:matData.n_RotTripletStates1
-            T1qv = blkdiag(T1qv, ttv);
-        end
-
-        T2q = zeros(n_FixFrameStates1);             % Eq. 14 for first-order states (eq.  9 in MBC3 Update document)
-        for ii = 1:matData.n_RotTripletStates1
-            T2q = blkdiag(T2q, tt2);
-        end
-
-    %     T1qc = eye(matData.NumHDInputs);            % inverse of T1q   
-
+        T1q  = blkdiag(  eye(n_FixFrameStates1), kron(eye(matData.n_RotTripletStates1), tt )); % Eq. 11 for first-order states (eq. 8 in MBC3 Update document)
+        T1qv = blkdiag(  eye(n_FixFrameStates1), kron(eye(matData.n_RotTripletStates1), ttv)); % inverse of T1q
+        T2q  = blkdiag(zeros(n_FixFrameStates1), kron(eye(matData.n_RotTripletStates1), tt2)); % Eq. 14 for first-order states (eq.  9 in MBC3 Update document)
 
         %---
-        T3 = zeros(n_FixFrameStates2);              % Eq. 15
-        for ii = 1:matData.n_RotTripletStates2
-            T3 = blkdiag(T3, tt3);
-        end
+        T3   = blkdiag(zeros(n_FixFrameStates2), kron(eye(matData.n_RotTripletStates2), tt3)); % Eq. 15
 
         %---
-        T1c = eye(n_FixFrameInputs);                % Eq. 21
-        for ii = 1:matData.n_RotTripletInputs
-            T1c = blkdiag(T1c, tt);
-        end
+        T1c  = blkdiag(  eye(n_FixFrameInputs),  kron(eye(matData.n_RotTripletInputs),  tt )); % Eq. 21
+        T1ov = blkdiag(  eye(n_FixFrameOutputs), kron(eye(matData.n_RotTripletOutputs), ttv)); % inverse of Tlo (Eq. 23)
 
-        T1ov = eye(n_FixFrameOutputs);              % inverse of Tlo (Eq. 23)
-        for ii = 1:matData.n_RotTripletOutputs
-            T1ov = blkdiag(T1ov, ttv);
-        end
 
     % mbc transformation of first-order matrices
     %  if ( MBC.EqnsOrder == 1 ) % activate later
